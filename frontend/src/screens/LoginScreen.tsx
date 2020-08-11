@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Checkbox } from "antd";
+import { getAccessToken, setAccessToken, setRefreshToken } from "../app/token";
 import { ResponseData, usePost } from "../utils/apiHooks";
 
 const layout = {
@@ -11,22 +12,21 @@ const tailLayout = {
 };
 
 interface LoginScreenProps {}
-type Response = { accessToken: string; refreshToken: string };
+type Response = { access_token: string; refresh_token: string };
 
 const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
     const [Login, { data, loading, errors }] = usePost<Response>("login");
 
-    const onFinish = (values: any) => {
+    const onFinish = async (values: any) => {
         console.log("Success:", values);
 
-        Login({
+        const res = await Login({
             username: values.username,
             password: values.password,
-        })
-            .then((response) => {
-                // response.data.accessToken;
-            })
-            .catch((response) => {});
+        });
+
+        await Promise.all([setRefreshToken(res.data.refresh_token), setAccessToken(res.data.access_token)]);
+        console.log("PROMISE SETTLED");
     };
 
     const onFinishFailed = (errorInfo: any) => {

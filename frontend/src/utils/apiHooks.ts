@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
 
-interface Error {}
+export const apiURL =
+    !process.env.NODE_ENV || process.env.NODE_ENV === "development"
+        ? "http://127.0.0.1:8080"
+        : "https://smart-plant-1.uc.r.appspot.com";
+
+export interface ResponseError {}
 export type ResponseData<Data> = AxiosResponse<Data>;
 
 export const useGet = <Data = {}, Variables = {}>(
     route: string
 ): {
     data?: Data;
-    errors?: Error[];
+    errors?: ResponseError[];
     loading: boolean;
 } => {
     const [data, setData] = useState<Data | undefined>(undefined);
-    const [errors, setErrors] = useState<Error[] | undefined>(undefined);
+    const [errors, setErrors] = useState<ResponseError[] | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(false);
 
     const request = async (variables?: Variables) => {
@@ -20,12 +25,12 @@ export const useGet = <Data = {}, Variables = {}>(
 
         // TODO change this so it works with post, etc.
         // TODO proper error shit
-        const result = await axios.get<Data>(`https://smart-plant-1.uc.r.appspot.com/${route}`, {
+        const result = await axios.get<Data>(`${apiURL}/${route}`, {
             data: variables,
         });
 
         setLoading(false);
-        setData(result.data);
+        setData(result?.data);
 
         return result;
     };
@@ -43,12 +48,12 @@ export const usePost = <Data = {}, Variables = {}>(
     (variables: Variables) => Promise<AxiosResponse<Data>>,
     {
         data?: Data;
-        errors?: Error[];
+        errors?: ResponseError[];
         loading: boolean;
     }
 ] => {
     const [data, setData] = useState<Data | undefined>(undefined);
-    const [errors, setErrors] = useState<Error[] | undefined>(undefined);
+    const [errors, setErrors] = useState<ResponseError[] | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(false);
 
     const request = async (variables: Variables) => {
@@ -56,7 +61,7 @@ export const usePost = <Data = {}, Variables = {}>(
 
         // TODO change this so it works with post, etc.
         // TODO proper error shit
-        const result = await axios.get<Data>(`https://smart-plant-1.uc.r.appspot.com/${route}`, {
+        const result = await axios.post<Data>(`${apiURL}/${route}`, {
             data: variables,
         });
 

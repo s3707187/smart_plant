@@ -3,12 +3,15 @@ import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { Layout } from "antd";
 import Navbar from "./containers/Navbar";
 
+import "./app/axiosAccess";
+
 import AuthContext from "./contexts/AuthContex";
+import DashboardScreen from "./screens/DashboardScreen";
 import LoginScreen from "./screens/LoginScreen";
+import RegisterScreen from "./screens/RegisterScreen";
 
 import "./App.css";
 import "antd/dist/antd.css";
-import RegisterScreen from "./screens/RegisterScreen";
 
 const { Header, Footer, Content } = Layout;
 
@@ -26,7 +29,7 @@ function App() {
                         <Switch>
                             <Route path="/about" component={LoginScreen} />
                             <Route path="/users" component={RegisterScreen} />
-                            <Route path="/" component={LoginScreen} />
+                            <Route path="/" component={DashboardScreen} />
                         </Switch>
                     </Content>
                     <Footer>Smort Plont - Mr. Bean, Mate, Paddy, Thomas Frantz, and Thomas Frantz</Footer>
