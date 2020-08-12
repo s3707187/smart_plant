@@ -14,15 +14,15 @@ class User(db.Model):
     __tablename__ = "User"
     username = db.Column(db.VARCHAR(100), nullable=False, unique=True, primary_key=True)
     password = db.Column(db.VARCHAR(100), nullable=False)
-    first_Name = db.Column(db.VARCHAR(100), nullable=False)
+    first_name = db.Column(db.VARCHAR(100), nullable=False)
     last_name = db.Column(db.VARCHAR(100), nullable=False)
     email  = db.Column(db.VARCHAR(255), nullable=False)
     account_type  = db.Column(db.VARCHAR(100), nullable=False)
 
-    def __init__(self, username, password, first_Name, last_name, email, account_type):
+    def __init__(self, username, password, first_name, last_name, email, account_type):
         self.username = username
         self.password = password
-        self.first_Name = first_Name
+        self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.account_type = account_type
@@ -90,7 +90,7 @@ class User_Schema(ma.Schema):
 
     class Meta:
         # Fields to expose
-        fields = ('username', 'password', 'first_Name', 'last_name', 'email', 'account_type')
+        fields = ('username', 'password', 'first_name', 'last_name', 'email', 'account_type')
 
 class Plant_Schema(ma.Schema):
 
