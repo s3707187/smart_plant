@@ -34,7 +34,6 @@ axios.interceptors.response.use(
 
         // 401 == Unauthenticated, ie, the access token was invalid
         if (error.response.status === 401 && !originalRequest._retry) {
-            await removeAccessToken();
             originalRequest._retry = true;
             // Try to get a new access token from the /refresh endpoint
             const refreshToken = await getRefreshToken();
