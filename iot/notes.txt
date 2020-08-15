@@ -1,0 +1,11 @@
+Instructions for running:
+
+
+script placed into startup commands as:
+xxx
+
+ensure sense_hat and gpiozero installed
+
+
+may need to calibrate moisture sensors differently?
+
