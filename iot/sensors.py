@@ -30,4 +30,8 @@ class SensorManager:
 
     def get_humidity_pct(self):
         return self.sense.get_humidity()
+    
+    def cleanup(self):
+        self.ldr.close()
+        self.moisture.close()
 
