@@ -2,7 +2,13 @@ Instructions for running:
 
 
 script placed into startup commands as:
-xxx
+/etc/rc.local:
+python3 /home/pi/smart_plant.py -f "/home/pi/log.txt"  -s 30 &
+
+ensure smart_plant.py and sensors.py in /home/pi
+
+^^ may instead consider adding to path
+--
 
 ensure sense_hat and gpiozero installed
 

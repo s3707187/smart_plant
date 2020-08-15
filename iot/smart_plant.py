@@ -1,3 +1,4 @@
+
 import time
 import argparse
 import os
@@ -47,11 +48,11 @@ def start_sampling(period_t, logging=False):
             log_file.write('{},{},{},{},{},\n'.format(
                 curr_time, light, humid, temp, moist))
             log_file.close()
-
-        print("Light %: {}".format(light))
-        print("Humidity %: {}".format(humid))
-        print("Moisture %: {}".format(moist))
-        print("Temperature (Celsius): {}".format(temp))
+        else:
+            print("Light %: {}".format(light))
+            print("Humidity %: {}".format(humid))
+            print("Moisture %: {}".format(moist))
+            print("Temperature (Celsius): {}".format(temp))
         time.sleep(period_t)
 
 
@@ -61,20 +62,26 @@ if __name__ == '__main__':
 
         PARSER.add_argument("-m", "--menu", action='store_true',
                             default=False, help="Enable menu mode.")
-        PARSER.add_argument("-f", "--file", action='store_true',
-                            default=False, help="Enable saving to file.")
+        PARSER.add_argument("-f", "--file", type=str,
+                            default="NONE", help="Set file logging path and enable file logging.")
         PARSER.add_argument("-s", "--sample-rate", type=int,
                             default=30, help="Sample rate in seconds")
 
         ARGS = vars(PARSER.parse_args())
 
-        if ARGS["file"]:
+        if ARGS["file"] != "NONE":
             LOG_ENABLED = True
+            LOG_FILE = ARGS["file"]
             # Create file if it does not exist
-            if not os.path.exists(LOG_FILE):
-                log_file = open(LOG_FILE, 'w+')
-                log_file.write('time,light,humidity,moisture,temp,\n')
-                log_file.close()
+            try:
+                if not os.path.exists(LOG_FILE):
+                    log_file = open(LOG_FILE, 'w+')
+                    log_file.write('time,light,humidity,moisture,temp,\n')
+                    log_file.close()
+            except FileNotFoundError:
+                print("Invalid file name.")
+                SM.cleanup()
+                exit()
 
         if ARGS["menu"]:
             menu_system()
