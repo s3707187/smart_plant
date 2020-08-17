@@ -9,7 +9,7 @@ from sensors import SensorManager
 
 SM = SensorManager()
 
-LOG_FILE = "log.csv"
+LOG_FILE_PATH = "log.csv"
 LOG_ENABLED = False
 
 
@@ -18,7 +18,7 @@ def menu_system():
     print("1. Begin local data collection.")
     # print("2. Calibrate moisture sensor.") - would be an extra feature
 
-    while(True):
+    while True:
         select = input("Selection: ")
 
         if select == "1":
@@ -35,7 +35,7 @@ def menu_system():
 
 
 def start_sampling(period_t, logging=False):
-    while(True):
+    while True:
 
         light = round(SM.get_light_pct(), 2)
         humid = round(SM.get_humidity_pct(), 2)
@@ -44,10 +44,10 @@ def start_sampling(period_t, logging=False):
         if(LOG_ENABLED):
             curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                          "%Y-%m-%d")
-            log_file = open(LOG_FILE, 'a')
-            log_file.write('{},{},{},{},{},\n'.format(
+            curr_log_file = open(LOG_FILE_PATH, 'a')
+            curr_log_file.write('{},{},{},{},{},\n'.format(
                 curr_time, light, humid, temp, moist))
-            log_file.close()
+            curr_log_file.close()
         else:
             print("Light %: {}".format(light))
             print("Humidity %: {}".format(humid))
@@ -58,24 +58,24 @@ def start_sampling(period_t, logging=False):
 
 if __name__ == '__main__':
     try:
-        PARSER = argparse.ArgumentParser()
+        parser = argparse.ArgumentParser()
 
-        PARSER.add_argument("-m", "--menu", action='store_true',
+        parser.add_argument("-m", "--menu", action='store_true',
                             default=False, help="Enable menu mode.")
-        PARSER.add_argument("-f", "--file", type=str,
+        parser.add_argument("-f", "--file", type=str,
                             default="NONE", help="Set file logging path and enable file logging.")
-        PARSER.add_argument("-s", "--sample-rate", type=int,
+        parser.add_argument("-s", "--sample-rate", type=int,
                             default=30, help="Sample rate in seconds")
 
-        ARGS = vars(PARSER.parse_args())
+        args = vars(parser.parse_args())
 
-        if ARGS["file"] != "NONE":
+        if args["file"] != "NONE":
             LOG_ENABLED = True
-            LOG_FILE = ARGS["file"]
+            LOG_FILE_PATH = args["file"]
             # Create file if it does not exist
             try:
-                if not os.path.exists(LOG_FILE):
-                    log_file = open(LOG_FILE, 'w+')
+                if not os.path.exists(LOG_FILE_PATH):
+                    log_file = open(LOG_FILE_PATH, 'w+')
                     log_file.write('time,light,humidity,moisture,temp,\n')
                     log_file.close()
             except FileNotFoundError:
@@ -83,10 +83,10 @@ if __name__ == '__main__':
                 SM.cleanup()
                 exit()
 
-        if ARGS["menu"]:
+        if args["menu"]:
             menu_system()
         else:
-            start_sampling(ARGS["sample_rate"], LOG_ENABLED)
+            start_sampling(args["sample_rate"], LOG_ENABLED)
 
     except KeyboardInterrupt:
         print("\nClosing.")
