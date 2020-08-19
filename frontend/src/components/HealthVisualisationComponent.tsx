@@ -20,6 +20,146 @@ var moistData = 0.66
 var padVal = 0.005
 
 //@ts-ignore
+
+
+const LAYOUT = [
+    //Layout - domain and healthy range
+    {
+        name: 'spiderMax',
+        temp: 1,
+        humidity: 1,
+        light: 1,
+        moisture: 1,
+
+        fill: '#f8f8f8',
+        stroke: '#cccccc'
+    },
+
+    //Outer axes, so that they appear "below" the healthy range
+    {
+        name: 'tempAx2',
+        temp: 1,
+        humidity: 0.001,
+        light: 0.001,
+        moisture: 0.001,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+    {
+        name: 'humidAx2',
+        temp: 0.001,
+        humidity: 1,
+        light: 0.001,
+        moisture: 0.001,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+    {
+        name: 'lightAx2',
+        temp: 0.001,
+        humidity: 0.001,
+        light: 1,
+        moisture: 0.001,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+    {
+        name: 'moistAx2',
+        temp: 0.001,
+        humidity: 0.001,
+        light: 0.001,
+        moisture: 1,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+
+
+    //Outer edge of the healthy range
+    {
+        name: 'healthHighBorder',
+        temp: healthMax,
+        humidity: healthMax,
+        light: healthMax,
+        moisture: healthMax,
+
+        fill: 'rgba(114,210,172,0.8)',
+        stroke: 'rgba(114,210,172,1)'
+    },
+
+    //Inner edge of the healthy range
+    {
+        name: 'healthLowBorder',
+        temp: healthMin,
+        humidity: healthMin,
+        light: healthMin,
+        moisture: healthMin,
+
+        fill: '#f8f8f8',
+        stroke: '#cccccc'
+    },
+
+    //The center dot, indicating minimum value
+    {
+        name: 'minVal',
+        temp: 0.001,
+        humidity: 0.001,
+        light: 0.001,
+        moisture: 0.001,
+
+        fill: '#f8f8f8',
+        stroke: '#cccccc'
+    },
+
+
+    //Inner portion of the axes
+    {
+        name: 'tempAx',
+        temp: healthMin,
+        humidity: 0.001,
+        light: 0.001,
+        moisture: 0.001,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+    {
+        name: 'humidAx',
+        temp: 0.001,
+        humidity: healthMin,
+        light: 0.001,
+        moisture: 0.001,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+    {
+        name: 'lightAx',
+        temp: 0.001,
+        humidity: 0.001,
+        light: healthMin,
+        moisture: 0.001,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+    {
+        name: 'moistAx',
+        temp: 0.001,
+        humidity: 0.001,
+        light: 0.001,
+        moisture: healthMin,
+
+        fill: 'black',
+        stroke: '#cccccc'
+    },
+];
+
+//const DATA = toGraphableData(tempData, humidData, lightData, moistData, padVal)
+//@ts-ignore
 function toGraphableData([tempData, humidData, lightData, moistData, padVal]) {
     return [
         {
@@ -54,156 +194,8 @@ function toGraphableData([tempData, humidData, lightData, moistData, padVal]) {
             fill: 'rgb(0,0,0,0)',
             stroke: 'red'
         },
-
     ]
-
 }
-
-const LAYOUT = [
-    //Layout - domain and healthy range
-    {
-        name: 'spiderMax',
-        temp: 1,
-        humidity: 1,
-        light: 1,
-        moisture: 1,
-
-        fill: '#f8f8f8',
-        stroke: '#cccccc'
-    },
-
-
-    //Outer axes, so that they appear "below" the healthy range
-    {
-        name: 'tempAx2',
-        temp: 1,
-        humidity: 0.001,
-        light: 0.001,
-        moisture: 0.001,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-    {
-        name: 'humidAx2',
-        temp: 0.001,
-        humidity: 1,
-        light: 0.001,
-        moisture: 0.001,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-
-    {
-        name: 'lightAx2',
-        temp: 0.001,
-        humidity: 0.001,
-        light: 1,
-        moisture: 0.001,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-
-    {
-        name: 'moistAx2',
-        temp: 0.001,
-        humidity: 0.001,
-        light: 0.001,
-        moisture: 1,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-
-
-    //Outer edge of the healthy range
-    {
-        name: 'healthHighBorder',
-        temp: healthMax,
-        humidity: healthMax,
-        light: healthMax,
-        moisture: healthMax,
-
-        fill: 'rgba(114,210,172,0.8)',
-        stroke: 'rgba(114,210,172,1)'
-    },
-
-    //Inner edge of the healthy range
-
-    {
-        name: 'healthLowBorder',
-        temp: healthMin,
-        humidity: healthMin,
-        light: healthMin,
-        moisture: healthMin,
-
-        fill: '#f8f8f8',
-        stroke: '#cccccc'
-    },
-
-    //The center dot, indicating minimum value
-
-    {
-        name: 'minVal',
-        temp: 0.001,
-        humidity: 0.001,
-        light: 0.001,
-        moisture: 0.001,
-
-        fill: '#f8f8f8',
-        stroke: '#cccccc'
-    },
-
-
-    //Inner portion of the axes
-
-    {
-        name: 'tempAx',
-        temp: healthMin,
-        humidity: 0.001,
-        light: 0.001,
-        moisture: 0.001,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-    {
-        name: 'humidAx',
-        temp: 0.001,
-        humidity: healthMin,
-        light: 0.001,
-        moisture: 0.001,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-
-    {
-        name: 'lightAx',
-        temp: 0.001,
-        humidity: 0.001,
-        light: healthMin,
-        moisture: 0.001,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-
-    {
-        name: 'moistAx',
-        temp: 0.001,
-        humidity: 0.001,
-        light: 0.001,
-        moisture: healthMin,
-
-        fill: 'black',
-        stroke: '#cccccc'
-    },
-];
-
-//const DATA = toGraphableData(tempData, humidData, lightData, moistData, padVal)
 
 const tipStyle = {
     display: 'flex',
@@ -220,10 +212,14 @@ export default class RadarChartWithTooltips extends Component {
     };
 
     render() {
+        //@ts-ignore
         const { hoveredCell } = this.state;
         //@ts-ignore
-        const { DATA } = LAYOUT.concat(toGraphableData(this.props))
-
+        const graphable = toGraphableData(this.props.d1)
+        console.log(graphable)
+        //@ts-ignore
+        const DATA = LAYOUT.concat(graphable);
+        console.log(DATA)
         return (
             <div>
                 <RadarChart
@@ -253,8 +249,8 @@ export default class RadarChartWithTooltips extends Component {
                         { name: 'Water Score', domain: [0, 1], getValue: d => d.moisture },
                         //@ts-ignore
                     ]}
-                    width={500}
-                    height={500}
+                    width={400}
+                    height={400}
                     //@ts-ignore
                     onValueMouseOver={v => {
                         this.setState({ hoveredCell: v });
@@ -304,6 +300,8 @@ export default class RadarChartWithTooltips extends Component {
                         )}
                 </RadarChart>
             </div >
+
+
 
         );
     }
