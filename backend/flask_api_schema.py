@@ -31,17 +31,30 @@ class User(db.Model):
 class Plant(db.Model):
     __tablename__ = "Plant"
     plant_id = db.Column(db.Integer, nullable=False, unique=True, autoincrement=True, primary_key=True)
+    plant_type = db.Column(db.VARCHAR(100), nullable=False) #, ForeignKey('Plant_type.plant_type')
+    plant_name = db.Column(db.VARCHAR(100), nullable=False)
+    password = db.Column(db.VARCHAR(100), nullable=False)
+
+    def __init__(self, plant_type, plant_name, password):
+        self.plant_type = plant_type
+        self.plant_name = plant_name
+        self.password = password
+
+#Plant_type model
+class Plant_type(db.Model):
+    __tablename__ = "Plant_type"
+    plant_type = db.Column(db.VARCHAR(100), nullable=False, unique=True, primary_key=True)
     temp_min = db.Column(db.Float, nullable=False)
     temp_max = db.Column(db.Float, nullable=False)
     humidity_min = db.Column(db.Float, nullable=False)
     humidity_max = db.Column(db.Float, nullable=False)
     light_min = db.Column(db.Float, nullable=False)
     light_max = db.Column(db.Float, nullable=False)
-    moisture_min  = db.Column(db.Float, nullable=False)
-    moisture_max  = db.Column(db.Float, nullable=False)
+    moisture_min = db.Column(db.Float, nullable=False)
+    moisture_max = db.Column(db.Float, nullable=False)
 
-    def __init__(self, plant_id, temp_min, temp_max, humidity_min, humidity_max, light_min, light_max, moisture_min, moisture_max):
-        self.plant_id = plant_id
+    def __init__(self, plant_type, temp_min, temp_max, humidity_min, humidity_max, light_min, light_max, moisture_min, moisture_max):
+        self.plant_type = plant_type
         self.temp_min = temp_min
         self.temp_max = temp_max
         self.humidity_min = humidity_min
@@ -99,6 +112,15 @@ class Plant_Schema(ma.Schema):
 
     class Meta:
         # Fields to expose
+        fields = ('plant_id', 'plant_type', 'plant_name')
+
+class Plant_type_Schema(ma.Schema):
+
+    def __init__(self, strict=True, **kwargs):
+        super(Plant_type_Schema, self).__init__(**kwargs)
+
+    class Meta:
+        # Fields to expose
         fields = ('plant_id', 'temp_min', 'temp_max', 'humidity_min', 'humidity_max',
                     'light_min', 'light_max', 'moisture_min', 'moisture_max')
 
@@ -125,6 +147,9 @@ Schema_Users = User_Schema(many=True)
 
 Schema_Plant = Plant_Schema()
 Schema_Plants = Plant_Schema(many=True)
+
+Schema_Plant_type = Plant_type_Schema()
+Schema_Plants_type = Plant_type_Schema(many=True)
 
 Schema_Plant_history = Plant_history_Schema()
 Schema_Plants_history = Plant_history_Schema(many=True)

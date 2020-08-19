@@ -1,4 +1,5 @@
 runtime: python38
+service: backend
 
 handlers:
 - url: /static

@@ -4,8 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os, requests, json
 from flask_api import api, db
+from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = 'super-secret'
+jwt = JWTManager(app)
+CORS(app)
+
 
 HOST = "34.87.205.64"
 USER = "root"
