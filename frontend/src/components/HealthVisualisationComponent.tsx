@@ -160,51 +160,9 @@ const LAYOUT = [
 
 //const DATA = toGraphableData(tempData, humidData, lightData, moistData, padVal)
 //@ts-ignore
-function toGraphableData([tempData, humidData, lightData, moistData, padVal]) {
-    return [
-        {
-            name: 'healthLowPad',
-            temp: tempData - padVal,
-            humidity: humidData - padVal,
-            light: lightData - padVal,
-            moisture: moistData - padVal,
 
-            fill: 'rgb(0,0,0,0)',
-            stroke: 'red'
-        },
 
-        {
-            name: 'healthHighPad',
-            temp: tempData + padVal,
-            humidity: humidData + padVal,
-            light: lightData + padVal,
-            moisture: moistData + padVal,
 
-            fill: 'rgb(0,0,0,0)',
-            stroke: 'red'
-        },
-
-        {
-            name: 'plant',
-            temp: tempData,
-            humidity: humidData,
-            light: lightData,
-            moisture: moistData,
-
-            fill: 'rgb(0,0,0,0)',
-            stroke: 'red'
-        },
-    ]
-}
-
-const tipStyle = {
-    display: 'flex',
-    color: '#fff',
-    background: '#000',
-    alignItems: 'center',
-    padding: '5px',
-    //position: "absolute"
-};
 
 export default class RadarChartWithTooltips extends Component {
     state = {
@@ -213,9 +171,54 @@ export default class RadarChartWithTooltips extends Component {
 
     render() {
         //@ts-ignore
+        function toGraphableData([tempData, humidData, lightData, moistData, padVal]) {
+            return [
+                {
+                    name: 'healthLowPad',
+                    temp: tempData - padVal,
+                    humidity: humidData - padVal,
+                    light: lightData - padVal,
+                    moisture: moistData - padVal,
+
+                    fill: 'rgb(0,0,0,0)',
+                    stroke: 'red'
+                },
+
+                {
+                    name: 'healthHighPad',
+                    temp: tempData + padVal,
+                    humidity: humidData + padVal,
+                    light: lightData + padVal,
+                    moisture: moistData + padVal,
+
+                    fill: 'rgb(0,0,0,0)',
+                    stroke: 'red'
+                },
+
+                {
+                    name: 'plant',
+                    temp: tempData,
+                    humidity: humidData,
+                    light: lightData,
+                    moisture: moistData,
+
+                    fill: 'rgb(0,0,0,0)',
+                    stroke: 'red'
+                },
+            ]
+        }
+        //@ts-ignore
         const { hoveredCell } = this.state;
         //@ts-ignore
         const graphable = toGraphableData(this.props.d1)
+        const tipStyle = {
+            display: 'flex',
+            color: '#fff',
+            background: '#000',
+            alignItems: 'center',
+            padding: '5px',
+            //position: "absolute"
+        };
         console.log(graphable)
         //@ts-ignore
         const DATA = LAYOUT.concat(graphable);
