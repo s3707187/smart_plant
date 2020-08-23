@@ -43,7 +43,7 @@ def menu_system():
             configure_cloud()
         elif select == "3":
             clean_exit()
-        else:   
+        else:
             print("Invalid selection. Try again.")
 
 
@@ -55,7 +55,7 @@ def start_sampling(period_t, logging=False):
         temp = round(SM.get_temp_val(), 2)
         moist = round(SM.get_moisture_pct(), 2)
 
-        if(LOG_ENABLED):
+        if(logging):
             curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                          "%Y-%m-%d")
             curr_log_file = open(LOG_FILE_PATH, 'a')
@@ -84,9 +84,11 @@ def configure_cloud():
         print("The activation details for the plants you own are available on the web "
               "application")
 
-        entered_id = input("Please enter the plant ID (enter nothing to cancel): ")
+        entered_id = input(
+            "Please enter the plant ID (enter nothing to cancel): ")
         if entered_id != "":
-            entered_key = input("Please enter the plant activation key (enter nothing to cancel): ")
+            entered_key = input(
+                "Please enter the plant activation key (enter nothing to cancel): ")
             if entered_key != "":
                 # may hash entered key here
                 hasher = hashlib.sha256()
@@ -113,6 +115,7 @@ def configure_cloud():
         else:
             again = False
 
+
 def verify_plant(plant_id, hashed_key):
     # returns true or false, calls API on plant check
 
@@ -125,17 +128,58 @@ def verify_plant(plant_id, hashed_key):
     return True
 
 
-def upload_data():
+def upload_data(date_time, light, moisture, humidity, temperature):
     # uploads a single peice of data, should only be called if
     # plant configuration is verified
-    pass
+
+    information = {"date_time": date_time,
+                   "light": light,
+                   "moisture": moisture,
+                   "humidity": humidity,
+                   "temperature": temperature
+                   }
+    response = requests.post("{}/save_plant_details".format(API_URL), json=information)
+    
+    if response.status_code != 200:
+        log_error("Data upload failed. Response code {}".format(response.status_code))
 
 
-def start_uploading():
+def start_uploading(period_t):
     # similar to start_sampling but uploads to cloud instead
     # verifies plant first, if fails then log error output and exits
     # may throw exceptions from sensors, catch here
-    pass
+    
+    # first get details from file
+    credentials = None
+    try:
+        with open(CONFIG_FILE_PATH, "r") as config_file:
+            credentials = json.load(config_file)
+    except FileNotFoundError:
+        error_message = "Credentials file not found."
+        log_error(error_message)
+    except json.JSONDecodeError:
+        error_message = "Credentials file not valid JSON."
+        log_error(error_message)
+
+    if verify_plant(credentials.plant_id, credentials.plant_key):
+        while True:
+            curr_time = datetime.datetime.now().strftime("%H:%M:%S "
+                                                         "%Y-%m-%d")
+            # may surround next block in try catch, catching sensor exceptions 
+            # and logging them but continuing without uploading
+            light = round(SM.get_light_pct(), 2)
+            moist = round(SM.get_moisture_pct(), 2)
+            humid = round(SM.get_humidity_pct(), 2)
+            temp = round(SM.get_temp_val(), 2)
+
+            upload_data(curr_time, light, moist, humid, temp)
+
+            time.sleep(period_t)
+    else:
+        error_message = "Invalid credentials from file."
+        log_error(error_message)
+
+    clean_exit()
 
 
 def log_error(message):
@@ -144,12 +188,13 @@ def log_error(message):
                                                  "%Y-%m-%d")
     with open(ERROR_FILE_PATH, "a+") as error_file:
         error_file.write("{} $ {}".format(curr_time, message))
-    
+
 
 def clean_exit():
     print("\nClosing.")
     SM.cleanup()
     exit()
+
 
 if __name__ == '__main__':
     try:
@@ -174,7 +219,7 @@ if __name__ == '__main__':
 
         if args["upload"]:
             # automatically start uploading
-            start_uploading()
+            start_uploading(args["sample_rate"])
 
         else:
             if args["file"] != "NONE":
