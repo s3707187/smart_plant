@@ -10,7 +10,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = "sup"
-app.config['JWT_TOKEN_LOCATION'] = ['query_string']
+#app.config['JWT_TOKEN_LOCATION'] = ['query_string']
 
 
 
