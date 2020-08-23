@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask_api_schema import *
 from flask import Flask, Blueprint, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +9,7 @@ from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
 from flask_api_schema import User_Schema
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 import random, string
 
 api = Blueprint("api", __name__)
@@ -32,6 +34,7 @@ PASSWORD_LENGTH = 8
 
 @api.route("/login", methods=["POST"])
 def login():
+    test()
     ERRORS = []
     # LOGIN NEEDS TO
     # - get username / check username with db
@@ -132,12 +135,25 @@ def register_new_user():
         }), 400
 
 @api.route("/register_plant", methods=["POST"])
+#@jwt_required
 def register_new_plant():
     valid = True
     ERRORS = []
+    # get username from token
     username = request.json["username"]
+
+    #current_user = get_jwt_identity()
+    #print(current_user)
+
     plant_type = request.json["plant_type"]
     plant_name = request.json["plant_name"]
+    # determine plant health by comparing data to plant_types data
+    plant_health = request.json["plant_health"]
+
+
+
+
+
     # create a random password for plant
     password = create_random_word()
 
@@ -162,12 +178,11 @@ def register_new_plant():
         })
 
     if valid:
-        new_plant = Plant(plant_type,plant_name, password)
+        new_plant = Plant(plant_type,plant_name, password, plant_health)
         message = "plant successfully registered"
         db.session.add(new_plant)
         db.session.commit()
         new_plant_dict = Schema_Plant.dump(new_plant)
-        print(new_plant)
 
         user_type = "plant_manager"
         new_plant_link = Plant_link(username, new_plant_dict['plant_id'], user_type)
@@ -179,6 +194,47 @@ def register_new_plant():
         return jsonify({
             "errors": ERRORS
         }), 400
+
+@api.route("/current_user", methods=["GET"])
+@jwt_required
+def get_current_user():
+    # Access the identity of the current user
+    current_user = get_jwt_identity()
+    return jsonify(username=current_user), 201
+
+#Dashboard Page
+@api.route("/get_users_plants?jwt=<ACCESS_TOKEN>", methods=["GET"])
+@jwt_required
+def get_users_plants():
+    #username = request.json["username"]
+    #plant_id = request.json["plant_id"]
+    current_user = get_jwt_identity()
+
+    plant_link = Plant_link.query.filter_by(username=current_user)
+    result = Schema_Plants_link.dump(plant_link)
+    return jsonify(result)
+
+#individual plant page
+@api.route("/view_plant_details", methods=["GET"])
+def view_plant_details():
+    plant_id  = request.json['plant_id']
+    return jsonify(get_plant(plant_id))
+
+@api.route("/save_plant_details", methods=["POST"])
+def save_plant_details():
+    plant_id = request.json["plant_id"]
+    date_time = request.json["date_time"]
+    light = request.json["light"]
+    moisture = request.json["moisture"]
+    humidity = request.json["humidity"]
+    temperature = request.json["temperature"]
+
+    new_plant_history = Plant_history(plant_id, date_time, light, moisture, humidity, temperature)
+    message = "New plant record successfully registered"
+    db.session.add(new_plant_history)
+    db.session.commit()
+    return jsonify(message), 201
+
 
 # DEBUGGING NEED TO DELETE LOL
 @api.route("/users", methods=["GET"])
@@ -216,6 +272,11 @@ def email_exists(email):
 def get_user(username):
     user = User.query.get(username)
     result = Schema_User.dump(user)
+    return result
+
+def get_plant(plant_id):
+    plant = Plant.query.get(plant_id)
+    result = Schema_Plant.dump(plant)
     return result
 
 def create_random_word():
