@@ -15,7 +15,7 @@ SM = SensorManager()
 LOG_FILE_PATH = "log.csv"
 LOG_ENABLED = False
 
-ERROR_FILE_PATH = "error_log.csv"
+ERROR_FILE_PATH = "error_log.txt"
 API_URL = "http://url.com"
 
 CONFIG_FILE_PATH = "cloud_config.json"
@@ -160,8 +160,7 @@ def start_uploading(period_t):
     except json.JSONDecodeError:
         error_message = "Credentials file not valid JSON."
         log_error(error_message)
-
-    if verify_plant(credentials.plant_id, credentials.plant_key):
+    if verify_plant(credentials["plant_id"], credentials["plant_key"]):
         while True:
             curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                          "%Y-%m-%d")
@@ -183,7 +182,7 @@ def start_uploading(period_t):
 
 
 def log_error(message):
-    # log the datetime+message to error_log.txt?
+    # log the datetime+message to error_log.txt
     curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                  "%Y-%m-%d")
     with open(ERROR_FILE_PATH, "a+") as error_file:
@@ -213,6 +212,11 @@ if __name__ == '__main__':
                             default=False, help="Automatically start uploading to cloud.")
 
         args = vars(parser.parse_args())
+
+        # extra check here just so we don't go through cloud billing
+        if args["sample_rate"] < 1800:
+            args["sample_rate"] = 1800
+
         if args["configure"]:
             # do cloud config then continue
             configure_cloud()
