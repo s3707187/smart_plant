@@ -1,9 +1,13 @@
 Instructions for running:
 
+enable SPI on pi
 
 script placed into startup commands as:
 /etc/rc.local:
-python3 /home/pi/smart_plant.py -f "/home/pi/log.txt"  -s 30 &
+python3 /home/pi/smart_plant.py -f "/home/pi/log.csv"  -s 30 &
+
+^^
+respective paths to python file and logging csv
 
 ensure smart_plant.py and sensors.py in /home/pi
 
