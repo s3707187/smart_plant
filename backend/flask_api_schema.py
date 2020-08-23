@@ -34,11 +34,13 @@ class Plant(db.Model):
     plant_type = db.Column(db.VARCHAR(100), nullable=False) #, ForeignKey('Plant_type.plant_type')
     plant_name = db.Column(db.VARCHAR(100), nullable=False)
     password = db.Column(db.VARCHAR(100), nullable=False)
+    plant_health = db.Column(db.VARCHAR(100), nullable=False)
 
-    def __init__(self, plant_type, plant_name, password):
+    def __init__(self, plant_type, plant_name, password, plant_health):
         self.plant_type = plant_type
         self.plant_name = plant_name
         self.password = password
+        self.plant_health = plant_health
 
 #Plant_type model
 class Plant_type(db.Model):
@@ -112,7 +114,7 @@ class Plant_Schema(ma.Schema):
 
     class Meta:
         # Fields to expose
-        fields = ('plant_id', 'plant_type', 'plant_name')
+        fields = ('plant_id', 'plant_type', 'plant_name', 'plant_health')
 
 class Plant_type_Schema(ma.Schema):
 
