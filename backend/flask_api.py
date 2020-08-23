@@ -1,5 +1,4 @@
-from datetime import date
-
+import datetime
 from flask_api_schema import *
 from flask import Flask, Blueprint, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +10,7 @@ from passlib.hash import pbkdf2_sha256
 from flask_api_schema import User_Schema
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
 import random, string
+from functools import wraps
 
 api = Blueprint("api", __name__)
 
@@ -18,40 +18,18 @@ api = Blueprint("api", __name__)
 
 
 PASSWORD_LENGTH = 8
-#ERRORS = []
-
-    #{
-    #"general_error": "There was some sort of validation error",
-    #"password_length": "The password did not contain enough characters (min 8)",
-    #"username_error": "Username is incorrect",
-    #"email_error": "Email already exists or is incorrect",
-    #"name_error": "name already is incorrect",
-    #"login_error" : "username or password is incorrect"
-    #}
-
 
 # ------------ CALLABLE API METHODS ----------------
 
 @api.route("/login", methods=["POST"])
 def login():
-    test()
     ERRORS = []
-    # LOGIN NEEDS TO
-    # - get username / check username with db
-    # - return some sort of error if username has no match
-    # - get plain text password and verify with db
-    # - return error if password doesn't match
-    # - else return tokens (access/refresh)
     username = request.json["username"]
     password = request.json["password"]
 
     valid_user = True
-    user = None
-    hashed_password = ""
-    ret_val = None
     if not username_exists(username):
         valid_user = False
-        #ret_val = ERRORS["login_error"]
         ERRORS.append({
             "path": ['username'],
             "message": "username or password is incorrect"
@@ -70,7 +48,6 @@ def login():
         }), 201
 
     else:
-        #ret_val = ERRORS["login_error"]
         ERRORS.append({
             "path": ['password'],
             "message": "username or password is incorrect"
@@ -135,24 +112,17 @@ def register_new_user():
         }), 400
 
 @api.route("/register_plant", methods=["POST"])
-#@jwt_required
+@jwt_required
 def register_new_plant():
     valid = True
     ERRORS = []
     # get username from token
-    username = request.json["username"]
-
-    #current_user = get_jwt_identity()
-    #print(current_user)
+    current_user = get_jwt_identity()
 
     plant_type = request.json["plant_type"]
     plant_name = request.json["plant_name"]
     # determine plant health by comparing data to plant_types data
     plant_health = request.json["plant_health"]
-
-
-
-
 
     # create a random password for plant
     password = create_random_word()
@@ -170,7 +140,7 @@ def register_new_plant():
             "message": "plant name is empty"
         })
 
-    if not username_exists(username):
+    if not username_exists(current_user):
         valid = False
         ERRORS.append({
             "path": ['username'],
@@ -185,7 +155,7 @@ def register_new_plant():
         new_plant_dict = Schema_Plant.dump(new_plant)
 
         user_type = "plant_manager"
-        new_plant_link = Plant_link(username, new_plant_dict['plant_id'], user_type)
+        new_plant_link = Plant_link(current_user, new_plant_dict['plant_id'], user_type)
         db.session.add(new_plant_link)
         db.session.commit()
 
@@ -195,33 +165,39 @@ def register_new_plant():
             "errors": ERRORS
         }), 400
 
-@api.route("/current_user", methods=["GET"])
-@jwt_required
-def get_current_user():
-    # Access the identity of the current user
-    current_user = get_jwt_identity()
-    return jsonify(username=current_user), 201
-
 #Dashboard Page
-@api.route("/get_users_plants?jwt=<ACCESS_TOKEN>", methods=["GET"])
+@api.route("/get_users_plants", methods=["GET"])
 @jwt_required
 def get_users_plants():
-    #username = request.json["username"]
-    #plant_id = request.json["plant_id"]
+    ERRORS=[]
     current_user = get_jwt_identity()
+    if username_exists(current_user):
+        plant_link = Plant_link.query.filter_by(username=current_user)
+        result = Schema_Plants_link.dump(plant_link)
 
-    plant_link = Plant_link.query.filter_by(username=current_user)
-    result = Schema_Plants_link.dump(plant_link)
-    return jsonify(result)
+        #plants from plant table
+
+
+        return jsonify(result), 201
+    else:
+        ERRORS.append({
+            "path": ['username'],
+            "message": "incorrect token"
+        })
+        return jsonify({
+            "errors": ERRORS
+        }), 400
+
 
 #individual plant page
 @api.route("/view_plant_details", methods=["GET"])
 def view_plant_details():
-    plant_id  = request.json['plant_id']
+    plant_id = request.json['plant_id']
     return jsonify(get_plant(plant_id))
 
 @api.route("/save_plant_details", methods=["POST"])
 def save_plant_details():
+    ERRORS= []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
     light = request.json["light"]
@@ -229,11 +205,53 @@ def save_plant_details():
     humidity = request.json["humidity"]
     temperature = request.json["temperature"]
 
-    new_plant_history = Plant_history(plant_id, date_time, light, moisture, humidity, temperature)
-    message = "New plant record successfully registered"
-    db.session.add(new_plant_history)
-    db.session.commit()
-    return jsonify(message), 201
+    #validate plant details
+    valid = True
+    if not plant_exists(plant_id):
+        valid = False
+        ERRORS.append({
+            "path": ['plant_id'],
+            "message": "Username does not exist"
+        }), 403
+
+    if not isinstance(light,float):
+        valid = False
+        ERRORS.append({
+            "path": ['light'],
+            "message": "light is invalid"
+        }), 403
+
+    if not isinstance(moisture, float):
+        valid = False
+        ERRORS.append({
+            "path": ['moisture'],
+            "message": "moisture is invalid"
+        }), 403
+
+    if not isinstance(humidity, float):
+        valid = False
+        ERRORS.append({
+            "path": ['humidity'],
+            "message": "humidity is invalid"
+        }), 403
+
+    if not isinstance(temperature, float):
+        valid = False
+        ERRORS.append({
+            "path": ['temperature'],
+            "message": "temperature is invalid"
+        }), 403
+
+    if valid:
+        new_plant_history = Plant_history(plant_id, date_time, light, moisture, humidity, temperature)
+        message = "New plant record successfully registered"
+        db.session.add(new_plant_history)
+        db.session.commit()
+        return jsonify(message), 201
+    else:
+        return jsonify({
+            "errors": ERRORS
+        }), 400
 
 
 # DEBUGGING NEED TO DELETE LOL
@@ -260,6 +278,12 @@ def get_plants_link():
 def username_exists(username_to_query):
     username = User.query.get(username_to_query)
     if username is None:
+        return False
+    return True
+
+def plant_exists(plant_to_query):
+    plant = Plant.query.get(plant_to_query)
+    if plant is None:
         return False
     return True
 
@@ -297,5 +321,13 @@ def plant_type_exists(plant_type_to_query):
         return False
     return True
 
+
+#?jwt=<token>
+@api.route("/current_user", methods=["GET"])
+@jwt_required
+def get_current_user():
+    # Access the identity of the current user
+    current_user = get_jwt_identity()
+    return jsonify(username=current_user), 201
 
 
