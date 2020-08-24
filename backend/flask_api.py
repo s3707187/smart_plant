@@ -8,7 +8,7 @@ from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
 from backend.flask_api_schema import User_Schema
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, jwt_refresh_token_required
 import random, string
 from functools import wraps
 
@@ -110,6 +110,24 @@ def register_new_user():
         return jsonify({
             "errors": ERRORS
         }), 400
+
+
+@api.route("/refresh", methods=["POST"])
+@jwt_refresh_token_required
+def refresh():
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        return jsonify({
+            "access_token": create_access_token(current_user)
+        }), 201
+    else:
+        return jsonify({
+            "errors": [{
+                "message": "The token is invalid",
+                "path": []
+            }]
+        }), 401
+
 
 @api.route("/register_plant", methods=["POST"])
 @jwt_required
