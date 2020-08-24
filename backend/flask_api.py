@@ -65,7 +65,8 @@ def register_new_user():
     last_name = request.json["last_name"]
     email = request.json["email"]
     password = request.json["password"]
-    account_type = request.json["account_type"]
+    # account_type = request.json["account_type"]
+    account_type = "user"
 
     if len(password) >= PASSWORD_LENGTH:
         hashed_password = pbkdf2_sha256.hash(password)
@@ -102,10 +103,12 @@ def register_new_user():
 
     if valid_user:
         new_user = User(username, hashed_password, first_name, last_name, email, account_type)
-        message = "user successfully registered"
         db.session.add(new_user)
         db.session.commit()
-        return jsonify(message), 201
+        return jsonify({
+            "access_token": create_access_token(username),
+            "refresh_token": create_refresh_token(username)
+        }), 201
     else:
         return jsonify({
             "errors": ERRORS

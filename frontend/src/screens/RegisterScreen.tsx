@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Form, Input, Tooltip, Cascader, Select, Row, Col, Checkbox, Button, AutoComplete } from "antd";
 import { QuestionCircleOutlined } from "@ant-design/icons";
+import { setAccessToken, setRefreshToken } from "../app/token";
+import { usePost } from "../utils/apiHooks";
 
 const { Option } = Select;
 
@@ -31,35 +33,31 @@ interface RegisterProps {}
 
 const RegisterScreen: React.FC<RegisterProps> = (props: RegisterProps) => {
     const [form] = Form.useForm();
-
-    const onFinish = (values: any) => {
-        console.log("Received values of form: ", values);
-    };
-
-    const prefixSelector = (
-        <Form.Item name="prefix" noStyle>
-            <Select style={{ width: 70 }}>
-                <Option value="86">+86</Option>
-                <Option value="87">+87</Option>
-            </Select>
-        </Form.Item>
-    );
-
-    const [autoCompleteResult, setAutoCompleteResult] = useState([]);
-
-    const onWebsiteChange = (value: any) => {
-        if (!value) {
-            setAutoCompleteResult([]);
-        } else {
-            //@ts-ignore
-            setAutoCompleteResult([".com", ".org", ".net"].map((domain) => `${value}${domain}`));
+    const [Register, { data, loading, errors }] = usePost<
+        { refresh_token: string; access_token: string },
+        {
+            username: string;
+            password: string;
+            first_name: string;
+            last_name: string;
+            email: string;
         }
-    };
+    >("register", form);
 
-    const websiteOptions = autoCompleteResult.map((website) => ({
-        label: website,
-        value: website,
-    }));
+    const onFinish = async (values: any) => {
+        console.log("Received values of form: ", values);
+        try {
+            const res = await Register({
+                username: values.username,
+                password: values.password,
+                first_name: values.first_name,
+                last_name: values.last_name,
+                email: values.email,
+            });
+
+            await Promise.all([setRefreshToken(res.data.refresh_token), setAccessToken(res.data.access_token)]);
+        } catch (e) {}
+    };
 
     return (
         <Form
@@ -85,6 +83,19 @@ const RegisterScreen: React.FC<RegisterProps> = (props: RegisterProps) => {
                     {
                         required: true,
                         message: "Please input your E-mail!",
+                    },
+                ]}
+            >
+                <Input />
+            </Form.Item>
+
+            <Form.Item
+                name="username"
+                label="Username"
+                rules={[
+                    {
+                        required: true,
+                        message: "Please input your username!",
                     },
                 ]}
             >
@@ -129,14 +140,14 @@ const RegisterScreen: React.FC<RegisterProps> = (props: RegisterProps) => {
             </Form.Item>
 
             <Form.Item
-                name="firstName"
+                name="first_name"
                 label="Given Name"
                 rules={[{ required: true, message: "Please input your given name!", whitespace: true }]}
             >
                 <Input />
             </Form.Item>
             <Form.Item
-                name="lastName"
+                name="last_name"
                 label="Family Name"
                 rules={[{ required: true, message: "Please input your family name!", whitespace: true }]}
             >
