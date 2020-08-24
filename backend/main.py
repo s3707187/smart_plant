@@ -3,16 +3,13 @@ from flask import Flask , redirect , url_for, render_template , request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os, requests, json
-from flask_api import api, db
+from flask_api import api
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
 app = Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = "sup"
-#app.config['JWT_TOKEN_LOCATION'] = ['query_string']
-
-
 
 jwt = JWTManager(app)
 CORS(app)

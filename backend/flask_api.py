@@ -24,8 +24,8 @@ PASSWORD_LENGTH = 8
 @api.route("/login", methods=["POST"])
 def login():
     ERRORS = []
-    username = request.json["username"]
-    password = request.json["password"]
+    username = request.args.get["username"]
+    password = request.args.get["password"]
 
     valid_user = True
     if not username_exists(username):
@@ -60,12 +60,12 @@ def login():
 def register_new_user():
     ERRORS = []
     valid_user = True
-    username = request.json["username"]
-    first_name = request.json["first_name"]
-    last_name = request.json["last_name"]
-    email = request.json["email"]
-    password = request.json["password"]
-    account_type = request.json["account_type"]
+    username = request.args.get["username"]
+    first_name = request.args.get["first_name"]
+    last_name = request.args.get["last_name"]
+    email = request.args.get["email"]
+    password = request.args.get["password"]
+    account_type = request.args.get["account_type"]
 
     if len(password) >= PASSWORD_LENGTH:
         hashed_password = pbkdf2_sha256.hash(password)
@@ -112,17 +112,18 @@ def register_new_user():
         }), 400
 
 @api.route("/register_plant", methods=["POST"])
-@jwt_required
+#@jwt_required
 def register_new_plant():
     valid = True
     ERRORS = []
     # get username from token
-    current_user = get_jwt_identity()
+    #current_user = get_jwt_identity()
+    current_user = request.args.get["username"]
 
-    plant_type = request.json["plant_type"]
-    plant_name = request.json["plant_name"]
+    plant_type = request.args.get["plant_type"]
+    plant_name = request.args.get["plant_name"]
     # determine plant health by comparing data to plant_types data
-    plant_health = request.json["plant_health"]
+    plant_health = request.args.get["plant_health"]
 
     # create a random password for plant
     password = create_random_word()
@@ -172,13 +173,22 @@ def get_users_plants():
     ERRORS=[]
     current_user = get_jwt_identity()
     if username_exists(current_user):
-        plant_link = Plant_link.query.filter_by(username=current_user)
-        result = Schema_Plants_link.dump(plant_link)
+        plants = []
+        list_of_plants = []
 
-        #plants from plant table
+        plant_link = Plant_link.query.filter_by(username=current_user).all()
+        link = Schema_Plants_link.dump(plant_link)
 
+        for x in link:
+            if plant_exists(x["plant_id"]):
+                plants.append(x["plant_id"])
 
-        return jsonify(result), 201
+        for i in plants:
+            plant = Plant.query.filter_by(plant_id=i).all()
+            result = Schema_Plant.dump(plant)
+            list_of_plants.append(result)
+
+        return jsonify(list_of_plants), 201
     else:
         ERRORS.append({
             "path": ['username'],
@@ -192,11 +202,25 @@ def get_users_plants():
 #individual plant page
 @api.route("/view_plant_details", methods=["GET"])
 def view_plant_details():
-    plant_id = request.json['plant_id']
+    plant_id = request.args.get['plant_id']
     return jsonify(get_plant(plant_id))
 
-@api.route("/save_plant_details", methods=["POST"])
-def save_plant_details():
+#IOT device
+@api.route("/verify_plant", methods=["GET"])
+def verify_plant():
+    plant_id = request.json["plant_id"]
+    password = request.json["password"]
+    invalid_message = "incorrect password"
+    valid_message = "Plant successfully verified"
+
+    if password_match(plant_id, password):
+        return jsonify(valid_message), 200
+    else:
+        return jsonify(invalid_message), 401
+
+
+@api.route("/save_plant_data", methods=["POST"])
+def save_plant_data():
     ERRORS= []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
@@ -287,6 +311,16 @@ def plant_exists(plant_to_query):
         return False
     return True
 
+def password_match(plant_id, password):
+    if plant_exists(plant_id):
+        plant = Plant.query.get(plant_id)
+        result = Schema_Plant.dump(plant)
+
+        if not result['password'] == password:
+            return False
+        else:
+            return True
+
 def email_exists(email):
     response = db.session.query(User).filter((User.email == email)).first()
     if response is None:
@@ -329,5 +363,3 @@ def get_current_user():
     # Access the identity of the current user
     current_user = get_jwt_identity()
     return jsonify(username=current_user), 201
-
-
