@@ -3,207 +3,200 @@ import { Layout, Typography, Menu } from "antd";
 import HistoryVisualisationComponent from "../components/HistoryVisualisationComponent";
 import HealthVisualisationComponent from "../components/HealthVisualisationComponent";
 
-var healthMin = .32
-var healthMax = .68
+var healthMin = 0.32;
+var healthMax = 0.68;
 
 //@ts-ignore
 function toGraphableData([tempData, humidData, lightData, moistData, padVal]) {
     return [
         {
-            name: 'healthLowPad',
+            name: "healthLowPad",
             temp: tempData - padVal,
             humidity: humidData - padVal,
             light: lightData - padVal,
             moisture: moistData - padVal,
 
-            fill: 'rgb(0,0,0,0)',
-            stroke: 'red'
+            fill: "rgb(0,0,0,0)",
+            stroke: "red",
         },
 
         {
-            name: 'healthHighPad',
+            name: "healthHighPad",
             temp: tempData + padVal,
             humidity: humidData + padVal,
             light: lightData + padVal,
             moisture: moistData + padVal,
 
-            fill: 'rgb(0,0,0,0)',
-            stroke: 'red'
+            fill: "rgb(0,0,0,0)",
+            stroke: "red",
         },
 
         {
-            name: 'plant',
+            name: "plant",
             temp: tempData,
             humidity: humidData,
             light: lightData,
             moisture: moistData,
 
-            fill: 'rgb(0,0,0,0)',
-            stroke: 'red'
+            fill: "rgb(0,0,0,0)",
+            stroke: "red",
         },
-
-    ]
-
+    ];
 }
 
 const LAYOUT = [
     //Layout - domain and healthy range
     {
-        name: 'spiderMax',
+        name: "spiderMax",
         temp: 1,
         humidity: 1,
         light: 1,
         moisture: 1,
 
-        fill: '#f8f8f8',
-        stroke: '#cccccc'
+        fill: "#f8f8f8",
+        stroke: "#cccccc",
     },
-
 
     //Outer axes, so that they appear "below" the healthy range
     {
-        name: 'tempAx2',
+        name: "tempAx2",
         temp: 1,
         humidity: 0.001,
         light: 0.001,
         moisture: 0.001,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
     {
-        name: 'humidAx2',
+        name: "humidAx2",
         temp: 0.001,
         humidity: 1,
         light: 0.001,
         moisture: 0.001,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
 
     {
-        name: 'lightAx2',
+        name: "lightAx2",
         temp: 0.001,
         humidity: 0.001,
         light: 1,
         moisture: 0.001,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
 
     {
-        name: 'moistAx2',
+        name: "moistAx2",
         temp: 0.001,
         humidity: 0.001,
         light: 0.001,
         moisture: 1,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
-
 
     //Outer edge of the healthy range
     {
-        name: 'healthHighBorder',
+        name: "healthHighBorder",
         temp: healthMax,
         humidity: healthMax,
         light: healthMax,
         moisture: healthMax,
 
-        fill: 'rgba(114,210,172,0.8)',
-        stroke: 'rgba(114,210,172,1)'
+        fill: "rgba(114,210,172,0.8)",
+        stroke: "rgba(114,210,172,1)",
     },
 
     //Inner edge of the healthy range
 
     {
-        name: 'healthLowBorder',
+        name: "healthLowBorder",
         temp: healthMin,
         humidity: healthMin,
         light: healthMin,
         moisture: healthMin,
 
-        fill: '#f8f8f8',
-        stroke: '#cccccc'
+        fill: "#f8f8f8",
+        stroke: "#cccccc",
     },
 
     //The center dot, indicating minimum value
 
     {
-        name: 'minVal',
+        name: "minVal",
         temp: 0.001,
         humidity: 0.001,
         light: 0.001,
         moisture: 0.001,
 
-        fill: '#f8f8f8',
-        stroke: '#cccccc'
+        fill: "#f8f8f8",
+        stroke: "#cccccc",
     },
-
 
     //Inner portion of the axes
 
     {
-        name: 'tempAx',
+        name: "tempAx",
         temp: healthMin,
         humidity: 0.001,
         light: 0.001,
         moisture: 0.001,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
     {
-        name: 'humidAx',
+        name: "humidAx",
         temp: 0.001,
         humidity: healthMin,
         light: 0.001,
         moisture: 0.001,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
 
     {
-        name: 'lightAx',
+        name: "lightAx",
         temp: 0.001,
         humidity: 0.001,
         light: healthMin,
         moisture: 0.001,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
 
     {
-        name: 'moistAx',
+        name: "moistAx",
         temp: 0.001,
         humidity: 0.001,
         light: 0.001,
         moisture: healthMin,
 
-        fill: 'black',
-        stroke: '#cccccc'
+        fill: "black",
+        stroke: "#cccccc",
     },
 ];
 
 //const DATA = toGraphableData(tempData, humidData, lightData, moistData, padVal)
 
 const tipStyle = {
-    display: 'flex',
-    color: '#fff',
-    background: '#000',
-    alignItems: 'center',
-    padding: '5px',
+    display: "flex",
+    color: "#fff",
+    background: "#000",
+    alignItems: "center",
+    padding: "5px",
     //position: "absolute"
 };
 
-
-
-interface PlantScreenProps { }
+interface PlantScreenProps {}
 const { Content, Header } = Layout;
 
 const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
@@ -216,12 +209,18 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     Plant Name
                 </Typography.Title>
             </Header>
-            <Content style={{ margin: 20 }}>
+            <Content
+                style={{
+                    margin: 20,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
                 <Typography.Title level={2}>Plant Health</Typography.Title>
 
-                <HealthVisualisationComponent
-                    //@ts-ignore
-                    d1={[0.2, 0.5, 0.4, 0.7, 0.002]} />
+                <HealthVisualisationComponent style={{ width: 400, height: 400 }} d1={[0.2, 0.5, 0.4, 0.7, 0.002]} />
                 <Typography.Title level={2}>Plant History</Typography.Title>
                 <Menu
                     //@ts-ignore
