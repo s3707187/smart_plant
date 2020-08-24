@@ -10,10 +10,21 @@ const { Title } = Typography;
 
 interface DashboardScreenProps {}
 
-const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenProps) => {
-    const { data, loading, errors } = useGet("get_users_plants");
+type GetUsersPlantsData = {
+    plant_id: number;
+    user_type: "plant_manager" | "viewer";
+    username: string;
+}[];
 
-    console.log(data, loading, errors, "dashboard");
+interface GetCurrentUserData {
+    username: string;
+}
+
+const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenProps) => {
+    const { data, loading, errors } = useGet<GetUsersPlantsData>("get_users_plants");
+    const { data: currentUserData } = useGet<GetCurrentUserData>("current_user");
+
+    console.log(data, loading, errors, "dashboard", currentUserData);
 
     if (loading) {
         return <p>Loading ...</p>;
@@ -33,7 +44,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                 }}
             >
                 <Title level={2} style={{ marginBottom: "0.25em" }}>
-                    [FIRSTNAME]'s Dashboard
+                    {currentUserData && currentUserData.username}'s Dashboard
                 </Title>
                 <div style={{ display: "flex", alignItems: "center" }}>
                     <Button type={"primary"}>Add Plant</Button>
@@ -49,9 +60,16 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
             <Content
                 style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-around" }}
             >
-                {[0, 1, 2, 3, 4, 5].map((item, index) => (
-                    <PlantCard key={index} title={"Some Plant"} overallHealth={"healthy"} />
-                ))}
+                {data &&
+                    data.map((item) => (
+                        <PlantCard
+                            id={item.plant_id.toString()}
+                            userType={item.user_type}
+                            key={item.plant_id}
+                            title={"TODO"}
+                            overallHealth={"healthy"}
+                        />
+                    ))}
             </Content>
         </Layout>
     );
