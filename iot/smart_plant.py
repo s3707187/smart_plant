@@ -5,8 +5,9 @@ import os
 import datetime
 import json
 import hashlib
-import requests
 import os
+import requests
+
 from sensors import SensorManager
 
 CURR_DIR = os.path.dirname(__file__)
@@ -94,8 +95,10 @@ def configure_cloud():
                 # may hash entered key here
                 hasher = hashlib.sha256()
                 hasher.update(bytes(entered_key, 'utf-8'))
-                hashed_key = hasher.hexdigest()
-
+                # Uncomment this line and comment the following if want hashing
+                # hashed_key = hasher.hexdigest()
+                hashed_key = entered_key
+                
                 verified = verify_plant(entered_id, hashed_key)
 
                 if verified:
@@ -117,10 +120,10 @@ def configure_cloud():
             again = False
 
 
-def verify_plant(plant_id, hashed_key):
+def verify_plant(plant_id, key):
     # returns true or false, calls API on plant check
 
-    # response = requests.get("{}/verify_plant".format(API_URL), auth=(plant_id, hashed_key))
+    # response = requests.get("{}/verify_plant".format(API_URL), auth=(plant_id, key))
     # if response.status_code == 200:
     #     return True
     # else:
