@@ -19,7 +19,7 @@
   resolved "https://registry.yarnpkg.com/@ant-design/icons-svg/-/icons-svg-4.1.0.tgz#480b025f4b20ef7fe8f47d4a4846e4fee84ea06c"
   integrity sha512-Fi03PfuUqRs76aI3UWYpP864lkrfPo0hluwGqh7NJdLhvH4iRDc3jbJqZIvRDLHKbXrvAfPPV3+zjUccfFvWOQ==
 
-"@ant-design/icons@^4.2.1":
+"@ant-design/icons@^4.2.1", "@ant-design/icons@^4.2.2":
   version "4.2.2"
   resolved "https://registry.yarnpkg.com/@ant-design/icons/-/icons-4.2.2.tgz#6533c5a02aec49238ec4748074845ad7d85a4f5e"
   integrity sha512-DrVV+wcupnHS7PehJ6KiTcJtAR5c25UMgjGECCc6pUT9rsvw0AuYG+a4HDjfxEQuDqKTHwW+oX/nIvCymyLE8Q==
@@ -1604,6 +1604,11 @@
   version "7.0.4"
   resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.4.tgz#38fd73ddfd9b55abb1e1b2ed578cb55bd7b7d339"
   integrity sha512-8+KAKzEvSUdeo+kmqnKrqgeE+LcA0tjYWFY7RPProVYwnqDjukzO+3b6dLD56rYX5TdWejnEOLJYOIeh4CXKuA==
+
+"@types/lodash@^4.14.159":
+  version "4.14.159"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.159.tgz#61089719dc6fdd9c5cb46efc827f2571d1517065"
+  integrity sha512-gF7A72f7WQN33DpqOWw9geApQPh4M3PxluMtaHxWHXEGSN12/WbcEk/eNSqWNQcQhF66VSZ06vCF94CrHwXJDg==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -6875,6 +6880,11 @@ lodash@^4.17.19:
   version "4.17.19"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
   integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
+
+lodash@^4.17.20:
+  version "4.17.20"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
+  integrity sha512-PlhdFcillOINfeV7Ni6oF1TAEayyZBoZ8bcshTHqOYJYlrqzRK5hagpagky5o4HfCzzd1TRkXPMFq6cKk9rGmA==
 
 loglevel@^1.6.6:
   version "1.6.7"

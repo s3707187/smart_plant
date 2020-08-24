@@ -16,7 +16,9 @@ axios.interceptors.request.use(
             config.headers["Authorization"] = `Bearer ${token}`;
             console.log("Setting auth with token");
         }
+
         config.headers["Content-Type"] = "application/json";
+        config.headers["Access-Control-Allow-Origin"] = "*";
         return config;
     },
     (error) => {
@@ -37,6 +39,9 @@ axios.interceptors.response.use(
             originalRequest._retry = true;
             // Try to get a new access token from the /refresh endpoint
             const refreshToken = await getRefreshToken();
+            if (refreshToken == undefined) {
+                return Promise.reject(error);
+            }
             return axios
                 .create()
                 .post(
@@ -62,7 +67,10 @@ axios.interceptors.response.use(
                     console.error(e);
                     await removeRefreshToken();
                     await removeAccessToken();
+                    return Promise.reject(e);
                 });
+        } else {
+            return Promise.reject(error);
         }
     }
 );
