@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Layout, Typography, Menu } from "antd";
 import HistoryVisualisationComponent from "../components/HistoryVisualisationComponent";
 import HealthVisualisationComponent from "../components/HealthVisualisationComponent";
+import { useGet } from "../utils/apiHooks";
 
 var healthMin = 0.32;
 var healthMax = 0.68;
@@ -200,6 +201,7 @@ interface PlantScreenProps {}
 const { Content, Header } = Layout;
 
 const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
+    console.log(useGet("view_plant_details", { plant_id: 23 }));
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
     return (

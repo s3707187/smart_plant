@@ -16,7 +16,8 @@ export interface ResponseError {
 export type ResponseData<Data> = AxiosResponse<Data>;
 
 export const useGet = <Data = {}, Variables = {}>(
-    route: string
+    route: string,
+    variables?: Variables
 ): {
     data?: Data;
     errors?: ResponseError[];
@@ -31,9 +32,7 @@ export const useGet = <Data = {}, Variables = {}>(
 
         // TODO change this so it works with post, etc.
         // TODO proper error shit
-        const result = await axios.get<Data>(`${apiURL}/${route}`, {
-            data: variables,
-        });
+        const result = await axios.get<Data>(`${apiURL}/${route}`, { params: variables });
 
         setLoading(false);
         setData(result?.data);
@@ -42,7 +41,7 @@ export const useGet = <Data = {}, Variables = {}>(
     };
 
     useEffect(() => {
-        request().then().catch();
+        request(variables).then().catch();
     }, []);
 
     return { data, errors, loading };
