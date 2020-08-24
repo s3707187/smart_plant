@@ -1,4 +1,3 @@
-
 import time
 import argparse
 import os
@@ -18,7 +17,7 @@ LOG_FILE_PATH = os.path.join(CURR_DIR, "log.csv")
 LOG_ENABLED = False
 
 ERROR_FILE_PATH = os.path.join(CURR_DIR, "error_log.txt")
-API_URL = "http://url.com"
+API_URL = "http://127.0.0.1:8080"
 
 CONFIG_FILE_PATH = os.path.join(CURR_DIR, "cloud_config.json")
 
@@ -98,7 +97,7 @@ def configure_cloud():
                 # Uncomment this line and comment the following if want hashing
                 # hashed_key = hasher.hexdigest()
                 hashed_key = entered_key
-                
+
                 verified = verify_plant(entered_id, hashed_key)
 
                 if verified:
@@ -106,6 +105,7 @@ def configure_cloud():
                                  "plant_key": hashed_key}
                     with open(CONFIG_FILE_PATH, 'w+') as config_file:
                         json.dump(json_info, config_file)
+                    print("Successful cloud link! \n")
                     again = False
                 else:
                     print("Error: plant ID or activation key is incorrect.")
@@ -123,13 +123,16 @@ def configure_cloud():
 def verify_plant(plant_id, key):
     # returns true or false, calls API on plant check
 
-    # response = requests.get("{}/verify_plant".format(API_URL), auth=(plant_id, key))
-    # if response.status_code == 200:
-    #     return True
-    # else:
-    #     return False
+    details = {"plant_id": plant_id,
+               "password": key
+               }
+    response = requests.get("{}/verify_plant".format(API_URL), json=details)
+    if response.status_code == 200:
+        return True
+    else:
+        return False
 
-    return True
+    # return True
 
 
 def upload_data(date_time, light, moisture, humidity, temperature):
@@ -142,17 +145,19 @@ def upload_data(date_time, light, moisture, humidity, temperature):
                    "humidity": humidity,
                    "temperature": temperature
                    }
-    response = requests.post("{}/save_plant_details".format(API_URL), json=information)
-    
+    response = requests.post(
+        "{}/save_plant_details".format(API_URL), json=information)
+
     if response.status_code != 200:
-        log_error("Data upload failed. Response code {}".format(response.status_code))
+        log_error("Data upload failed. Response code {}".format(
+            response.status_code))
 
 
 def start_uploading(period_t):
     # similar to start_sampling but uploads to cloud instead
     # verifies plant first, if fails then log error output and exits
     # may throw exceptions from sensors, catch here
-    
+
     # first get details from file
     credentials = None
     try:
@@ -168,8 +173,8 @@ def start_uploading(period_t):
         if verify_plant(credentials["plant_id"], credentials["plant_key"]):
             while True:
                 curr_time = datetime.datetime.now().strftime("%H:%M:%S "
-                                                            "%Y-%m-%d")
-                # may surround next block in try catch, catching sensor exceptions 
+                                                             "%Y-%m-%d")
+                # may surround next block in try catch, catching sensor exceptions
                 # and logging them but continuing without uploading
                 light = round(SM.get_light_pct(), 2)
                 moist = round(SM.get_moisture_pct(), 2)
