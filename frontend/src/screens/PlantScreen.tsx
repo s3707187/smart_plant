@@ -3,6 +3,7 @@ import { Layout, Typography, Menu } from "antd";
 import HistoryVisualisationComponent from "../components/HistoryVisualisationComponent";
 import HealthVisualisationComponent from "../components/HealthVisualisationComponent";
 import { useGet } from "../utils/apiHooks";
+import { useParams } from "react-router-dom";
 
 var healthMin = 0.32;
 var healthMax = 0.68;
@@ -201,14 +202,25 @@ interface PlantScreenProps {}
 const { Content, Header } = Layout;
 
 const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
-    console.log(useGet("view_plant_details", { plant_id: 23 }));
+    const { id: plant_id } = useParams();
+
+    const { data, errors, loading } = useGet<
+        {
+            plant_name: string;
+            plant_id: number;
+            plant_type: string;
+            plant_health: string;
+        },
+        { plant_id: number }
+    >("view_plant_details", { plant_id });
+    console.log("data", data);
     const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
     return (
         <Layout>
             <Header style={{ background: "#FFF", display: "flex", alignItems: "center" }}>
                 <Typography.Title level={2} style={{ marginBottom: "0.25em" }}>
-                    Plant Name
+                    {data?.plant_name}
                 </Typography.Title>
             </Header>
             <Content

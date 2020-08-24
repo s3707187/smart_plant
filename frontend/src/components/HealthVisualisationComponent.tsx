@@ -218,7 +218,7 @@ const HealthVisualisationComponent = (props: HealthVisualisationComponentProps) 
         //position: "absolute"
     };
     const DATA = LAYOUT.concat(graphable);
-    console.log(DATA);
+    // console.log(DATA);
 
     const div = useCallback((node) => {
         if (node !== null) {
