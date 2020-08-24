@@ -5,7 +5,7 @@ import { Redirect } from "react-router-dom";
 interface DashboardScreenProps {}
 
 const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenProps) => {
-    const { data, loading, errors } = useGet("dashboard");
+    const { data, loading, errors } = useGet("get_users_plants");
 
     console.log(data, loading, errors, "dashboard");
 

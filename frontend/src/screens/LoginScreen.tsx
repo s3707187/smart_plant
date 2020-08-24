@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, Input, Button, Checkbox } from "antd";
 import { getAccessToken, setAccessToken, setRefreshToken } from "../app/token";
-import { ResponseData, usePost } from "../utils/apiHooks";
+import { ResponseData, ResponseError, usePost } from "../utils/apiHooks";
 
 const layout = {
     labelCol: { span: 8 },
@@ -15,17 +15,19 @@ interface LoginScreenProps {}
 type Response = { access_token: string; refresh_token: string };
 
 const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
-    const [Login, { data, loading, errors }] = usePost<Response>("login");
+    const [form] = Form.useForm();
+    const [Login, { data, loading, errors }] = usePost<Response>("login", form);
 
     const onFinish = async (values: any) => {
         console.log("Success:", values);
+        try {
+            const res = await Login({
+                username: values.username,
+                password: values.password,
+            });
+            await Promise.all([setRefreshToken(res.data.refresh_token), setAccessToken(res.data.access_token)]);
+        } catch (e) {}
 
-        const res = await Login({
-            username: values.username,
-            password: values.password,
-        });
-
-        await Promise.all([setRefreshToken(res.data.refresh_token), setAccessToken(res.data.access_token)]);
         console.log("PROMISE SETTLED");
     };
 
@@ -36,6 +38,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
     return (
         <Form
             {...layout}
+            form={form}
             name="basic"
             initialValues={{ remember: true }}
             onFinish={onFinish}
