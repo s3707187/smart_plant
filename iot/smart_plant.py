@@ -6,19 +6,20 @@ import datetime
 import json
 import hashlib
 import requests
-
+import os
 from sensors import SensorManager
 
+CURR_DIR = os.path.dirname(__file__)
 
 SM = SensorManager()
 
-LOG_FILE_PATH = "log.csv"
+LOG_FILE_PATH = os.path.join(CURR_DIR, "log.csv")
 LOG_ENABLED = False
 
-ERROR_FILE_PATH = "error_log.txt"
+ERROR_FILE_PATH = os.path.join(CURR_DIR, "error_log.txt")
 API_URL = "http://url.com"
 
-CONFIG_FILE_PATH = "cloud_config.json"
+CONFIG_FILE_PATH = os.path.join(CURR_DIR, "cloud_config.json")
 
 
 def menu_system():
@@ -160,25 +161,26 @@ def start_uploading(period_t):
     except json.JSONDecodeError:
         error_message = "Credentials file not valid JSON."
         log_error(error_message)
-    if verify_plant(credentials["plant_id"], credentials["plant_key"]):
-        while True:
-            curr_time = datetime.datetime.now().strftime("%H:%M:%S "
-                                                         "%Y-%m-%d")
-            # may surround next block in try catch, catching sensor exceptions 
-            # and logging them but continuing without uploading
-            light = round(SM.get_light_pct(), 2)
-            moist = round(SM.get_moisture_pct(), 2)
-            humid = round(SM.get_humidity_pct(), 2)
-            temp = round(SM.get_temp_val(), 2)
+    if credentials is not None:
+        if verify_plant(credentials["plant_id"], credentials["plant_key"]):
+            while True:
+                curr_time = datetime.datetime.now().strftime("%H:%M:%S "
+                                                            "%Y-%m-%d")
+                # may surround next block in try catch, catching sensor exceptions 
+                # and logging them but continuing without uploading
+                light = round(SM.get_light_pct(), 2)
+                moist = round(SM.get_moisture_pct(), 2)
+                humid = round(SM.get_humidity_pct(), 2)
+                temp = round(SM.get_temp_val(), 2)
 
-            upload_data(curr_time, light, moist, humid, temp)
+                upload_data(curr_time, light, moist, humid, temp)
 
-            time.sleep(period_t)
-    else:
-        error_message = "Invalid credentials from file."
-        log_error(error_message)
+                time.sleep(period_t)
+        else:
+            error_message = "Invalid credentials from file."
+            log_error(error_message)
 
-    clean_exit()
+    clean_exit(False)
 
 
 def log_error(message):
@@ -186,11 +188,12 @@ def log_error(message):
     curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                  "%Y-%m-%d")
     with open(ERROR_FILE_PATH, "a+") as error_file:
-        error_file.write("{} $ {}".format(curr_time, message))
+        error_file.write("{} $ {}\n".format(curr_time, message))
 
 
-def clean_exit():
-    print("\nClosing.")
+def clean_exit(notify=True):
+    if notify:
+        print("\nClosing.")
     SM.cleanup()
     exit()
 
