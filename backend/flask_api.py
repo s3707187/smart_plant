@@ -24,8 +24,8 @@ PASSWORD_LENGTH = 8
 @api.route("/login", methods=["POST"])
 def login():
     ERRORS = []
-    username = request.args.get["username"]
-    password = request.args.get["password"]
+    username = request.json["username"]
+    password = request.json["password"]
 
     valid_user = True
     if not username_exists(username):
@@ -60,12 +60,12 @@ def login():
 def register_new_user():
     ERRORS = []
     valid_user = True
-    username = request.args.get["username"]
-    first_name = request.args.get["first_name"]
-    last_name = request.args.get["last_name"]
-    email = request.args.get["email"]
-    password = request.args.get["password"]
-    account_type = request.args.get["account_type"]
+    username = request.json["username"]
+    first_name = request.json["first_name"]
+    last_name = request.json["last_name"]
+    email = request.json["email"]
+    password = request.json["password"]
+    account_type = request.json["account_type"]
 
     if len(password) >= PASSWORD_LENGTH:
         hashed_password = pbkdf2_sha256.hash(password)
@@ -118,12 +118,12 @@ def register_new_plant():
     ERRORS = []
     # get username from token
     #current_user = get_jwt_identity()
-    current_user = request.args.get["username"]
+    current_user = request.json["username"]
 
-    plant_type = request.args.get["plant_type"]
-    plant_name = request.args.get["plant_name"]
+    plant_type = request.json["plant_type"]
+    plant_name = request.json["plant_name"]
     # determine plant health by comparing data to plant_types data
-    plant_health = request.args.get["plant_health"]
+    plant_health = request.json["plant_health"]
 
     # create a random password for plant
     password = create_random_word()
@@ -202,14 +202,14 @@ def get_users_plants():
 #individual plant page
 @api.route("/view_plant_details", methods=["GET"])
 def view_plant_details():
-    plant_id = request.args.get['plant_id']
+    plant_id = request.request.args.get['plant_id']
     return jsonify(get_plant(plant_id))
 
 #IOT device
 @api.route("/verify_plant", methods=["GET"])
 def verify_plant():
-    plant_id = request.json["plant_id"]
-    password = request.json["password"]
+    plant_id = request.request.args.get["plant_id"]
+    password = request.request.args.get["password"]
     invalid_message = "incorrect password"
     valid_message = "Plant successfully verified"
 
