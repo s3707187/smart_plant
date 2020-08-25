@@ -112,13 +112,13 @@ def register_new_user():
         }), 400
 
 @api.route("/register_plant", methods=["POST"])
-#@jwt_required
+@jwt_required
 def register_new_plant():
     valid = True
     ERRORS = []
     # get username from token
-    #current_user = get_jwt_identity()
-    current_user = request.json["username"]
+    current_user = get_jwt_identity()
+    #current_user = request.json["username"]
 
     plant_type = request.json["plant_type"]
     plant_name = request.json["plant_name"]
@@ -202,14 +202,14 @@ def get_users_plants():
 #individual plant page
 @api.route("/view_plant_details", methods=["GET"])
 def view_plant_details():
-    plant_id = request.request.args.get['plant_id']
+    plant_id = request.args.get['plant_id']
     return jsonify(get_plant(plant_id))
 
 #IOT device
 @api.route("/verify_plant", methods=["GET"])
 def verify_plant():
-    plant_id = request.request.args.get["plant_id"]
-    password = request.request.args.get["password"]
+    plant_id = request.json["plant_id"]
+    password = request.json["password"]
     invalid_message = "incorrect password"
     valid_message = "Plant successfully verified"
 
