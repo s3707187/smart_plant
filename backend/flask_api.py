@@ -202,11 +202,11 @@ def get_users_plants():
 #individual plant page
 @api.route("/view_plant_details", methods=["GET"])
 def view_plant_details():
-    plant_id = request.args.get['plant_id']
+    plant_id = request.args.get('plant_id')
     return jsonify(get_plant(plant_id))
 
 #IOT device
-@api.route("/verify_plant", methods=["GET"])
+@api.route("/verify_plant", methods=["POST"])
 def verify_plant():
     plant_id = request.json["plant_id"]
     password = request.json["password"]
@@ -356,7 +356,6 @@ def plant_type_exists(plant_type_to_query):
     return True
 
 
-#?jwt=<token>
 @api.route("/current_user", methods=["GET"])
 @jwt_required
 def get_current_user():
