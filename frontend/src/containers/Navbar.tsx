@@ -2,6 +2,7 @@ import { Layout, Menu } from "antd";
 import "antd/dist/antd.css";
 import React, { useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
+import { removeAccessToken, removeRefreshToken } from "../app/token";
 import AuthContex from "../contexts/AuthContex";
 
 const { Header } = Layout;
@@ -33,6 +34,14 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                     </Menu.Item>,
                     <Menu.Item key="/users">
                         <Link to="/users">Users</Link>
+                    </Menu.Item>,
+                    <Menu.Item
+                        style={{ float: "right" }}
+                        onClick={async () => {
+                            await Promise.all([removeAccessToken(), removeRefreshToken()]);
+                        }}
+                    >
+                        Logout
                     </Menu.Item>,
                 ]}
             </Menu>

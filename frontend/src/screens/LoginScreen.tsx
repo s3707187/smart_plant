@@ -38,6 +38,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
     return (
         <Form
             {...layout}
+            style={{ padding: 13 }}
             form={form}
             name="basic"
             initialValues={{ remember: true }}

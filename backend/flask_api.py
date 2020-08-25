@@ -8,7 +8,7 @@ from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
 from backend.flask_api_schema import User_Schema
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, jwt_refresh_token_required
 import random, string
 from functools import wraps
 
@@ -65,7 +65,8 @@ def register_new_user():
     last_name = request.json["last_name"]
     email = request.json["email"]
     password = request.json["password"]
-    account_type = request.json["account_type"]
+    # account_type = request.json["account_type"]
+    account_type = "user"
 
     if len(password) >= PASSWORD_LENGTH:
         hashed_password = pbkdf2_sha256.hash(password)
@@ -102,14 +103,34 @@ def register_new_user():
 
     if valid_user:
         new_user = User(username, hashed_password, first_name, last_name, email, account_type)
-        message = "user successfully registered"
         db.session.add(new_user)
         db.session.commit()
-        return jsonify(message), 201
+        return jsonify({
+            "access_token": create_access_token(username),
+            "refresh_token": create_refresh_token(username)
+        }), 201
     else:
         return jsonify({
             "errors": ERRORS
         }), 400
+
+
+@api.route("/refresh", methods=["POST"])
+@jwt_refresh_token_required
+def refresh():
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        return jsonify({
+            "access_token": create_access_token(current_user)
+        }), 201
+    else:
+        return jsonify({
+            "errors": [{
+                "message": "The token is invalid",
+                "path": []
+            }]
+        }), 401
+
 
 @api.route("/register_plant", methods=["POST"])
 @jwt_required
