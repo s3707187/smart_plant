@@ -139,6 +139,7 @@ def register_new_plant():
     ERRORS = []
     # get username from token
     current_user = get_jwt_identity()
+    #current_user = request.json["username"]
 
     plant_type = request.json["plant_type"]
     plant_name = request.json["plant_name"]
@@ -193,13 +194,22 @@ def get_users_plants():
     ERRORS=[]
     current_user = get_jwt_identity()
     if username_exists(current_user):
-        plant_link = Plant_link.query.filter_by(username=current_user)
-        result = Schema_Plants_link.dump(plant_link)
+        plants = []
+        list_of_plants = []
 
-        #plants from plant table
+        plant_link = Plant_link.query.filter_by(username=current_user).all()
+        link = Schema_Plants_link.dump(plant_link)
 
+        for x in link:
+            if plant_exists(x["plant_id"]):
+                plants.append(x["plant_id"])
 
-        return jsonify(result), 201
+        for i in plants:
+            plant = Plant.query.filter_by(plant_id=i).all()
+            result = Schema_Plant.dump(plant)
+            list_of_plants.append(result)
+
+        return jsonify(list_of_plants), 201
     else:
         ERRORS.append({
             "path": ['username'],
@@ -216,8 +226,22 @@ def view_plant_details():
     plant_id = request.args.get('plant_id')
     return jsonify(get_plant(plant_id))
 
-@api.route("/save_plant_details", methods=["POST"])
-def save_plant_details():
+#IOT device
+@api.route("/verify_plant", methods=["POST"])
+def verify_plant():
+    plant_id = request.json["plant_id"]
+    password = request.json["password"]
+    invalid_message = "incorrect password"
+    valid_message = "Plant successfully verified"
+
+    if password_match(plant_id, password):
+        return jsonify(valid_message), 200
+    else:
+        return jsonify(invalid_message), 401
+
+
+@api.route("/save_plant_data", methods=["POST"])
+def save_plant_data():
     ERRORS= []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
@@ -308,6 +332,16 @@ def plant_exists(plant_to_query):
         return False
     return True
 
+def password_match(plant_id, password):
+    if plant_exists(plant_id):
+        plant = Plant.query.get(plant_id)
+        result = Schema_Plant.dump(plant)
+
+        if not result['password'] == password:
+            return False
+        else:
+            return True
+
 def email_exists(email):
     response = db.session.query(User).filter((User.email == email)).first()
     if response is None:
@@ -343,12 +377,9 @@ def plant_type_exists(plant_type_to_query):
     return True
 
 
-#?jwt=<token>
 @api.route("/current_user", methods=["GET"])
 @jwt_required
 def get_current_user():
     # Access the identity of the current user
     current_user = get_jwt_identity()
     return jsonify(username=current_user), 201
-
-

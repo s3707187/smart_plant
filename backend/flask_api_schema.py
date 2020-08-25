@@ -88,7 +88,7 @@ class Plant_history(db.Model):
 class Plant_link(db.Model):
     __tablename__ = "Plant_link"
     username = db.Column(db.VARCHAR(100), nullable=False, primary_key=True) #, ForeignKey('User.username')
-    plant_id = db.Column(db.Integer, nullable=False) #, ForeignKey('Plant.plant_id')
+    plant_id = db.Column(db.Integer, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
     user_type = db.Column(db.VARCHAR(100), nullable=False)
 
 
@@ -114,7 +114,7 @@ class Plant_Schema(ma.Schema):
 
     class Meta:
         # Fields to expose
-        fields = ('plant_id', 'plant_type', 'plant_name', 'plant_health')
+        fields = ('plant_id', 'plant_type', 'plant_name', 'plant_health', 'password')
 
 class Plant_type_Schema(ma.Schema):
 
