@@ -6,6 +6,7 @@ import json
 import hashlib
 import os
 import requests
+import urllib3
 
 from sensors import SensorManager
 
@@ -131,7 +132,15 @@ class SystemRunner:
         details = {"plant_id": plant_id,
                 "password": key
                 }
-        response = requests.get("{}/verify_plant".format(API_URL), json=details)
+        try:
+            response = requests.get("{}/verify_plant".format(API_URL), json=details)
+        except (ConnectionRefusedError, 
+                urllib3.exceptions.NewConnectionError, 
+                urllib3.exceptions.MaxRetryError,
+                requests.exceptions.ConnectionError) as e:
+            self.log_error("Error accessing API: {}".format(e))
+            return False
+
         if response.status_code == 200:
             return True
         else:
