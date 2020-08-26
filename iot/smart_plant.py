@@ -133,7 +133,7 @@ class SystemRunner:
                 "password": key
                 }
         try:
-            response = requests.get("{}/verify_plant".format(API_URL), json=details)
+            response = requests.post("{}/verify_plant".format(API_URL), json=details)
         except (ConnectionRefusedError, 
                 urllib3.exceptions.NewConnectionError, 
                 urllib3.exceptions.MaxRetryError,
