@@ -153,7 +153,7 @@ def register_new_plant():
         valid = False
         ERRORS.append({
             "path": ['plant_type'],
-            "message": "plant type is incorrect"
+            "message": "plant type is invalid. Please ask an administrator for the valid plant types."
         })
     if len(plant_name) == 0:
         valid = False
@@ -206,6 +206,8 @@ def get_users_plants():
 
         for i in plants:
             plant = Plant.query.filter_by(plant_id=i).all()
+            assert len(plant) > 0
+            plant = plant[0]
             result = Schema_Plant.dump(plant)
             list_of_plants.append(result)
 
@@ -372,7 +374,7 @@ def get_plant_type(type):
 
 def plant_type_exists(plant_type_to_query):
     plant_type = get_plant_type(plant_type_to_query)
-    if plant_type is None:
+    if plant_type is None or plant_type == {}:
         return False
     return True
 

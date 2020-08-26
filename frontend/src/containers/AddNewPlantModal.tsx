@@ -1,9 +1,10 @@
 import { Form, Modal, Input, Button } from "antd";
 import { ModalProps } from "antd/es/modal";
 import React from "react";
+import { usePost } from "../utils/apiHooks";
 
 interface AddNewPlantModalProps extends Pick<ModalProps, "visible" | "onCancel"> {
-    onOk: (plantName: string, plantPassword: string) => void;
+    onOk: () => void;
 }
 
 const layout = {
@@ -17,6 +18,10 @@ const tailLayout = {
 const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantModalProps) => {
     const { visible, onOk, onCancel } = props;
     const [form] = Form.useForm();
+    const [CreatePlant] = usePost<{}, { plant_name: string; plant_health: string; plant_type: string }>(
+        "register_plant",
+        form
+    );
     const onFinish = (values: any) => {
         console.log("Success:", values);
     };
@@ -33,15 +38,23 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
             onOk={() =>
                 form
                     .validateFields()
-                    .then((values) => {
+                    .then(async (values) => {
+                        await CreatePlant({
+                            plant_health: "healthy",
+                            plant_name: values.plant_name,
+                            plant_type: values.plant_type,
+                        });
+                        onOk();
                         form.resetFields();
-                        onOk("", "");
                     })
                     .catch((info) => {
                         console.log("Validate Failed:", info);
                     })
             }
-            onCancel={onCancel}
+            onCancel={(e) => {
+                form.resetFields();
+                if (onCancel) onCancel(e);
+            }}
         >
             <Form
                 form={form}
@@ -52,8 +65,15 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
                 onFinishFailed={onFinishFailed}
             >
                 <Form.Item
-                    label="Plant ID"
-                    name="plant_id"
+                    label="Plant Name"
+                    name="plant_name"
+                    rules={[{ required: true, message: "Please input the Plant Name!" }]}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item
+                    label="Plant Type"
+                    name="plant_type"
                     rules={[{ required: true, message: "Please input the Plant ID!" }]}
                 >
                     <Input />
