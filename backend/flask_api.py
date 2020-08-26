@@ -206,6 +206,8 @@ def get_users_plants():
 
         for i in plants:
             plant = Plant.query.filter_by(plant_id=i).all()
+            assert len(plant) > 0
+            plant = plant[0]
             result = Schema_Plant.dump(plant)
             list_of_plants.append(result)
 

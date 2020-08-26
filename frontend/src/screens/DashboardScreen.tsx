@@ -12,8 +12,10 @@ interface DashboardScreenProps {}
 
 type GetUsersPlantsData = {
     plant_id: number;
-    user_type: "plant_manager" | "viewer";
-    username: string;
+    plant_type: string;
+    plant_health: string;
+    plant_name: string;
+    password: string;
 }[];
 
 interface GetCurrentUserData {
@@ -64,10 +66,9 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                     data.map((item) => (
                         <PlantCard
                             id={item.plant_id.toString()}
-                            userType={item.user_type}
                             key={item.plant_id}
-                            title={"TODO"}
-                            overallHealth={"healthy"}
+                            title={item.plant_name}
+                            overallHealth={item.plant_health}
                         />
                     ))}
             </Content>
