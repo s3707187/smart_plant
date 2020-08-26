@@ -22,17 +22,18 @@ export const useGet = <Data = {}, Variables = {}>(
     data?: Data;
     errors?: ResponseError[];
     loading: boolean;
+    refetch: (variables?: Variables) => Promise<AxiosResponse<Data>>;
 } => {
     const [data, setData] = useState<Data | undefined>(undefined);
     const [errors, setErrors] = useState<ResponseError[] | undefined>(undefined);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const request = async (variables?: Variables) => {
+    const request = async (inner_variables?: Variables) => {
         setLoading(true);
 
         // TODO change this so it works with post, etc.
         // TODO proper error shit
-        const result = await axios.get<Data>(`${apiURL}/${route}`, { params: variables });
+        const result = await axios.get<Data>(`${apiURL}/${route}`, { params: inner_variables || variables });
 
         setLoading(false);
         setData(result?.data);
@@ -44,7 +45,7 @@ export const useGet = <Data = {}, Variables = {}>(
         request(variables).then().catch();
     }, []);
 
-    return { data, errors, loading };
+    return { data, errors, loading, refetch: request };
 };
 
 export const usePost = <Data = {}, Variables = {}>(

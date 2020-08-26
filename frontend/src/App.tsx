@@ -49,7 +49,7 @@ function App() {
                     {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
                     <Navbar />
-                    <Content>
+                    <Content style={{ display: "flex" }}>
                         <Switch>
                             <RedirectRoute
                                 path="/login"

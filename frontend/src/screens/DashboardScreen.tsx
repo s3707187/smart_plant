@@ -1,9 +1,13 @@
-import React from "react";
-import { Button, Layout, Typography } from "antd";
+import React, { useState } from "react";
+import { Button, Layout, Typography, Spin } from "antd";
+import AddNewPlantModal from "../containers/AddNewPlantModal";
 import PlantCard from "../containers/PlantCard";
-import { useGet } from "../utils/apiHooks";
+import { useGet, usePost } from "../utils/apiHooks";
 import { Redirect } from "react-router-dom";
 import { SettingOutlined } from "@ant-design/icons";
+import { LoadingOutlined } from "@ant-design/icons";
+
+const antIcon = <LoadingOutlined style={{ fontSize: 48 }} spin />;
 
 const { Content, Sider, Header } = Layout;
 const { Title } = Typography;
@@ -23,23 +27,35 @@ interface GetCurrentUserData {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenProps) => {
-    const { data, loading, errors } = useGet<GetUsersPlantsData>("get_users_plants");
+    const { data, loading, errors, refetch } = useGet<GetUsersPlantsData>("get_users_plants");
     const { data: currentUserData } = useGet<GetCurrentUserData>("current_user");
+
+    // const data = undefined;
+    // const loading = true;
+    // const errors = undefined;
+
+    const [visible, setVisible] = useState<boolean>(false);
 
     console.log(data, loading, errors, "dashboard", currentUserData);
 
-    if (loading) {
-        return <p>Loading ...</p>;
-    } else if (errors) {
+    if (errors) {
         return <p>Errors!</p>;
     }
 
     return (
-        <Layout>
+        <Layout style={{ flexGrow: 1 }}>
+            <AddNewPlantModal
+                onOk={async () => {
+                    setVisible(false);
+                    //@ts-ignore
+                    await refetch();
+                }}
+                visible={visible}
+                onCancel={() => setVisible(false)}
+            />
             <Header
                 style={{
                     background: "#FFF",
-                    flexGrow: 1,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
@@ -49,7 +65,9 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                     {currentUserData && currentUserData.username}'s Dashboard
                 </Title>
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    <Button type={"primary"}>Add Plant</Button>
+                    <Button type={"primary"} onClick={() => setVisible(true)}>
+                        Add Plant
+                    </Button>
                     <SettingOutlined
                         style={{
                             fontSize: 20,
@@ -60,9 +78,20 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                 </div>
             </Header>
             <Content
-                style={{ display: "flex", flexDirection: "row", flexWrap: "wrap", justifyContent: "space-around" }}
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    flexGrow: loading ? 1 : 0,
+                    flexShrink: loading ? 0 : 1,
+                    flexWrap: "wrap",
+                    justifyContent: loading ? "center" : "flex-start",
+                    alignItems: loading ? "center" : "flex-start",
+                }}
             >
+                {loading && <Spin indicator={antIcon} />}
                 {data &&
+                    !loading &&
+                    //@ts-ignore
                     data.map((item) => (
                         <PlantCard
                             id={item.plant_id.toString()}
