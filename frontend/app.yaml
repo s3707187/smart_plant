@@ -10,8 +10,3 @@ handlers:
 - url: /.*
   static_files: build/index.html
   upload: build/index.html
-  
-env_variables:
-    MYSQL_DSN: mysql:unix_socket=/cloudsql/smart-plant-1:australia-southeast1:smartplant-dbms;dbname=smart_plant
-    MYSQL_USER: root
-    MYSQL_PASSWORD: 'reza123'
