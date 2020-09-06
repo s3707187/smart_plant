@@ -19,6 +19,8 @@ LOG_ENABLED = False
 
 ERROR_FILE_PATH = os.path.join(CURR_DIR, "error_log.txt")
 API_URL = "http://127.0.0.1:8080"
+# Deployment URL:
+# API_URL = "https://smart-plant-1.uc.r.appspot.com/"
 
 CONFIG_FILE_PATH = os.path.join(CURR_DIR, "cloud_config.json")
 
