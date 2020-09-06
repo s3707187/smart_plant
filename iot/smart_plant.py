@@ -149,7 +149,7 @@ class SystemRunner:
         # return True
 
 
-    def upload_data(self, date_time, light, moisture, humidity, temperature):
+    def upload_data(self, plant_id, plant_key, date_time, light, moisture, humidity, temperature):
         # uploads a single peice of data, should only be called if
         # plant configuration is verified
 
@@ -157,12 +157,14 @@ class SystemRunner:
                     "light": light,
                     "moisture": moisture,
                     "humidity": humidity,
-                    "temperature": temperature
+                    "temperature": temperature,
+                    "plant_id": plant_id,
+                    "password": plant_key
                     }
         response = requests.post(
-            "{}/save_plant_details".format(API_URL), json=information)
-
-        if response.status_code != 200:
+            "{}/save_plant_data".format(API_URL), json=information)
+        # response code 201 is "Created"
+        if response.status_code != 201:
             self.log_error("Data upload failed. Response code {}".format(
                 response.status_code))
 
@@ -195,7 +197,7 @@ class SystemRunner:
                     humid = round(self.SM.get_humidity_pct(), 2)
                     temp = round(self.SM.get_temp_val(), 2)
 
-                    self.upload_data(curr_time, light, moist, humid, temp)
+                    self.upload_data(credentials["plant_id"], credentials["plant_key"], curr_time, light, moist, humid, temp)
 
                     time.sleep(period_t)
             else:
