@@ -251,6 +251,7 @@ def save_plant_data():
     moisture = request.json["moisture"]
     humidity = request.json["humidity"]
     temperature = request.json["temperature"]
+    password = request.json["password"]
 
     #validate plant details
     valid = True
@@ -259,6 +260,13 @@ def save_plant_data():
         ERRORS.append({
             "path": ['plant_id'],
             "message": "Username does not exist"
+        }), 403
+
+    if not password_match(plant_id, password):
+        valid = False
+        ERRORS.append({
+            "path": ['password'],
+            "message": "invalid password"
         }), 403
 
     if not isinstance(light,float):
