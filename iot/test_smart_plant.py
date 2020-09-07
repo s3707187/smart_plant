@@ -8,6 +8,8 @@ import smart_plant
 from smart_plant import SystemRunner
 
 TEST_CONFIG = "test_config.json"
+TEST_CONFIG_PERMANENT = os.path.join("test_files", "test_config_perm.json")
+TEST_CONFIG_PERMANENT_BAD = os.path.join("test_files", "test_config_perm_bad.json")
 
 class MockResponse():
 
@@ -18,6 +20,12 @@ def mock_post(url, json=None):
     if url == "{}/verify_plant".format(smart_plant.API_URL):
         if json["plant_id"] == "01" and json["password"] == "testpassword":
             return MockResponse(200)
+        else:
+            return MockResponse(401)
+
+    elif url == "{}/save_plant_data".format(smart_plant.API_URL):
+        if json["plant_id"] == "01" and json["password"] == "testpassword":
+            return MockResponse(201)
         else:
             return MockResponse(401)
     else:
@@ -35,6 +43,18 @@ def mock_verify_plant_check(plant_id, key):
     else:
         return False
 
+class ErrorMock:
+    previous_error = None
+    @staticmethod
+    def mock_error(message):
+        ErrorMock.previous_error = message
+
+class DataUploadMock:
+    previous_upload = None
+    @staticmethod
+    def mock_upload(plant_id, plant_key, date_time, light, moisture, humidity, temperature):
+        DataUploadMock.previous_upload = (plant_id, plant_key, date_time, light, moisture, humidity, temperature)
+
 class MainSystemTest(unittest.TestCase):
     def setUp(self):
         self.sr = SystemRunner()
@@ -43,6 +63,8 @@ class MainSystemTest(unittest.TestCase):
         self.sr.SM.cleanup()
         if os.path.exists(TEST_CONFIG):
             os.remove(TEST_CONFIG)
+        ErrorMock.previous_error = None
+        DataUploadMock.previous_upload = None
 
 
     @mock.patch('requests.post', side_effect=mock_post)
@@ -137,10 +159,52 @@ class MainSystemTest(unittest.TestCase):
             file_check = '{"plant_id": "01", "plant_key": "testpassword"}' in test_config_file.read()
         self.assertTrue(file_check)
         
+    ####################
+    # Story 19 Tests Ahead
 
+    @mock.patch('requests.post', side_effect=mock_post)
+    @mock.patch('smart_plant.SystemRunner.log_error', side_effect=ErrorMock.mock_error)
+    def test_upload_data(self, mock_error_log, mock_requests):
+        self.sr.upload_data("01", "testpassword", "01:49:12 2020-08-24", 35, 50, 35, 21)
+        self.assertIsNone(ErrorMock.previous_error)
 
+    @mock.patch('requests.post', side_effect=mock_post)
+    @mock.patch('smart_plant.SystemRunner.log_error', side_effect=ErrorMock.mock_error)
+    def test_upload_data_invalid(self, mock_error_log, mock_requests):
+        self.sr.upload_data("02", "testpassword", "01:49:12 2020-08-24", 35, 50, 35, 21)
+        self.assertTrue("Data upload failed. Response code" in ErrorMock.previous_error)
+
+    @mock.patch('smart_plant.SystemRunner.verify_plant', side_effect=mock_verify_plant_success)
+    @mock.patch('smart_plant.CONFIG_FILE_PATH', TEST_CONFIG_PERMANENT)
+    @mock.patch('smart_plant.SystemRunner.upload_data', side_effect=DataUploadMock.mock_upload)
+    @mock.patch('smart_plant.SystemRunner.clean_exit', side_effect=None)
+    @mock.patch('smart_plant.SystemRunner.log_error', side_effect=ErrorMock.mock_error)
+    def test_start_uploading(self, mock_error_log, mock_exit_clean, mock_data_up, mock_verification):
+        self.sr.start_uploading(1, 1)
+        self.assertTrue(ErrorMock.previous_error is None)
+        for i in range(0,7):
+            self.assertTrue(DataUploadMock.previous_upload[i] is not None)
+
+    @mock.patch('smart_plant.SystemRunner.verify_plant', side_effect=mock_verify_plant_success)
+    @mock.patch('smart_plant.CONFIG_FILE_PATH', "none file")
+    @mock.patch('smart_plant.SystemRunner.upload_data', side_effect=DataUploadMock.mock_upload)
+    @mock.patch('smart_plant.SystemRunner.clean_exit', side_effect=None)
+    @mock.patch('smart_plant.SystemRunner.log_error', side_effect=ErrorMock.mock_error)
+    def test_start_uploading_no_creds(self, mock_error_log, mock_exit_clean, mock_data_up, mock_verification):
+        self.sr.start_uploading(1, 1)
+        self.assertTrue("Credentials file not found." in ErrorMock.previous_error)
+        self.assertTrue(DataUploadMock.previous_upload is None)
+
+    @mock.patch('smart_plant.SystemRunner.verify_plant', side_effect=mock_verify_plant_success)
+    @mock.patch('smart_plant.CONFIG_FILE_PATH', TEST_CONFIG_PERMANENT_BAD)
+    @mock.patch('smart_plant.SystemRunner.upload_data', side_effect=DataUploadMock.mock_upload)
+    @mock.patch('smart_plant.SystemRunner.clean_exit', side_effect=None)
+    @mock.patch('smart_plant.SystemRunner.log_error', side_effect=ErrorMock.mock_error)
+    def test_start_uploading_bad_creds(self, mock_error_log, mock_exit_clean, mock_data_up, mock_verification):
+        self.sr.start_uploading(1, 1)
+        self.assertTrue("Credentials file not valid JSON." in ErrorMock.previous_error)
+        self.assertTrue(DataUploadMock.previous_upload is None)
 
     
-
 if __name__ == "__main__":
     unittest.main()

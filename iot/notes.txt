@@ -1,24 +1,21 @@
 Instructions for running:
 
-enable SPI on pi
+- enable SPI on pi
+- ensure sense_hat and gpiozero installed (they are automatically installed on the Pi)
+- moisture sensor calibration is unlikely to be needed as long as wires are not loose
 
-script placed into startup commands as:
-/etc/rc.local:
-python3 /home/pi/smart_plant.py --upload=True -s 1800 &
+Make the script run on startup:
+Inside /etc/rc.local, add the folowing line before it exits:
+    python3 /home/pi/smart_plant.py --upload=True -s 1800 &
 
-
-XXXXXXXX OLD FILE LOGGING VERSION:python3 /home/pi/smart_plant.py -f "/home/pi/log.csv"  -s 30 & XXXXXXXXX
-
-^^
-respective paths to python file and logging csv
-
-ensure smart_plant.py and sensors.py in /home/pi
-
-^^ may instead consider adding to path
---
-
-ensure sense_hat and gpiozero installed
+AUTO CONFIGURATION OF CLOUD: (i.e. if SSH/Pi access is not available to setup cloud details):
+- turn off Pi, remove microSD card, insert into another machine using a card reader
+- add a plant.config file in the /boot partition on the Pi's SD card 
+- copy paste the following into this file and save it, replacing ID and PASSWORD with your plant ID and password
+{"plant_id": "ID", "plant_key": "PASSWORD"}
 
 
-may need to calibrate moisture sensors differently?
+
+
+
 

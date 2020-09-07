@@ -7,6 +7,7 @@ import hashlib
 import os
 import requests
 import urllib3
+from shutil import copyfile
 
 from sensors import SensorManager
 
@@ -16,13 +17,13 @@ CURR_DIR = os.path.dirname(__file__)
 
 LOG_FILE_PATH = os.path.join(CURR_DIR, "log.csv")
 LOG_ENABLED = False
-
+BOOT_CONFIG_PATH = "/boot/plant.config"
 ERROR_FILE_PATH = os.path.join(CURR_DIR, "error_log.txt")
 API_URL = "http://127.0.0.1:8080"
 # Deployment URL:
 # API_URL = "https://smart-plant-1.uc.r.appspot.com/"
-
-CONFIG_FILE_PATH = os.path.join(CURR_DIR, "cloud_config.json")
+CONFIG_FILE_NAME = "cloud_config.json"
+CONFIG_FILE_PATH = os.path.join(CURR_DIR, CONFIG_FILE_NAME)
 
 class SystemRunner:
     def __init__(self):
@@ -171,7 +172,7 @@ class SystemRunner:
                 response.status_code))
 
 
-    def start_uploading(self, period_t):
+    def start_uploading(self, period_t, max_uploads=-1):
         # similar to start_sampling but uploads to cloud instead
         # verifies plant first, if fails then log error output and exits
         # may throw exceptions from sensors, catch here
@@ -189,7 +190,8 @@ class SystemRunner:
             self.log_error(error_message)
         if credentials is not None:
             if self.verify_plant(credentials["plant_id"], credentials["plant_key"]):
-                while True:
+                upload_count = 0
+                while upload_count < max_uploads:
                     curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                                 "%Y-%m-%d")
                     # may surround next block in try catch, catching sensor exceptions
@@ -200,7 +202,7 @@ class SystemRunner:
                     temp = round(self.SM.get_temp_val(), 2)
 
                     self.upload_data(credentials["plant_id"], credentials["plant_key"], curr_time, light, moist, humid, temp)
-
+                    upload_count += 1
                     time.sleep(period_t)
             else:
                 error_message = "Invalid credentials from file."
@@ -223,8 +225,14 @@ class SystemRunner:
         self.SM.cleanup()
         exit()
 
+def boot_config():
+    if os.path.exists("/boot/plant.config"):
+        print("Configuration loaded from /boot directory.")
+        new_path = os.path.join(CURR_DIR, CONFIG_FILE_NAME)
+        copyfile(BOOT_CONFIG_PATH, new_path)
 
 if __name__ == '__main__':
+    boot_config()
     runner = SystemRunner()
 
     try:
