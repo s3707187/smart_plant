@@ -14,4 +14,4 @@
 .gitignore
 
 # Node.js dependencies:
-node_modules/z
+/node_modules
