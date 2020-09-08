@@ -1,5 +1,5 @@
 import datetime
-from flask_api_schema import *
+from backend.flask_api_schema import *
 from flask import Flask, Blueprint, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -7,10 +7,13 @@ import os, requests, json
 from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
-from flask_api_schema import User_Schema
+from backend.flask_api_schema import User_Schema
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, jwt_refresh_token_required
 import random, string
 from functools import wraps
+import datetime
+
+
 
 api = Blueprint("api", __name__)
 
@@ -20,6 +23,12 @@ api = Blueprint("api", __name__)
 PASSWORD_LENGTH = 8
 
 # ------------ CALLABLE API METHODS ----------------
+
+@api.route("/plant_record", methods=["GET"])
+def get_plant_record():
+    plant_id = request.json["plant_id"]
+    result = Plant_history.query.all()
+    return Plant_history_Schema.jsonify(result)
 
 @api.route("/login", methods=["POST"])
 def login():
