@@ -1,5 +1,5 @@
 import datetime
-from backend.flask_api_schema import *
+from flask_api_schema import *
 from flask import Flask, Blueprint, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -7,7 +7,7 @@ import os, requests, json
 from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
-from backend.flask_api_schema import User_Schema
+from flask_api_schema import User_Schema
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, jwt_refresh_token_required
 import random, string
 from functools import wraps
@@ -307,7 +307,8 @@ def save_plant_data():
         }), 403
 
     if valid:
-        new_plant_history = Plant_history(plant_id, date_time, light, moisture, humidity, temperature)
+        real_time = datetime.datetime.strptime(date_time, "%H:%M:%S %Y-%m-%d")
+        new_plant_history = Plant_history(plant_id, real_time, temperature, humidity, light, moisture)
         message = "New plant record successfully registered"
         db.session.add(new_plant_history)
         db.session.commit()
