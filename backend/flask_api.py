@@ -26,9 +26,22 @@ PASSWORD_LENGTH = 8
 
 @api.route("/plant_record", methods=["GET"])
 def get_plant_record():
-    plant_id = request.json["plant_id"]
-    result = Plant_history.query.all()
-    return Plant_history_Schema.jsonify(result)
+    ERRORS = []
+    result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(Plant_history.plant_id == request.json['plant_id']).limit(1)
+    result = Schema_Plants_history.dump(result)
+
+    if len(result) == 0:
+        ERRORS.append({
+            "path": ['plant_id'],
+            "message": "plant id is invalid. Please ask an administrator for the valid plant types."
+
+        })
+        return jsonify({
+            "errors": ERRORS
+        }), 400
+    else:
+        return jsonify(result), 201
+
 
 @api.route("/login", methods=["POST"])
 def login():
