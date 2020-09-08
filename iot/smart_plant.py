@@ -210,7 +210,7 @@ class SystemRunner:
                 upload_count = 0
                 # by default, uploads until interrupted.
                 # otherwise uploads until argument of max_uploads reached
-                while upload_count < max_uploads:
+                while upload_count < max_uploads or max_uploads == -1:
                     curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                                  "%Y-%m-%d")
                     # may surround next block in try catch, catching sensor exceptions
@@ -283,8 +283,8 @@ if __name__ == '__main__':
 
         # extra check here just so we don't go through cloud billing
         # 1800 seconds is 30 minutes
-        if args["sample_rate"] < 1800:
-            args["sample_rate"] = 1800
+        # if args["sample_rate"] < 1800:
+            # args["sample_rate"] = 1800
 
         if args["configure"]:
             # do cloud config then continue

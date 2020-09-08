@@ -3,7 +3,7 @@ from flask import Flask , redirect , url_for, render_template , request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 import os, requests, json
-from backend.flask_api import api
+from flask_api import api
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 
