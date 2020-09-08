@@ -110,7 +110,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-smart-plant/
+/smart-plant
 
 # Spyder project settings
 .spyderproject
