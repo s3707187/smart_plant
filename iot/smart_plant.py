@@ -283,8 +283,8 @@ if __name__ == '__main__':
 
         # extra check here just so we don't go through cloud billing
         # 1800 seconds is 30 minutes
-        # if args["sample_rate"] < 1800:
-            # args["sample_rate"] = 1800
+        if args["sample_rate"] < 1800:
+            args["sample_rate"] = 1800
 
         if args["configure"]:
             # do cloud config then continue
