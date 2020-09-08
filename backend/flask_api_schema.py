@@ -69,7 +69,7 @@ class Plant_type(db.Model):
 #Plant_history model
 class Plant_history(db.Model):
     __tablename__ = "Plant_history"
-    history_id = db.Column(db.Integer, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
+    history_id = db.Column(db.Integer, autoincrement=True, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
     plant_id = db.Column(db.Integer, nullable=False)
     date_time = db.Column(db.DateTime, nullable=False)
     temperature = db.Column(db.Float, nullable=False)
@@ -77,8 +77,8 @@ class Plant_history(db.Model):
     light  = db.Column(db.Float, nullable=False)
     moisture  = db.Column(db.Float, nullable=False)
 
-    def __init__(self,history_id,plant_id,date_time, temperature, humidity, light, moisture):
-        self.history_id = history_id
+    def __init__(self,plant_id,date_time, temperature, humidity, light, moisture):
+        # self.history_id = history_id
         self.plant_id = plant_id
         self.date_time = date_time
         self.temperature = temperature
