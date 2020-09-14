@@ -25,27 +25,6 @@ PASSWORD_LENGTH = 8
 
 
 # ------------ CALLABLE API METHODS ----------------
-
-@api.route("/plant_record", methods=["GET"])
-def get_plant_record():
-    ERRORS = []
-    result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(
-        Plant_history.plant_id == request.args.get['plant_id']).limit(1)
-    result = Schema_Plants_history.dump(result)
-
-    if len(result) == 0:
-        ERRORS.append({
-            "path": ['plant_id'],
-            "message": "plant id is invalid. Please ask an administrator for the valid plant types."
-
-        })
-        return jsonify({
-            "errors": ERRORS
-        }), 400
-    else:
-        return jsonify(result), 201
-
-
 @api.route("/login", methods=["POST"])
 def login():
     ERRORS = []
@@ -351,11 +330,43 @@ def save_plant_data():
         }), 400
 
 
+@api.route("/recent_plant_record", methods=["GET"])
+@jwt_required
+def get_recent_plant_record():
+    ERRORS = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(
+            Plant_history.plant_id == request.args.get['plant_id']).limit(1)
+        result = Schema_Plants_history.dump(result)
+
+        if len(result) == 0:
+            ERRORS.append({
+                "path": ['plant_id'],
+                "message": "plant id is invalid. Please ask an administrator for the valid plant types."
+
+            })
+            return jsonify({
+                "errors": ERRORS
+            }), 400
+        else:
+            return jsonify(result), 201
+    else:
+        ERRORS.append({
+            "path": ['username'],
+            "message": "Username does not exist"
+        })
+        return jsonify({
+            "errors": ERRORS
+        }), 403
+
+
 @api.route("/delete_plant", methods=["POST"])
 @jwt_required
 def delete_plant():
     ERRORS = []
     current_user = get_jwt_identity()
+    can_delete = True
     if username_exists(current_user):
         plant_id = request.json["plant_id"]
 
@@ -366,17 +377,25 @@ def delete_plant():
             db.session.delete(plant_delete)
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
-
+            can_delete = False
             ERRORS.append({
                 "path": ['plant_id'],
                 "message": "plant_id does not exist"
             }), 403
 
-            return jsonify({
-                "errors": ERRORS
-            }), 403
+    else:
+        can_delete = False
+        ERRORS.append({
+            "path": ['username'],
+            "message": "Username does not exist"
+        })
 
+    if can_delete:
         return jsonify("Plant Successfully Deleted from Database"), 201
+
+    return jsonify({
+        "errors": ERRORS
+    }), 403
 
 
 @api.route("/delete_user", methods=["POST"])
@@ -384,31 +403,37 @@ def delete_plant():
 def delete_user():
     ERRORS = []
     current_user = get_jwt_identity()
+    can_delete = True
     if username_exists(current_user):
-        username = request.json["username"]
+        username = current_user
 
         try:
             link_delete = Plant_link.query.get(username)
             db.session.delete(link_delete)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
-
         try:
             user_delete = User.query.get(username)
             db.session.delete(user_delete)
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
-
+            can_delete = False
             ERRORS.append({
                 "path": ['username'],
                 "message": "username does not exist"
             }), 403
+    else:
+        can_delete = False
+        ERRORS.append({
+            "path": ['username'],
+            "message": "Username does not exist"
+        })
 
-            return jsonify({
-                "errors": ERRORS
-            }), 403
-
+    if can_delete:
         return jsonify("User Successfully Deleted from Database"), 201
+    return jsonify({
+        "errors": ERRORS
+    }), 403
 
 
 @api.route("/update_user_details", methods=["POST"])
@@ -461,6 +486,13 @@ def update_user_details():
                     "message": "lastname is incorrect"
                 })
 
+    else:
+        successful_change = False
+        ERRORS.append({
+            "path": ['username'],
+            "message": "Username does not exist"
+        })
+
     if successful_change:
         db.session.commit()
         return jsonify("User Details Successfully Changed"), 201
@@ -470,11 +502,11 @@ def update_user_details():
         }), 403
 
 @api.route("/update_plant_details", methods=["POST"])
-#@jwt_required
+@jwt_required
 def update_plant_details():
     ERRORS = []
     successful_change = True
-    current_user = request.json['username'] #get_jwt_identity()
+    current_user = get_jwt_identity()
     plant_id = request.json['plant_id']
     plant_name = request.json['plant_name']
     plant_type = request.json['plant_type']
