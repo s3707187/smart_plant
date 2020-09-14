@@ -2,6 +2,7 @@ import datetime
 from flask_api_schema import *
 from flask import Flask, Blueprint, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import orm as sql_alchemy_error
 from flask_marshmallow import Marshmallow
 import os, requests, json
 from flask import current_app as app
@@ -27,7 +28,7 @@ PASSWORD_LENGTH = 8
 @api.route("/plant_record", methods=["GET"])
 def get_plant_record():
     ERRORS = []
-    result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(Plant_history.plant_id == request.json['plant_id']).limit(1)
+    result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(Plant_history.plant_id == request.args.get['plant_id']).limit(1)
     result = Schema_Plants_history.dump(result)
 
     if len(result) == 0:
@@ -331,6 +332,64 @@ def save_plant_data():
             "errors": ERRORS
         }), 400
 
+@api.route("/delete_plant", methods=["POST"])
+@jwt_required
+def delete_plant():
+    ERRORS = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        plant_id = request.json["plant_id"]
+
+        try:
+            link_delete = Plant_link.query.get(plant_id)
+            db.session.delete(link_delete)
+            plant_delete = Plant.query.get(plant_id)
+            db.session.delete(plant_delete)
+            db.session.commit()
+        except sql_alchemy_error.exc.UnmappedInstanceError:
+
+            ERRORS.append({
+                "path": ['plant_id'],
+                "message": "plant_id does not exist"
+            }), 403
+
+            return jsonify({
+                "errors": ERRORS
+            }), 403
+
+        return jsonify("Plant Successfully Deleted from Database"), 201
+
+@api.route("/delete_user", methods=["POST"])
+@jwt_required
+def delete_user():
+    ERRORS = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        username = request.json["username"]
+
+        try:
+            link_delete = Plant_link.query.get(username)
+            db.session.delete(link_delete)
+        except sql_alchemy_error.exc.UnmappedInstanceError:
+            pass
+
+        try:
+            user_delete = User.query.get(username)
+            db.session.delete(user_delete)
+            db.session.commit()
+        except sql_alchemy_error.exc.UnmappedInstanceError:
+
+            ERRORS.append({
+                "path": ['username'],
+                "message": "username does not exist"
+            }), 403
+
+            return jsonify({
+                "errors": ERRORS
+            }), 403
+
+        return jsonify("User Successfully Deleted from Database"), 201
+
 
 # DEBUGGING NEED TO DELETE LOL
 @api.route("/users", methods=["GET"])
@@ -349,6 +408,13 @@ def get_plants():
 def get_plants_link():
     plant_link = Plant_link.query.all()
     result = Schema_Plants_link.dump(plant_link)
+    return jsonify(result)
+
+@api.route("/plant_link_user", methods=["POST"])
+def get_plants_link_user():
+    username = request.json["username"]
+    link_delete = Plant_link.query.get(username)
+    result = Schema_Plant_link.dump(link_delete)
     return jsonify(result)
 
 # ------------ HELPER FUNCTIONS ----------------
