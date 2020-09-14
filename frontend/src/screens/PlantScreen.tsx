@@ -257,7 +257,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     <Menu.Item key={"light"}>Light</Menu.Item>
                     <Menu.Item key={"soil"}>Soil Moisture</Menu.Item>
                 </Menu>
-                <HistoryVisualisationComponent />
+                <HistoryVisualisationComponent rawData={[]} />
             </Content>
         </Layout>
     );
