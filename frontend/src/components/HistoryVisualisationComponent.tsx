@@ -11,8 +11,10 @@ import {
     Borders,
     HighlightArea,
 } from "react-vis";
+import { Typography } from "antd";
 import "react-vis/dist/style.css";
 
+const { Text } = Typography;
 //Colors must be assigned statically to avoid problems with DiscreteLegend
 const lightCol = "rgb(227,77,66)";
 const moistureCol = "rgb(21,42,161)";
@@ -83,6 +85,9 @@ const HistoryVisualisationComponent: React.FC<HistoryVisualisationComponentProps
     const { lightSeries, humiditySeries, moistureSeries, tempSeries } = toUseableData(rawData);
 
     // TODO no data here will throw error
+    if (lightSeries.length === 0) {
+        return <Text>There is no historical data available.</Text>;
+    }
     const firstDate = lightSeries[0].x;
     const lastDate = lightSeries[lightSeries.length - 1].x;
 
