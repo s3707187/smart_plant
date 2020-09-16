@@ -5,6 +5,8 @@ import HealthVisualisationComponent from "../components/HealthVisualisationCompo
 import { useGet } from "../utils/apiHooks";
 import { useParams } from "react-router-dom";
 
+const { Title, Text } = Typography;
+
 var healthMin = 0.32;
 var healthMax = 0.68;
 
@@ -909,10 +911,19 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
 
     const { data, errors, loading } = useGet<
         {
+            latest_reading: {
+                date_time: string;
+                humidity: number;
+                light: number;
+                moisture: number;
+                plant_id: number;
+                temperature: number;
+            };
             plant_name: string;
             plant_id: number;
             plant_type: string;
             plant_health: string;
+            password: string;
         },
         { plant_id: number }
     >("view_plant_details", { plant_id });
@@ -947,12 +958,75 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     justifyContent: "center",
                 }}
             >
-                <Typography.Title level={2}>Plant Health</Typography.Title>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
+                    }}
+                >
+                    <div
+                        style={{
+                            margin: 20,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Title level={2}>Plant Health</Title>
+                        <HealthVisualisationComponent
+                            style={{ width: 400, height: 400 }}
+                            d1={[0.2, 0.5, 0.4, 0.7, 0.002]}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            margin: 20,
+                            display: "flex",
 
-                <HealthVisualisationComponent style={{ width: 400, height: 400 }} d1={[0.2, 0.5, 0.4, 0.7, 0.002]} />
-                <Typography.Title level={2}>Plant History</Typography.Title>
-                {/* TODO hook this up to API */}
-                <HistoryVisualisationComponent rawData={rawDataExample} />
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <Title level={2}>Plant History</Title>
+                        {/* TODO hook this up to API */}
+                        <HistoryVisualisationComponent rawData={rawDataExample} />
+                    </div>
+                </div>
+                <div
+                    style={{
+                        margin: 20,
+                        display: "flex",
+
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Title level={2}>Plant Details</Title>
+                    <Text>
+                        <Text style={{ fontWeight: "bold" }}>Password:</Text> {data?.password || "No password set"}
+                        <br />
+                        <Text style={{ fontWeight: "bold" }}>Plant Type:</Text>{" "}
+                        {data?.plant_type || "No plant type set"}
+                    </Text>
+                </div>
+                <div
+                    style={{
+                        margin: 20,
+                        display: "flex",
+
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Title level={2}>Access Controls</Title>
+                </div>
             </Content>
         </Layout>
     );
