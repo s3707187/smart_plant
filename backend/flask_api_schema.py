@@ -89,7 +89,7 @@ class Plant_history(db.Model):
 #Plant_history model
 class Plant_link(db.Model):
     __tablename__ = "Plant_link"
-    username = db.Column(db.VARCHAR(100), nullable=False) #primary_key=True #, ForeignKey('User.username')
+    username = db.Column(db.VARCHAR(100), nullable=False, primary_key=True) #primary_key=True #, ForeignKey('User.username')
     plant_id = db.Column(db.Integer, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
     user_type = db.Column(db.VARCHAR(100), nullable=False)
 

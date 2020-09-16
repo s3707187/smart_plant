@@ -283,7 +283,7 @@ def get_current_user():
 
     # Access the identity of the current user
     current_user = get_jwt_identity()
-    return jsonify(username=current_user), 201
+    return jsonify(username=current_user), 200
 
 
 @USER_API.route("/remove_plant_link", methods=["POST"])
@@ -312,7 +312,7 @@ def remove_plant_link():
     if can_delete:
         try:
             # try to delete the link
-            plant_link = Plant_link.query.filter_by(username=linked_user, plant_id=plant_id).one()
+            plant_link = Plant_link.query.filter_by(username=linked_user).filter_by(plant_id=plant_id).one()
             db.session.delete(plant_link)
             db.session.commit()
             return jsonify("Plant link successfully deleted from database"), 201
@@ -385,4 +385,3 @@ def add_plant_link():
             "errors": errors
         }), 400
 
-    
