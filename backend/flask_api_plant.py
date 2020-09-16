@@ -295,20 +295,19 @@ def update_plant_details():
         }), 403
 
 @PLANT_API.route("/get_plant_members", methods=["GET"])
-# @jwt_required
+@jwt_required
 def get_plant_members():
     """ TODO docstring
     """
 
     errors = []
-    # current_user = get_jwt_identity()
-    current_user = "dingus"
+    current_user = get_jwt_identity()
     plant_id = request.args.get('plant_id')
 
     if get_plant_read_permission(current_user, plant_id):
         plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
         links = Schema_Plants_link.dump(plant_links)
-        print(links)
+        # print(links)
         user_ids = []
         for link in links:
             if link["user_type"] == "plant_viewer":
