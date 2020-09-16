@@ -9,9 +9,7 @@ import random
 
 # third party imports
 from sqlalchemy import orm as sql_alchemy_error
-from passlib.hash import pbkdf2_sha256
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, \
-    jwt_required, jwt_refresh_token_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 # other imports
 from flask_api_schema import *
@@ -32,7 +30,7 @@ from flask_api_helpers import *
 
 # from functools import wraps
 
-PLANT_API = Blueprint("api", __name__)
+PLANT_API = Blueprint("plant_api", __name__)
 
 # ------------ SETUP VARIBLES -------------------
 

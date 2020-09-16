@@ -1,8 +1,8 @@
 # standard imports
-import datetime
-import re
-import string
-import random
+# import datetime
+# import re
+# import string
+# import random
 # import json
 # import os
 # import requests
@@ -32,7 +32,7 @@ from flask_api_helpers import *
 
 # from functools import wraps
 
-USER_API = Blueprint("api", __name__)
+USER_API = Blueprint("user_api", __name__)
 
 # ------------ SETUP VARIBLES -------------------
 

@@ -33,7 +33,7 @@ from flask_api_helpers import *
 
 # from functools import wraps
 
-IOT_API = Blueprint("api", __name__)
+IOT_API = Blueprint("iot_api", __name__)
 
 # ------------ SETUP VARIBLES -------------------
 
