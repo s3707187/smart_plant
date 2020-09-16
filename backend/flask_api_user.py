@@ -284,3 +284,75 @@ def get_current_user():
     # Access the identity of the current user
     current_user = get_jwt_identity()
     return jsonify(username=current_user), 201
+
+
+@USER_API.route("/add_plant_link", methods=["POST"])
+@jwt_required
+def add_plant_link():
+    """ TODO docstring
+    """
+
+    # Access the identity of the current user
+    current_user = get_jwt_identity()
+
+
+    return jsonify(username=current_user), 201
+
+
+@USER_API.route("/remove_plant_link", methods=["POST"])
+@jwt_required
+def add_plant_link():
+    """ TODO docstring
+    """
+    errors = []
+    # Access the identity of the current user
+    current_user = get_jwt_identity()
+
+    user_to_link = request.json["user_to_link"]
+    user_link_type = request.json["user_link_type"]
+    plant_id = request.json["plant_id"]
+    valid_link = True
+
+
+    if not username_exists(user_to_link):
+        valid_link = False
+        errors.append({
+            "path": ['user_to_link'],
+            "message": "User to link does not exist"
+        })
+
+    if not plant_exists(plant_id):
+        valid_link = False
+        errors.append({
+            "path": ['plant_id'],
+            "message": "Plant to link does not exist"
+        })
+
+    # Here we need to check the plant and users exist (hence valid_link)
+    # before trying to get the permission.
+    if valid_link and not get_plant_edit_permission(current_user, plant_id):
+        valid_link = False
+        errors.append({
+            "path": ['plant_id'],
+            "message": "User does not have permission to change plant."
+        })
+
+    if user_link_type != "plant_manager" or user_link_type != "plant_viewer":
+        valid_link = False
+        errors.append({
+            "path": ['user_link_type'],
+            "message": "User link type is invalid."
+        })
+
+    if valid_link:
+        new_link = Plant_link(user_to_link, plant_id, user_link_type)
+        db.session.add(new_link)
+        db.session.commit()
+        return jsonify("Link successfully created."), 201
+
+    else:
+        return jsonify({
+            "errors": errors
+        }), 400
+
+    

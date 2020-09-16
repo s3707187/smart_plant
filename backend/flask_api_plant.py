@@ -153,7 +153,7 @@ def view_plant_details():
         plant_info = get_plant(plant_id)
         latest_reading = Plant_history.query.order_by(
             Plant_history.date_time.desc()).filter(
-                Plant_history.plant_id == 25).limit(1)
+                Plant_history.plant_id == plant_id).limit(1)
 
         latest_reading = Schema_Plants_history.dump(latest_reading)
         if len(latest_reading) == 1:
