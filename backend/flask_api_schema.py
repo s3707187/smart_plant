@@ -126,7 +126,7 @@ class Plant_type_Schema(ma.Schema):
     class Meta:
         # Fields to expose
         fields = ('plant_id', 'temp_min', 'temp_max', 'humidity_min', 'humidity_max',
-                    'light_min', 'light_max', 'moisture_min', 'moisture_max')
+                  'light_min', 'light_max', 'moisture_min', 'moisture_max')
 
 class Plant_history_Schema(ma.Schema):
 

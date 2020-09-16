@@ -1,19 +1,33 @@
+# standard imports
 import datetime
-from flask_api_schema import *
-from flask import Flask, Blueprint, request, jsonify, render_template
-from flask_sqlalchemy import SQLAlchemy
+import re
+import string
+import random
+# import json
+# import os
+# import requests
+
+# third party imports
 from sqlalchemy import orm as sql_alchemy_error
-from flask_marshmallow import Marshmallow
-import os, requests, json
-from flask import current_app as app
-from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
-from flask_api_schema import User_Schema, db, User, Plant, Plant_link, Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, \
     jwt_required, jwt_refresh_token_required
-import random, string
-from functools import wraps
-import re
+
+# other imports
+from flask_api_schema import *
+from flask import Blueprint, request, jsonify
+# render_template, Flask
+# from flask_sqlalchemy import SQLAlchemy
+# from flask_marshmallow import Marshmallow
+# from flask import current_app as app
+# from sqlalchemy import func, ForeignKey, desc
+
+from flask_api_schema import User_Schema, db, User, Plant, Plant_link, \
+    Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history, \
+    Schema_Users, Schema_Plants, Schema_Plant_link, Schema_User, Schema_Plant_type, \
+    Plant_type
+
+# from functools import wraps
 
 api = Blueprint("api", __name__)
 
@@ -26,6 +40,9 @@ PASSWORD_LENGTH = 8
 # ------------ CALLABLE API METHODS ----------------
 @api.route("/login", methods=["POST"])
 def login():
+    """ TODO docstring
+    """
+
     errors = []
     username = request.json["username"]
     password = request.json["password"]
@@ -62,6 +79,9 @@ def login():
 
 @api.route("/register", methods=["POST"])
 def register_new_user():
+    """ TODO docstring
+    """
+
     errors = []
     valid_user = True
     username = request.json["username"]
@@ -106,7 +126,8 @@ def register_new_user():
         })
 
     if valid_user:
-        new_user = User(username, hashed_password, first_name, last_name, email, account_type)
+        new_user = User(username, hashed_password,
+                        first_name, last_name, email, account_type)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({
@@ -122,6 +143,9 @@ def register_new_user():
 @api.route("/refresh", methods=["POST"])
 @jwt_refresh_token_required
 def refresh():
+    """ TODO docstring
+    """
+
     current_user = get_jwt_identity()
     if username_exists(current_user):
         return jsonify({
@@ -139,6 +163,9 @@ def refresh():
 @api.route("/register_plant", methods=["POST"])
 @jwt_required
 def register_new_plant():
+    """ TODO docstring
+    """
+
     valid = True
     errors = []
     # get username from token
@@ -157,7 +184,8 @@ def register_new_plant():
         valid = False
         errors.append({
             "path": ['plant_type'],
-            "message": "plant type is invalid. Please ask an administrator for the valid plant types."
+            "message": "plant type is invalid. "
+                       "Please ask an administrator for the valid plant types."
         })
     if len(plant_name) == 0:
         valid = False
@@ -181,7 +209,9 @@ def register_new_plant():
         new_plant_dict = Schema_Plant.dump(new_plant)
 
         user_type = "plant_manager"
-        new_plant_link = Plant_link(current_user, new_plant_dict['plant_id'], user_type)
+        new_plant_link = Plant_link(current_user,
+                                    new_plant_dict['plant_id'],
+                                    user_type)
         db.session.add(new_plant_link)
         db.session.commit()
 
@@ -196,6 +226,9 @@ def register_new_plant():
 @api.route("/get_users_plants", methods=["GET"])
 @jwt_required
 def get_users_plants():
+    """ TODO docstring
+    """
+
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
@@ -231,11 +264,16 @@ def get_users_plants():
 @api.route("/view_plant_details", methods=["GET"])
 @jwt_required
 def view_plant_details():
+    """ TODO docstring
+    """
+
     errors = []
     current_user = get_jwt_identity()
     plant_id = request.args.get('plant_id')
-    if username_exists(current_user) and get_plant_read_permission(current_user, plant_id):
+    if (username_exists(current_user) and
+            get_plant_read_permission(current_user, plant_id)):
         return jsonify(get_plant(plant_id))
+
     else:
         errors.append({
             "path": ['username'],
@@ -246,10 +284,12 @@ def view_plant_details():
         }), 400
 
 
-
 # IOT device
 @api.route("/verify_plant", methods=["POST"])
 def verify_plant():
+    """ TODO docstring
+    """
+
     plant_id = request.json["plant_id"]
     password = request.json["password"]
     invalid_message = "incorrect password"
@@ -263,6 +303,9 @@ def verify_plant():
 
 @api.route("/save_plant_data", methods=["POST"])
 def save_plant_data():
+    """ TODO docstring
+    """
+
     errors = []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
@@ -318,7 +361,8 @@ def save_plant_data():
 
     if valid:
         real_time = datetime.datetime.strptime(date_time, "%H:%M:%S %Y-%m-%d")
-        new_plant_history = Plant_history(plant_id, real_time, temperature, humidity, light, moisture)
+        new_plant_history = Plant_history(
+            plant_id, real_time, temperature, humidity, light, moisture)
         message = "New plant record successfully registered"
         db.session.add(new_plant_history)
         db.session.commit()
@@ -332,19 +376,26 @@ def save_plant_data():
 @api.route("/get_plant_records", methods=["GET"])
 @jwt_required
 def get_recent_plant_record():
+    """ TODO docstring
+    """
+
     errors = []
     current_user = get_jwt_identity()
     plant_id = request.args.get['plant_id']
-    if username_exists(current_user) and get_plant_read_permission(current_user, plant_id):
-        result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(
-            Plant_history.plant_id == plant_id)
+    if (username_exists(current_user)
+            and get_plant_read_permission(current_user, plant_id)):
+
+        result = Plant_history.query.order_by(
+            Plant_history.date_time.desc()).filter(
+                Plant_history.plant_id == plant_id)
+
         result = Schema_Plants_history.dump(result)
 
         if len(result) == 0:
             errors.append({
                 "path": ['plant_id'],
-                "message": "plant id is invalid. Please ask an administrator for the valid plant types."
-
+                "message": "plant id is invalid. Please ask an administrator "
+                           "for the valid plant types."
             })
             return jsonify({
                 "errors": errors
@@ -364,6 +415,9 @@ def get_recent_plant_record():
 @api.route("/delete_plant", methods=["POST"])
 @jwt_required
 def delete_plant():
+    """ TODO docstring
+    """
+
     errors = []
     current_user = get_jwt_identity()
     can_delete = True
@@ -401,6 +455,9 @@ def delete_plant():
 @api.route("/delete_user", methods=["POST"])
 @jwt_required
 def delete_user():
+    """ TODO docstring
+    """
+
     errors = []
     current_user = get_jwt_identity()
     can_delete = True
@@ -439,6 +496,9 @@ def delete_user():
 @api.route("/update_user_details", methods=["POST"])
 @jwt_required
 def update_user_details():
+    """ TODO docstring
+    """
+
     errors = []
     successful_change = True
     current_user = get_jwt_identity()
@@ -456,7 +516,8 @@ def update_user_details():
                 successful_change = False
                 errors.append({
                     "path": ['password'],
-                    "message": "The password did not contain enough characters (min 8)"
+                    "message": "The password did not contain "
+                               "enough characters (min 8)"
                 })
         if email != "":
             if is_email(email):
@@ -501,9 +562,13 @@ def update_user_details():
             "errors": errors
         }), 403
 
+
 @api.route("/update_plant_details", methods=["POST"])
 @jwt_required
 def update_plant_details():
+    """ TODO docstring
+    """
+
     errors = []
     successful_change = True
     current_user = get_jwt_identity()
@@ -523,7 +588,8 @@ def update_plant_details():
                 successful_change = False
                 errors.append({
                     "path": ['plant_type'],
-                    "message": "plant type is invalid. Please ask an administrator for the valid plant types."
+                    "message": "plant type is invalid. Please ask an "
+                               "administrator for the valid plant types."
                 })
     else:
         successful_change = False
@@ -541,10 +607,12 @@ def update_plant_details():
         }), 403
 
 
-
 # DEBUGGING NEED TO DELETE LOL
 @api.route("/users", methods=["GET"])
 def get_users():
+    """ TODO docstring
+    """
+
     user = User.query.all()
     result = Schema_Users.dump(user)
     return jsonify(result)
@@ -552,6 +620,9 @@ def get_users():
 
 @api.route("/plants", methods=["GET"])
 def get_plants():
+    """ TODO docstring
+    """
+
     plant = Plant.query.all()
     result = Schema_Plants.dump(plant)
     return jsonify(result)
@@ -559,6 +630,9 @@ def get_plants():
 
 @api.route("/plant_link", methods=["GET"])
 def get_plants_link():
+    """ TODO docstring
+    """
+
     plant_link = Plant_link.query.all()
     result = Schema_Plants_link.dump(plant_link)
     return jsonify(result)
@@ -566,6 +640,9 @@ def get_plants_link():
 
 @api.route("/plant_link_user", methods=["POST"])
 def get_plants_link_user():
+    """ TODO docstring
+    """
+
     username = request.json["username"]
     link_delete = Plant_link.query.get(username)
     result = Schema_Plant_link.dump(link_delete)
@@ -575,6 +652,9 @@ def get_plants_link_user():
 # ------------ HELPER FUNCTIONS ----------------
 
 def username_exists(username_to_query):
+    """ TODO docstring
+    """
+
     username = User.query.get(username_to_query)
     if username is None:
         return False
@@ -582,6 +662,9 @@ def username_exists(username_to_query):
 
 
 def plant_exists(plant_to_query):
+    """ TODO docstring
+    """
+
     plant = Plant.query.get(plant_to_query)
     if plant is None:
         return False
@@ -589,6 +672,9 @@ def plant_exists(plant_to_query):
 
 
 def password_match(plant_id, password):
+    """ TODO docstring
+    """
+
     if plant_exists(plant_id):
         plant = Plant.query.get(plant_id)
         result = Schema_Plant.dump(plant)
@@ -600,6 +686,9 @@ def password_match(plant_id, password):
 
 
 def email_exists(email):
+    """ TODO docstring
+    """
+
     response = db.session.query(User).filter((User.email == email)).first()
     if response is None:
         return False
@@ -607,18 +696,27 @@ def email_exists(email):
 
 
 def get_user(username):
+    """ TODO docstring
+    """
+
     user = User.query.get(username)
     result = Schema_User.dump(user)
     return result
 
 
 def get_plant(plant_id):
+    """ TODO docstring
+    """
+
     plant = Plant.query.get(plant_id)
     result = Schema_Plant.dump(plant)
     return result
 
 
 def create_random_word():
+    """ TODO docstring
+    """
+
     word = ""
     for i in range(4):
         word += str(random.randint(0, 9))
@@ -627,23 +725,37 @@ def create_random_word():
 
 
 def get_plant_type(type):
+    """ TODO docstring
+    """
+
     plant_type = Plant_type.query.get(type)
     result = Schema_Plant_type.dump(plant_type)
     return result
 
 
 def plant_type_exists(plant_type_to_query):
+    """ TODO docstring
+    """
+
     plant_type = get_plant_type(plant_type_to_query)
     if plant_type is None or plant_type == {}:
         return False
     return True
 
+
 def is_email(email):
+    """ TODO docstring
+    """
+
     if re.match(r'[\w.-]+@([\w.-]+\.)+[\w-]+', email):
         return True
     return False
 
+
 def get_plant_edit_permission(user_id, plant_id):
+    """ TODO docstring
+    """
+
     # return true if user_id can edit details for plant_id (i.e. is the owner)
     # (including whether they can edit the links for that plant, which they can
     # if they own it)
@@ -651,22 +763,30 @@ def get_plant_edit_permission(user_id, plant_id):
     # use this to determine if they can get the plant password too
     pass
 
+
 def get_plant_read_permission(user_id, plant_id):
+    """ TODO docstring
+    """
+
     # return true if user_id can READ details for plant_id (i.e. is owner or viewer)
     # admins get TRUE too
     pass
 
+
 def get_user_edit_permission(user_id, user_to_edit):
+    """ TODO docstring
+    """
+
     # return true if user_id = user_to_edit or if user_id is an admin
     pass
+
 
 def get_user_read_permission(user_id, user_to_edit):
+    """ TODO docstring
+    """
+
     # return true if user_id = user_to_edit or if user_id is an admin
     pass
-
-
-
-
 
 
 @api.route("/current_user", methods=["GET"])
