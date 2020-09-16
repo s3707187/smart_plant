@@ -911,7 +911,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
 
     const { data, errors, loading } = useGet<
         {
-            latest_reading: {
+            latest_reading?: {
                 date_time: string;
                 humidity: number;
                 light: number;
@@ -939,7 +939,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
             temperature: number;
         },
         { plant_id: number }
-    >("plant_record", { plant_id });
+    >("get_plant_records", { plant_id });
     console.log("Plant History Data:", plantHistoryData);
 
     return (
@@ -977,10 +977,19 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                         }}
                     >
                         <Title level={2}>Plant Health</Title>
-                        <HealthVisualisationComponent
-                            style={{ width: 400, height: 400 }}
-                            d1={[0.2, 0.5, 0.4, 0.7, 0.002]}
-                        />
+                        {data?.latest_reading && (
+                            <HealthVisualisationComponent
+                                style={{ width: 400, height: 400 }}
+                                d1={[
+                                    data.latest_reading.temperature,
+                                    data.latest_reading.humidity,
+                                    data.latest_reading.light,
+                                    data.latest_reading.moisture,
+                                    0.002,
+                                ]}
+                            />
+                        )}
+                        {data?.latest_reading == null && <Text>There are no current readings for the plant.</Text>}
                     </div>
                     <div
                         style={{
