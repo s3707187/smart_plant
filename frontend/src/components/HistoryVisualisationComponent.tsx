@@ -82,6 +82,7 @@ const HistoryVisualisationComponent: React.FC<HistoryVisualisationComponentProps
 
     const { lightSeries, humiditySeries, moistureSeries, tempSeries } = toUseableData(rawData);
 
+    // TODO no data here will throw error
     const firstDate = lightSeries[0].x;
     const lastDate = lightSeries[lightSeries.length - 1].x;
 

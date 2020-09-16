@@ -918,6 +918,19 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
     >("view_plant_details", { plant_id });
     console.log("data", data);
 
+    const { data: plantHistoryData } = useGet<
+        {
+            date_time: string;
+            humidity: number;
+            light: number;
+            moisture: number;
+            plant_id: number;
+            temperature: number;
+        },
+        { plant_id: number }
+    >("plant_record", { plant_id });
+    console.log("Plant History Data:", plantHistoryData);
+
     return (
         <Layout>
             <Header style={{ background: "#FFF", display: "flex", alignItems: "center" }}>
