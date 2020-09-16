@@ -8,12 +8,11 @@ import os, requests, json
 from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 from passlib.hash import pbkdf2_sha256
-from flask_api_schema import User_Schema
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required, \
-    jwt_refresh_token_required
+from flask_api_schema import User_Schema, db, User, Plant, Plant_link, Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, \
+    jwt_required, jwt_refresh_token_required
 import random, string
 from functools import wraps
-import datetime
 import re
 
 api = Blueprint("api", __name__)
@@ -27,19 +26,19 @@ PASSWORD_LENGTH = 8
 # ------------ CALLABLE API METHODS ----------------
 @api.route("/login", methods=["POST"])
 def login():
-    ERRORS = []
+    errors = []
     username = request.json["username"]
     password = request.json["password"]
 
     valid_user = True
     if not username_exists(username):
         valid_user = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "username or password is incorrect"
         })
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
     else:
         hashed_password = get_user(username)["password"]
@@ -52,18 +51,18 @@ def login():
         }), 201
 
     else:
-        ERRORS.append({
+        errors.append({
             "path": ['password'],
             "message": "username or password is incorrect"
         })
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
 
 
 @api.route("/register", methods=["POST"])
 def register_new_user():
-    ERRORS = []
+    errors = []
     valid_user = True
     username = request.json["username"]
     first_name = request.json["first_name"]
@@ -77,31 +76,31 @@ def register_new_user():
         hashed_password = pbkdf2_sha256.hash(password)
     else:
         valid_user = False
-        ERRORS.append({
+        errors.append({
             "path": ['password'],
             "message": "The password did not contain enough characters (min 8)"
         })
     if username_exists(username):
         valid_user = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username already exists or is incorrect"
         })
     if email_exists(email) or not is_email(email):
         valid_user = False
-        ERRORS.append({
+        errors.append({
             "path": ['email'],
             "message": "Email already exists or is incorrect"
         })
     if not first_name.isalpha() or len(first_name) == 0:
         valid_user = False
-        ERRORS.append({
+        errors.append({
             "path": ['first_name'],
             "message": "first name is incorrect"
         })
     if not last_name.isalpha() or len(last_name) == 0:
         valid_user = False
-        ERRORS.append({
+        errors.append({
             "path": ['last_name'],
             "message": "lastname is incorrect"
         })
@@ -116,7 +115,7 @@ def register_new_user():
         }), 201
     else:
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
 
 
@@ -141,7 +140,7 @@ def refresh():
 @jwt_required
 def register_new_plant():
     valid = True
-    ERRORS = []
+    errors = []
     # get username from token
     current_user = get_jwt_identity()
     # current_user = request.json["username"]
@@ -156,20 +155,20 @@ def register_new_plant():
 
     if not plant_type_exists(plant_type):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['plant_type'],
             "message": "plant type is invalid. Please ask an administrator for the valid plant types."
         })
     if len(plant_name) == 0:
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['plant_name'],
             "message": "plant name is empty"
         })
 
     if not username_exists(current_user):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username does not exist"
         })
@@ -189,7 +188,7 @@ def register_new_plant():
         return jsonify(message), 201
     else:
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
 
 
@@ -197,7 +196,7 @@ def register_new_plant():
 @api.route("/get_users_plants", methods=["GET"])
 @jwt_required
 def get_users_plants():
-    ERRORS = []
+    errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
         plants = []
@@ -219,12 +218,12 @@ def get_users_plants():
 
         return jsonify(list_of_plants), 201
     else:
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "incorrect token"
         })
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
 
 
@@ -232,18 +231,18 @@ def get_users_plants():
 @api.route("/view_plant_details", methods=["GET"])
 @jwt_required
 def view_plant_details():
-    ERRORS = []
+    errors = []
     current_user = get_jwt_identity()
-    if username_exists(current_user):
-        plant_id = request.args.get('plant_id')
+    plant_id = request.args.get('plant_id')
+    if username_exists(current_user) and get_plant_read_permission(current_user, plant_id):
         return jsonify(get_plant(plant_id))
     else:
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "incorrect token"
         })
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
 
 
@@ -264,7 +263,7 @@ def verify_plant():
 
 @api.route("/save_plant_data", methods=["POST"])
 def save_plant_data():
-    ERRORS = []
+    errors = []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
     light = request.json["light"]
@@ -277,45 +276,45 @@ def save_plant_data():
     valid = True
     if not plant_exists(plant_id):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['plant_id'],
             "message": "Username does not exist"
-        }), 403
+        })
 
     if not password_match(plant_id, password):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['password'],
             "message": "invalid password"
-        }), 403
+        })
 
     if not isinstance(light, float):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['light'],
             "message": "light is invalid"
-        }), 403
+        })
 
     if not isinstance(moisture, float):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['moisture'],
             "message": "moisture is invalid"
-        }), 403
+        })
 
     if not isinstance(humidity, float):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['humidity'],
             "message": "humidity is invalid"
-        }), 403
+        })
 
     if not isinstance(temperature, float):
         valid = False
-        ERRORS.append({
+        errors.append({
             "path": ['temperature'],
             "message": "temperature is invalid"
-        }), 403
+        })
 
     if valid:
         real_time = datetime.datetime.strptime(date_time, "%H:%M:%S %Y-%m-%d")
@@ -326,45 +325,46 @@ def save_plant_data():
         return jsonify(message), 201
     else:
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 400
 
 
-@api.route("/recent_plant_record", methods=["GET"])
+@api.route("/get_plant_records", methods=["GET"])
 @jwt_required
 def get_recent_plant_record():
-    ERRORS = []
+    errors = []
     current_user = get_jwt_identity()
-    if username_exists(current_user):
+    plant_id = request.args.get['plant_id']
+    if username_exists(current_user) and get_plant_read_permission(current_user, plant_id):
         result = Plant_history.query.order_by(Plant_history.date_time.desc()).filter(
-            Plant_history.plant_id == request.args.get['plant_id']).limit(1)
+            Plant_history.plant_id == plant_id)
         result = Schema_Plants_history.dump(result)
 
         if len(result) == 0:
-            ERRORS.append({
+            errors.append({
                 "path": ['plant_id'],
                 "message": "plant id is invalid. Please ask an administrator for the valid plant types."
 
             })
             return jsonify({
-                "errors": ERRORS
+                "errors": errors
             }), 400
         else:
             return jsonify(result), 201
     else:
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username does not exist"
         })
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 403
 
 
 @api.route("/delete_plant", methods=["POST"])
 @jwt_required
 def delete_plant():
-    ERRORS = []
+    errors = []
     current_user = get_jwt_identity()
     can_delete = True
     if username_exists(current_user):
@@ -378,14 +378,14 @@ def delete_plant():
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
             can_delete = False
-            ERRORS.append({
+            errors.append({
                 "path": ['plant_id'],
                 "message": "plant_id does not exist"
-            }), 403
+            }, 403)
 
     else:
         can_delete = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username does not exist"
         })
@@ -394,14 +394,14 @@ def delete_plant():
         return jsonify("Plant Successfully Deleted from Database"), 201
 
     return jsonify({
-        "errors": ERRORS
+        "errors": errors
     }), 403
 
 
 @api.route("/delete_user", methods=["POST"])
 @jwt_required
 def delete_user():
-    ERRORS = []
+    errors = []
     current_user = get_jwt_identity()
     can_delete = True
     if username_exists(current_user):
@@ -418,13 +418,13 @@ def delete_user():
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
             can_delete = False
-            ERRORS.append({
+            errors.append({
                 "path": ['username'],
                 "message": "username does not exist"
-            }), 403
+            }, 403)
     else:
         can_delete = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username does not exist"
         })
@@ -432,14 +432,14 @@ def delete_user():
     if can_delete:
         return jsonify("User Successfully Deleted from Database"), 201
     return jsonify({
-        "errors": ERRORS
+        "errors": errors
     }), 403
 
 
 @api.route("/update_user_details", methods=["POST"])
 @jwt_required
 def update_user_details():
-    ERRORS = []
+    errors = []
     successful_change = True
     current_user = get_jwt_identity()
     password = request.json['password']
@@ -454,7 +454,7 @@ def update_user_details():
                 user_to_change.password = hashed_password
             else:
                 successful_change = False
-                ERRORS.append({
+                errors.append({
                     "path": ['password'],
                     "message": "The password did not contain enough characters (min 8)"
                 })
@@ -463,7 +463,7 @@ def update_user_details():
                 user_to_change.email = email
             else:
                 successful_change = False
-                ERRORS.append({
+                errors.append({
                     "path": ['email'],
                     "message": "Email already exists or is incorrect"
                 })
@@ -472,7 +472,7 @@ def update_user_details():
             if first_name.isalpha() and len(first_name) > 0:
                 user_to_change.first_name = first_name
             else:
-                ERRORS.append({
+                errors.append({
                     "path": ['first_name'],
                     "message": "first name is incorrect"
                 })
@@ -481,14 +481,14 @@ def update_user_details():
                 user_to_change.last_name = last_name
             else:
                 successful_change = False
-                ERRORS.append({
+                errors.append({
                     "path": ['last_name'],
                     "message": "lastname is incorrect"
                 })
 
     else:
         successful_change = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username does not exist"
         })
@@ -498,13 +498,13 @@ def update_user_details():
         return jsonify("User Details Successfully Changed"), 201
     else:
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 403
 
 @api.route("/update_plant_details", methods=["POST"])
 @jwt_required
 def update_plant_details():
-    ERRORS = []
+    errors = []
     successful_change = True
     current_user = get_jwt_identity()
     plant_id = request.json['plant_id']
@@ -521,13 +521,13 @@ def update_plant_details():
                 plant_to_change.plant_type = plant_type
             else:
                 successful_change = False
-                ERRORS.append({
+                errors.append({
                     "path": ['plant_type'],
                     "message": "plant type is invalid. Please ask an administrator for the valid plant types."
                 })
     else:
         successful_change = False
-        ERRORS.append({
+        errors.append({
             "path": ['username'],
             "message": "Username does not exist"
         })
@@ -537,7 +537,7 @@ def update_plant_details():
         return jsonify("User Details Successfully Changed"), 201
     else:
         return jsonify({
-            "errors": ERRORS
+            "errors": errors
         }), 403
 
 
@@ -664,7 +664,7 @@ def get_user_read_permission(user_id, user_to_edit):
     # return true if user_id = user_to_edit or if user_id is an admin
     pass
 
-def 
+
 
 
 
