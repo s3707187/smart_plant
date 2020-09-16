@@ -148,8 +148,19 @@ def view_plant_details():
     current_user = get_jwt_identity()
     plant_id = request.args.get('plant_id')
     if (username_exists(current_user) and
-            get_plant_read_permission(current_user, plant_id)):
-        return jsonify(get_plant(plant_id))
+        get_plant_read_permission(current_user, plant_id)):
+        
+        plant_info = get_plant(plant_id)
+        latest_reading = Plant_history.query.order_by(
+            Plant_history.date_time.desc()).filter(
+                Plant_history.plant_id == 25).limit(1)
+
+        latest_reading = Schema_Plants_history.dump(latest_reading)
+        if len(latest_reading) == 1:
+            plant_info["latest_reading"] = latest_reading[0]
+        else:
+            plant_info["latest_reading"] = None
+        return jsonify(plant_info)
 
     else:
         errors.append({
@@ -169,7 +180,7 @@ def get_recent_plant_record():
 
     errors = []
     current_user = get_jwt_identity()
-    plant_id = request.args.get['plant_id']
+    plant_id = request.args.get('plant_id')
     if (username_exists(current_user)
             and get_plant_read_permission(current_user, plant_id)):
 

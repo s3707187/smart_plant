@@ -141,7 +141,7 @@ def get_plant_edit_permission(user_id, plant_id):
     # if they own it)
     # admins get TRUE too
     # use this to determine if they can get the plant password too
-    pass
+    return True
 
 
 def get_plant_read_permission(user_id, plant_id):
@@ -150,7 +150,7 @@ def get_plant_read_permission(user_id, plant_id):
 
     # return true if user_id can READ details for plant_id (i.e. is owner or viewer)
     # admins get TRUE too
-    pass
+    return True
 
 
 def get_user_edit_permission(user_id, user_to_edit):
@@ -158,7 +158,7 @@ def get_user_edit_permission(user_id, user_to_edit):
     """
 
     # return true if user_id = user_to_edit or if user_id is an admin
-    pass
+    return True
 
 
 def get_user_read_permission(user_id, user_to_edit):
@@ -166,4 +166,4 @@ def get_user_read_permission(user_id, user_to_edit):
     """
 
     # return true if user_id = user_to_edit or if user_id is an admin
-    pass
+    return True
