@@ -126,7 +126,7 @@ def get_users_plants():
             result = Schema_Plant.dump(plant)
             list_of_plants.append(result)
 
-        return jsonify(list_of_plants), 201
+        return jsonify(list_of_plants), 200
     else:
         errors.append({
             "path": ['username'],
@@ -153,7 +153,7 @@ def view_plant_details():
         plant_info = get_plant(plant_id)
         latest_reading = Plant_history.query.order_by(
             Plant_history.date_time.desc()).filter(
-                Plant_history.plant_id == 25).limit(1)
+                Plant_history.plant_id == plant_id).limit(1)
 
         latest_reading = Schema_Plants_history.dump(latest_reading)
         if len(latest_reading) == 1:
@@ -200,7 +200,7 @@ def get_recent_plant_record():
                 "errors": errors
             }), 400
         else:
-            return jsonify(result), 201
+            return jsonify(result), 200
     else:
         errors.append({
             "path": ['username'],
@@ -294,3 +294,31 @@ def update_plant_details():
             "errors": errors
         }), 403
 
+@PLANT_API.route("/get_plant_members", methods=["GET"])
+@jwt_required
+def get_plant_members():
+    """ TODO docstring
+    """
+
+    errors = []
+    current_user = get_jwt_identity()
+    plant_id = request.args.get('plant_id')
+
+    if get_plant_read_permission(current_user, plant_id):
+        plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
+        links = Schema_Plants_link.dump(plant_links)
+        # print(links)
+        user_ids = []
+        for link in links:
+            if link["user_type"] == "plant_viewer":
+                user_ids.append(link["username"])
+        return jsonify(user_ids), 200
+
+    else:
+        errors.append({
+            "path": ['plant_id'],
+            "message": "User does not have permission to view plant details."
+        })
+        return jsonify({
+            "errors": errors
+        }), 400
