@@ -39,6 +39,15 @@ IOT_API = Blueprint("iot_api", __name__)
 
 
 # ------------ CALLABLE API METHODS ----------------
+#DELETE THIS
+@IOT_API.route("/plants", methods=["GET"])
+def get_plants():
+    """ TODO docstring
+    """
+
+    plant = Plant.query.all()
+    result = Schema_Plants.dump(plant)
+    return jsonify(result)
 
 # IOT device
 @IOT_API.route("/verify_plant", methods=["POST"])
