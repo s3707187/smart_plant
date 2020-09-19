@@ -6,7 +6,7 @@ LDR_CHANNEL = 0
 # MCP3008 channel for moisture sensor
 MOISTURE_CHANNEL = 7
 
-MOISTURE_WATER_VALUE = 700.0
+MOISTURE_WATER_VALUE = 740.0
 
 
 class SensorManager:
@@ -21,7 +21,7 @@ class SensorManager:
         # convert moisture value to a %.
         # MOISTURE_WATER_VALUE is where the medium is pure water (max value)
         # this value is 700 based on moisture sensor specification
-        return self.moisture.value / (MOISTURE_WATER_VALUE / 1000.0) * 100.0
+        return min(self.moisture.value / (MOISTURE_WATER_VALUE / 1000.0) * 100.0, 100.0)
 
     def get_light_pct(self):
         # light sensor gives 'amount of darkness', conver here to '% of light'
