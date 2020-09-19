@@ -155,7 +155,9 @@ def get_plant_edit_permission(user_id, plant_id):
     # if they own it)
     # admins get TRUE too
     # use this to determine if they can get the plant password too
-
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
     # get the links for a plant_id
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
     links = Schema_Plants_link.dump(plant_links)
@@ -174,6 +176,9 @@ def get_plant_read_permission(user_id, plant_id):
 
     # return true if user_id can READ details for plant_id (i.e. is owner or viewer)
     # admins get TRUE too
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
 
     # get the links for a plant_id
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
@@ -189,6 +194,9 @@ def get_plant_read_permission(user_id, plant_id):
 def get_user_edit_permission(user_id, user_to_edit):
     """ TODO docstring
     """
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
 
     # return true if user_id = user_to_edit or if user_id is an admin
     return user_id == user_to_edit
@@ -197,7 +205,10 @@ def get_user_edit_permission(user_id, user_to_edit):
 def get_user_read_permission(user_id, user_to_edit):
     """ TODO docstring
     """
-
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
+        
     # return true if user_id = user_to_edit or if user_id is an admin
     return user_id == user_to_edit
 

@@ -160,6 +160,9 @@ def view_plant_details():
             plant_info["latest_reading"] = latest_reading[0]
         else:
             plant_info["latest_reading"] = None
+        
+        if not get_plant_edit_permission(current_user, plant_id):
+            plant_info["password"] = None
         return jsonify(plant_info)
 
     else:
