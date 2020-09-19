@@ -172,30 +172,34 @@ def delete_user():
 
     errors = []
     current_user = get_jwt_identity()
+    user_to_del = request.json["user_to_del"]
     can_delete = True
-    if username_exists(current_user):
-        username = current_user
+    # check if the user to delete exists and current user has permissions over it
+    # don't need to check if current_user exists here 
+    if (username_exists(current_user) 
+        and username_exists(user_to_del)
+        and get_user_edit_permission(current_user, user_to_del)):
 
         try:
-            link_delete = Plant_link.query.get(username)
+            link_delete = Plant_link.query.get(user_to_del)
             db.session.delete(link_delete)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
         try:
-            user_delete = User.query.get(username)
+            user_delete = User.query.get(user_to_del)
             db.session.delete(user_delete)
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
             can_delete = False
             errors.append({
-                "path": ['username'],
-                "message": "username does not exist"
+                "path": ['user_to_del'],
+                "message": "user_to_del does not exist"
             }, 403)
     else:
         can_delete = False
         errors.append({
             "path": ['username'],
-            "message": "Username does not exist"
+            "message": "Username does not have permission"
         })
 
     if can_delete:
@@ -213,6 +217,9 @@ def update_user_details():
 
     errors = []
     successful_change = True
+    # perhaps request.json should contain the user to update too?
+    # so the admin can update user details? would then need to add an edit-
+    # permissions check where username exists check is
     current_user = get_jwt_identity()
     password = request.json['password']
     email = request.json['email']

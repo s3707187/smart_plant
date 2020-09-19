@@ -168,7 +168,7 @@ def view_plant_details():
     else:
         errors.append({
             "path": ['username'],
-            "message": "incorrect token"
+            "message": "incorrect token or invalid permission"
         })
         return jsonify({
             "errors": errors
@@ -223,8 +223,10 @@ def delete_plant():
     errors = []
     current_user = get_jwt_identity()
     can_delete = True
-    if username_exists(current_user):
-        plant_id = request.json["plant_id"]
+    plant_id = request.json["plant_id"]
+
+    if (username_exists(current_user)
+        and get_plant_edit_permission(current_user, plant_id)):
 
         try:
             link_delete = Plant_link.query.get(plant_id)
@@ -243,7 +245,7 @@ def delete_plant():
         can_delete = False
         errors.append({
             "path": ['username'],
-            "message": "Username does not exist"
+            "message": "Username does not exist or does not have permission"
         })
 
     if can_delete:
@@ -266,7 +268,9 @@ def update_plant_details():
     plant_id = request.json['plant_id']
     plant_name = request.json['plant_name']
     plant_type = request.json['plant_type']
-    if username_exists(current_user):
+    if (username_exists(current_user)
+        and get_plant_edit_permission(current_user, plant_id)):
+
         plant_to_change = Plant.query.get(plant_id)
 
         if plant_name != "":
@@ -286,7 +290,7 @@ def update_plant_details():
         successful_change = False
         errors.append({
             "path": ['username'],
-            "message": "Username does not exist"
+            "message": "Username does not exist or does not have permission"
         })
 
     if successful_change:
