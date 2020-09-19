@@ -1,3 +1,5 @@
+import numpy as np
+import pymysql
 from flask import Flask
 from flask import Flask , redirect , url_for, render_template , request, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +18,9 @@ app.config['JWT_SECRET_KEY'] = "sup"
 jwt = JWTManager(app)
 CORS(app)
 
+pymysql.converters.encoders[np.float64] = pymysql.converters.escape_float
+pymysql.converters.conversions = pymysql.converters.encoders.copy()
+pymysql.converters.conversions.update(pymysql.converters.decoders)
 
 HOST = "34.87.205.64"
 USER = "root"
@@ -28,8 +33,8 @@ cloud_sql_instance_name = "smart-plant-1:australia-southeast1:smartplant-dbms"
 
 # mysql+pymysql://<USER>:<PASSWORD>@/<DATABASE>?unix_socket=<socket_path>/<cloud_sql_instance_name>
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@/{}?unix_socket={}/{}".format(USER, PASSWORD, DATABASE,
-                                                                                            #   socket_path,
-                                                                                            #   cloud_sql_instance_name)
+#                                                                                               socket_path,
+#                                                                                               cloud_sql_instance_name)
 
 #LOCAL
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@{}/{}".format(USER, PASSWORD, HOST, DATABASE)
