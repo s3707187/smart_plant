@@ -12,8 +12,8 @@ from sqlalchemy import orm as sql_alchemy_error
 from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_claims
 
 # other imports
-from backend.flask_api_schema import *
-from backend.flask_api_schema import db
+from flask_api_schema import *
+from flask_api_schema import db
 from flask import Blueprint, request, jsonify
 # render_template, Flask
 # from flask_sqlalchemy import SQLAlchemy
