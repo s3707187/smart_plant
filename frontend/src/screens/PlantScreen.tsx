@@ -4,14 +4,15 @@ import HistoryVisualisationComponent from "../components/HistoryVisualisationCom
 import HealthVisualisationComponent from "../components/HealthVisualisationComponent";
 import PlantHealthContainer from "../containers/PlantHealthContainer";
 import PlantHistoryContainer from "../containers/PlantHistoryContainer";
+import PlantUsersContainer from "../containers/PlantUsersContainer";
 import { useGet } from "../utils/apiHooks";
 import { useParams } from "react-router-dom";
+import { CloseCircleOutlined } from "@ant-design/icons";
 
 const { Title, Text, Link } = Typography;
 
 var healthMin = 0.32;
 var healthMax = 0.68;
-
 
 //@ts-ignore
 function toGraphableData([tempData, humidData, lightData, moistData, padVal]) {
@@ -209,8 +210,6 @@ const { Content, Header } = Layout;
 const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
     const { id: plant_id } = useParams();
 
-    const [isAddingNewPerson, setAddingNewPerson] = useState<boolean>(false);
-
     const { data, errors, loading } = useGet<
         {
             latest_reading?: {
@@ -276,20 +275,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                         {data?.plant_type || "No plant type set"}
                     </Text>
                 </div>
-                <div
-                    style={{
-                        margin: 20,
-                        display: "flex",
-
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                    }}
-                >
-                    <Title level={2}>Access Controls</Title>
-
-                    {!isAddingNewPerson && <Link onClick={() => {}}>Add another user!</Link>}
-                </div>
+                <PlantUsersContainer plant_id={plant_id} />
             </Content>
         </Layout>
     );

@@ -43,5 +43,10 @@ app.register_blueprint(PLANT_API)
 app.register_blueprint(IOT_API)
 
 
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db.session.remove()
+
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
