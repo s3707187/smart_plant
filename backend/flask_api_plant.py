@@ -77,10 +77,11 @@ def register_new_plant():
             "message": "plant name is empty"
         })
 
-    if not username_exists(current_user):
+    user = current_user if plant_owner is None else plant_owner
+    if not username_exists(user):
         valid = False
         errors.append({
-            "path": ['username'],
+            "path": ['plant_owner'],
             "message": "Username does not exist"
         })
 
