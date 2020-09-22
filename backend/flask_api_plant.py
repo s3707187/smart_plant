@@ -9,7 +9,7 @@ import random
 
 # third party imports
 from sqlalchemy import orm as sql_alchemy_error
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_claims
 
 # other imports
 from flask_api_schema import *
@@ -53,6 +53,12 @@ def register_new_plant():
     plant_name = request.json["plant_name"]
     # determine plant health by comparing data to plant_types data
     plant_health = request.json["plant_health"]
+    plant_owner = request.json.get("plant_owner", None)
+
+    if plant_owner is not None and get_jwt_claims()['role'] != "admin":
+        return jsonify({
+            "errors": [{"message": "You do not have permission to do this.", "path": ["plant_owner"]}]
+        }), 403
 
     # create a random password for plant
     password = create_random_word()
@@ -86,7 +92,8 @@ def register_new_plant():
         new_plant_dict = Schema_Plant.dump(new_plant)
 
         user_type = "plant_manager"
-        new_plant_link = Plant_link(current_user,
+        user = current_user if plant_owner is None else plant_owner
+        new_plant_link = Plant_link(user,
                                     new_plant_dict['plant_id'],
                                     user_type)
         db.session.add(new_plant_link)
