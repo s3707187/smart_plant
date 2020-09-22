@@ -163,6 +163,9 @@ def view_plant_details():
         
         if not get_plant_edit_permission(current_user, plant_id):
             plant_info["password"] = None
+            plant_info["access"] = "plant_viewer"
+        else:
+            plant_info["access"] = "plant_owner"
         return jsonify(plant_info)
 
     else:

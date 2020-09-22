@@ -49,7 +49,7 @@ def login():
     errors = []
     username = request.json["username"]
     password = request.json["password"]
-
+    hashed_password = None
     valid_user = True
     if not username_exists(username):
         valid_user = False
@@ -65,9 +65,12 @@ def login():
 
     if pbkdf2_sha256.verify(password, hashed_password) and valid_user:
         # return tokens
+        # would frontend want to be returned the user type here?
+        # otherwise a new API method to return user type
+        user_type = get_user(username)["account_type"]
         return jsonify({
-            "access_token": create_access_token(username),
-            "refresh_token": create_refresh_token(username)
+            "access_token": create_access_token(username, user_claims={"role": user_type}),
+            "refresh_token": create_refresh_token(username, user_claims={"role": user_type})
         }), 201
 
     else:
@@ -134,8 +137,8 @@ def register_new_user():
         db.session.add(new_user)
         db.session.commit()
         return jsonify({
-            "access_token": create_access_token(username),
-            "refresh_token": create_refresh_token(username)
+            "access_token": create_access_token(username, user_claims={"role": account_type}),
+            "refresh_token": create_refresh_token(username, user_claims={"role": account_type})
         }), 201
     else:
         return jsonify({
@@ -151,8 +154,9 @@ def refresh():
 
     current_user = get_jwt_identity()
     if username_exists(current_user):
+        user_type = get_user(current_user)["account_type"]
         return jsonify({
-            "access_token": create_access_token(current_user)
+            "access_token": create_access_token(current_user, user_claims={"role": user_type})
         }), 201
     else:
         return jsonify({
