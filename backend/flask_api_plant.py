@@ -9,11 +9,11 @@ import random
 
 # third party imports
 from sqlalchemy import orm as sql_alchemy_error
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_claims
 
 # other imports
-from flask_api_schema import *
-from flask_api_schema import db
+from backend.flask_api_schema import *
+from backend.flask_api_schema import db
 from flask import Blueprint, request, jsonify
 # render_template, Flask
 # from flask_sqlalchemy import SQLAlchemy
@@ -36,13 +36,11 @@ PLANT_API = Blueprint("plant_api", __name__)
 
 
 # ------------ CALLABLE API METHODS ----------------
-
 @PLANT_API.route("/register_plant", methods=["POST"])
 @jwt_required
 def register_new_plant():
     """ TODO docstring
     """
-
     valid = True
     errors = []
     # get username from token
@@ -105,28 +103,33 @@ def register_new_plant():
 def get_users_plants():
     """ TODO docstring
     """
-
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
-        plants = []
-        list_of_plants = []
+        if get_jwt_claims()['role'] != "admin":
+            plant = Plant.query.all()
+            print(plant)
+            result = Schema_Plants.dump(plant)
+            return jsonify(result), 200
+        else:
+            plants = []
+            list_of_plants = []
 
-        plant_link = Plant_link.query.filter_by(username=current_user).all()
-        link = Schema_Plants_link.dump(plant_link)
+            plant_link = Plant_link.query.filter_by(username=current_user).all()
+            link = Schema_Plants_link.dump(plant_link)
 
-        for x in link:
-            if plant_exists(x["plant_id"]):
-                plants.append(x["plant_id"])
+            for x in link:
+                if plant_exists(x["plant_id"]):
+                    plants.append(x["plant_id"])
 
-        for i in plants:
-            plant = Plant.query.filter_by(plant_id=i).all()
-            assert len(plant) > 0
-            plant = plant[0]
-            result = Schema_Plant.dump(plant)
-            list_of_plants.append(result)
+            for i in plants:
+                plant = Plant.query.filter_by(plant_id=i).all()
+                assert len(plant) > 0
+                plant = plant[0]
+                result = Schema_Plant.dump(plant)
+                list_of_plants.append(result)
 
-        return jsonify(list_of_plants), 200
+            return jsonify(list_of_plants), 200
     else:
         errors.append({
             "path": ['username'],
