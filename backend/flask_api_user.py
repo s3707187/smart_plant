@@ -450,3 +450,4 @@ def get_user_details():
     return jsonify({
             "errors": errors
         }), 400
+        
