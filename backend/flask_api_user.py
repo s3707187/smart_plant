@@ -283,4 +283,105 @@ def get_current_user():
 
     # Access the identity of the current user
     current_user = get_jwt_identity()
-    return jsonify(username=current_user), 201
+    return jsonify(username=current_user), 200
+
+
+@USER_API.route("/remove_plant_link", methods=["POST"])
+@jwt_required
+def remove_plant_link():
+    """ TODO docstring
+    """
+
+    errors = []
+    # Access the identity of the current user
+    current_user = get_jwt_identity()
+
+    linked_user = request.json["linked_user"]
+    plant_id = request.json["plant_id"]
+    can_delete = True
+
+    # check edit permissions on plant
+    if not get_plant_edit_permission(current_user, plant_id):
+        can_delete = False
+        errors.append({
+            "path": ['plant_id'],
+            "message": "User does not have permission to edit plant links."
+        })
+
+    # if good so far, proceed
+    if can_delete:
+        try:
+            # try to delete the link
+            plant_link = Plant_link.query.filter_by(username=linked_user).filter_by(plant_id=plant_id).one()
+            db.session.delete(plant_link)
+            db.session.commit()
+            return jsonify("Plant link successfully deleted from database"), 201
+        except sql_alchemy_error.exc.NoResultFound:
+            # if the link does not exist, add an error
+            errors.append({
+            "path": ['plant_id'],
+            "message": "Link does not exist for user."
+        })
+
+    return jsonify({
+        "errors": errors
+    }), 403
+
+
+@USER_API.route("/add_plant_link", methods=["POST"])
+@jwt_required
+def add_plant_link():
+    """ TODO docstring
+    """
+    errors = []
+    # Access the identity of the current user
+    current_user = get_jwt_identity()
+    user_to_link = request.json["user_to_link"]
+    user_link_type = request.json["user_link_type"]
+    plant_id = request.json["plant_id"]
+    valid_link = True
+
+    # check if username is correct
+    if not username_exists(user_to_link):
+        valid_link = False
+        errors.append({
+            "path": ['user_to_link'],
+            "message": "User to link does not exist"
+        })
+    # check plant_id is correct
+    if not plant_exists(plant_id):
+        valid_link = False
+        errors.append({
+            "path": ['plant_id'],
+            "message": "Plant to link does not exist"
+        })
+
+    # Here we need to check the plant and users exist (hence valid_link)
+    # before trying to get the permission.
+    if valid_link and not get_plant_edit_permission(current_user, plant_id):
+        valid_link = False
+        errors.append({
+            "path": ['plant_id'],
+            "message": "User does not have permission to change plant."
+        })
+
+    # check the link type is correct
+    if user_link_type != "plant_manager" and user_link_type != "plant_viewer":
+        valid_link = False
+        errors.append({
+            "path": ['user_link_type'],
+            "message": "User link type is invalid."
+        })
+
+    # add the new link if all is good
+    if valid_link:
+        new_link = Plant_link(user_to_link, plant_id, user_link_type)
+        db.session.add(new_link)
+        db.session.commit()
+        return jsonify("Link successfully created."), 201
+    # return errors if all is bad
+    else:
+        return jsonify({
+            "errors": errors
+        }), 400
+
