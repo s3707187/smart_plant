@@ -41,6 +41,30 @@ PASSWORD_LENGTH = 8
 
 
 # ------------ CALLABLE API METHODS ----------------
+@USER_API.route("/all_users", methods=["GET"])
+@jwt_required
+def get_all_users():
+    errors = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        if get_jwt_claims()['role'] == "admin":
+            users = User.query.all()
+            result = Schema_Users.dump(users)
+            return jsonify(result), 200
+        else:
+            errors.append({
+                "path": ['account_type'],
+                "message": "incorrect privileges"
+            })
+    else:
+        errors.append({
+            "path": ['username'],
+            "message": "incorrect token"
+        })
+    return jsonify({
+        "errors": errors
+    }), 400
+
 @USER_API.route("/login", methods=["POST"])
 def login():
     """ TODO docstring
