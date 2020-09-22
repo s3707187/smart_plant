@@ -41,6 +41,30 @@ PASSWORD_LENGTH = 8
 
 
 # ------------ CALLABLE API METHODS ----------------
+@USER_API.route("/all_users", methods=["GET"])
+@jwt_required
+def get_all_users():
+    errors = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        if get_jwt_claims()['role'] == "admin":
+            users = User.query.all()
+            result = Schema_Users.dump(users)
+            return jsonify(result), 200
+        else:
+            errors.append({
+                "path": ['account_type'],
+                "message": "incorrect privileges"
+            })
+    else:
+        errors.append({
+            "path": ['username'],
+            "message": "incorrect token"
+        })
+    return jsonify({
+        "errors": errors
+    }), 400
+
 @USER_API.route("/login", methods=["POST"])
 def login():
     """ TODO docstring
@@ -396,3 +420,34 @@ def add_plant_link():
             "errors": errors
         }), 400
 
+
+@USER_API.route("/get_user_details", methods=["GET"])
+@jwt_required
+def get_user_details():
+    """ TODO docstring
+    """
+    errors = []
+    current_user = get_jwt_identity()
+    # expects "user_to_query" field being the user_id we want the details of
+    user_to_query = request.args.get('user_to_query')
+
+    # check if user being queried exists and current user has read permission
+    if (username_exists(user_to_query) 
+        and get_user_read_permission(current_user, user_to_query)):
+        # get details
+        user_details = get_user(user_to_query)
+        # don't return the password, ever (unless?)
+        user_details["password"] = None
+        return jsonify(user_details), 200
+
+    else:
+        # error if no permission or user does not exist (can split this if necessary)
+        errors.append({
+            "path": ['user_to_query'],
+            "message": "User does not have permission or queried user does not exist."
+        })
+    
+    return jsonify({
+            "errors": errors
+        }), 400
+        
