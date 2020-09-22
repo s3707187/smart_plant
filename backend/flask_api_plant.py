@@ -106,7 +106,7 @@ def get_users_plants():
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
-        if get_jwt_claims()['role'] != "admin":
+        if get_jwt_claims()['role'] == "admin":
             plant = Plant.query.all()
             print(plant)
             result = Schema_Plants.dump(plant)
