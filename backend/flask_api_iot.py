@@ -73,7 +73,8 @@ def save_plant_data():
 
     errors = []
     plant_id = request.json["plant_id"]
-    date_time = datetime.datetime.now().strftime("%H:%M:%S %Y-%m-%d") #request.json["date_time"]
+    date_time = request.json["date_time"]
+    # date_time = datetime.datetime.now().strftime("%H:%M:%S %Y-%m-%d") #request.json["date_time"]
     light = request.json["light"]
     moisture = request.json["moisture"]
     humidity = request.json["humidity"]
