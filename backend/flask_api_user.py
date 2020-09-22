@@ -420,3 +420,33 @@ def add_plant_link():
             "errors": errors
         }), 400
 
+
+@USER_API.route("/get_user_details", methods=["GET"])
+@jwt_required
+def get_user_details():
+    """ TODO docstring
+    """
+    errors = []
+    current_user = get_jwt_identity()
+    # expects "user_to_query" field being the user_id we want the details of
+    user_to_query = request.args.get('user_to_query')
+
+    # check if user being queried exists and current user has read permission
+    if (username_exists(user_to_query) 
+        and get_user_read_permission(current_user, user_to_query)):
+        # get details
+        user_details = get_user(user_to_query)
+        # don't return the password, ever (unless?)
+        user_details["password"] = None
+        return jsonify(user_details), 200
+
+    else:
+        # error if no permission or user does not exist (can split this if necessary)
+        errors.append({
+            "path": ['user_to_query'],
+            "message": "User does not have permission or queried user does not exist."
+        })
+    
+    return jsonify({
+            "errors": errors
+        }), 400
