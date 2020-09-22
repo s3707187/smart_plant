@@ -108,7 +108,6 @@ def get_users_plants():
     if username_exists(current_user):
         if get_jwt_claims()['role'] == "admin":
             plant = Plant.query.all()
-            print(plant)
             result = Schema_Plants.dump(plant)
             return jsonify(result), 200
         else:
