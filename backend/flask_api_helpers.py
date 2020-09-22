@@ -8,6 +8,7 @@ import random
 # import requests
 
 # third party imports
+from scipy.stats import norm
 from sqlalchemy import orm as sql_alchemy_error
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, \
@@ -17,6 +18,8 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from flask_api_schema import *
 from flask_api_schema import db
 from flask import Blueprint, request, jsonify
+
+
 # render_template, Flask
 # from flask_sqlalchemy import SQLAlchemy
 # from flask_marshmallow import Marshmallow
@@ -49,6 +52,7 @@ def plant_exists(plant_to_query):
     if plant is None:
         return False
     return True
+
 
 # def get_plant_link(user_id, plant_id_to_query):
 #     """ TODO docstring
@@ -151,7 +155,9 @@ def get_plant_edit_permission(user_id, plant_id):
     # if they own it)
     # admins get TRUE too
     # use this to determine if they can get the plant password too
-
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
     # get the links for a plant_id
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
     links = Schema_Plants_link.dump(plant_links)
@@ -160,7 +166,7 @@ def get_plant_edit_permission(user_id, plant_id):
         if link["user_type"] == "plant_manager":
             if link["username"] == user_id:
                 return True
-    
+
     return False
 
 
@@ -170,6 +176,9 @@ def get_plant_read_permission(user_id, plant_id):
 
     # return true if user_id can READ details for plant_id (i.e. is owner or viewer)
     # admins get TRUE too
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
 
     # get the links for a plant_id
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
@@ -178,14 +187,17 @@ def get_plant_read_permission(user_id, plant_id):
     for link in links:
         if link["username"] == user_id:
             return True
-        
+
     return False
 
 
 def get_user_edit_permission(user_id, user_to_edit):
     """ TODO docstring
     """
-    
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
+
     # return true if user_id = user_to_edit or if user_id is an admin
     return user_id == user_to_edit
 
@@ -193,6 +205,29 @@ def get_user_edit_permission(user_id, user_to_edit):
 def get_user_read_permission(user_id, user_to_edit):
     """ TODO docstring
     """
-
+    user_obj = get_user(user_id)
+    if user_obj["account_type"] == "admin":
+        return True
+        
     # return true if user_id = user_to_edit or if user_id is an admin
     return user_id == user_to_edit
+
+
+def toScaledRadarData(healthMin, healthMax, dataPoint):
+    # Static modifier for the standard deviation, this determines how large the healthy range should be on the chart
+    dMod = 1.2
+    # Calculated difference between min and max
+    diff = healthMax - healthMin
+    # Calculate midpoint of healthy range, this is the mean of the normal distribution
+    mean = healthMax - (diff / 2)
+    # Calculated scaled data, as well as the threshold for the min/max data
+    sData = norm.cdf(dataPoint, mean, dMod * (diff))
+    # sMin = norm.cdf(healthMin, mean, dMod * (diff))
+    # sMax = norm.cdf(healthMax, mean, dMod * (diff))
+    # output = {
+    #     "scaledData": sData,
+    #     "scaledMin": sMin,
+    #     "scaledMax": sMax
+    # }
+    # print(sMin)
+    return sData #output

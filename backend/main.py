@@ -1,3 +1,5 @@
+import numpy as np
+import pymysql
 from flask import Flask
 from flask import Flask , redirect , url_for, render_template , request, session, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +18,9 @@ app.config['JWT_SECRET_KEY'] = "sup"
 jwt = JWTManager(app)
 CORS(app)
 
+pymysql.converters.encoders[np.float64] = pymysql.converters.escape_float
+pymysql.converters.conversions = pymysql.converters.encoders.copy()
+pymysql.converters.conversions.update(pymysql.converters.decoders)
 
 HOST = "34.87.205.64"
 USER = "root"

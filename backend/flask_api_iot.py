@@ -39,6 +39,15 @@ IOT_API = Blueprint("iot_api", __name__)
 
 
 # ------------ CALLABLE API METHODS ----------------
+#DELETE THIS
+@IOT_API.route("/plants", methods=["GET"])
+def get_plants():
+    """ TODO docstring
+    """
+
+    plant = Plant.query.all()
+    result = Schema_Plants.dump(plant)
+    return jsonify(result)
 
 # IOT device
 @IOT_API.route("/verify_plant", methods=["POST"])
@@ -65,6 +74,7 @@ def save_plant_data():
     errors = []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
+    # date_time = datetime.datetime.now().strftime("%H:%M:%S %Y-%m-%d") #request.json["date_time"]
     light = request.json["light"]
     moisture = request.json["moisture"]
     humidity = request.json["humidity"]
@@ -116,9 +126,21 @@ def save_plant_data():
         })
 
     if valid:
+        plant_check = Plant.query.get(plant_id)
+        plant_result = Schema_Plant.dump(plant_check)
+
+        type_check = Plant_type.query.get(plant_result['plant_type'])
+        type_result = Schema_Plant_type.dump(type_check)
+
+        #toScaledRadarData(healthMin, healthMax, dataPoint)
+        scaled_humidity = toScaledRadarData(type_result['humidity_min'], type_result['humidity_max'], humidity)
+        scaled_moisture = toScaledRadarData(type_result['moisture_min'], type_result['moisture_max'], moisture)
+        scaled_temperature = toScaledRadarData(type_result['temp_min'], type_result['temp_max'], temperature)
+        scaled_light = toScaledRadarData(type_result['light_min'], type_result['light_max'], light)
+
         real_time = datetime.datetime.strptime(date_time, "%H:%M:%S %Y-%m-%d")
         new_plant_history = Plant_history(
-            plant_id, real_time, temperature, humidity, light, moisture)
+            plant_id, real_time, scaled_temperature, scaled_humidity, scaled_light, scaled_moisture)
         message = "New plant record successfully registered"
         db.session.add(new_plant_history)
         db.session.commit()
