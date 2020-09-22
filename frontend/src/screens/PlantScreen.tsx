@@ -2,8 +2,14 @@ import React, { useState } from "react";
 import { Layout, Typography, Menu } from "antd";
 import HistoryVisualisationComponent from "../components/HistoryVisualisationComponent";
 import HealthVisualisationComponent from "../components/HealthVisualisationComponent";
+import PlantHealthContainer from "../containers/PlantHealthContainer";
+import PlantHistoryContainer from "../containers/PlantHistoryContainer";
+import PlantUsersContainer from "../containers/PlantUsersContainer";
 import { useGet } from "../utils/apiHooks";
 import { useParams } from "react-router-dom";
+import { CloseCircleOutlined } from "@ant-design/icons";
+
+const { Title, Text, Link } = Typography;
 
 var healthMin = 0.32;
 var healthMax = 0.68;
@@ -206,15 +212,22 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
 
     const { data, errors, loading } = useGet<
         {
+            latest_reading?: {
+                date_time: string;
+                humidity: number;
+                light: number;
+                moisture: number;
+                plant_id: number;
+                temperature: number;
+            };
             plant_name: string;
             plant_id: number;
             plant_type: string;
             plant_health: string;
+            password: string;
         },
         { plant_id: number }
     >("view_plant_details", { plant_id });
-    console.log("data", data);
-    const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
 
     return (
         <Layout>
@@ -232,32 +245,37 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     justifyContent: "center",
                 }}
             >
-                <Typography.Title level={2}>Plant Health</Typography.Title>
-
-                <HealthVisualisationComponent style={{ width: 400, height: 400 }} d1={[0.2, 0.5, 0.4, 0.7, 0.002]} />
-                <Typography.Title level={2}>Plant History</Typography.Title>
-                <Menu
-                    //@ts-ignore
-                    onClick={({ key }) => {
-                        // @ts-ignore
-                        setSelectedKeys((prevState) => {
-                            // @ts-ignore
-                            if (prevState.includes(key)) {
-                                return prevState.filter((value) => value != key);
-                            } else {
-                                return [...prevState, key];
-                            }
-                        });
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        flexWrap: "wrap",
+                        justifyContent: "center",
                     }}
-                    selectedKeys={selectedKeys}
-                    mode="horizontal"
                 >
-                    <Menu.Item key={"temperature"}>Temperature</Menu.Item>
-                    <Menu.Item key={"humidity"}>Humidity</Menu.Item>
-                    <Menu.Item key={"light"}>Light</Menu.Item>
-                    <Menu.Item key={"soil"}>Soil Moisture</Menu.Item>
-                </Menu>
-                <HistoryVisualisationComponent />
+                    <PlantHealthContainer plant_id={plant_id} />
+                    <PlantHistoryContainer plant_id={plant_id} />
+                </div>
+                <div
+                    style={{
+                        margin: 20,
+                        display: "flex",
+
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}
+                >
+                    <Title level={2}>Plant Details</Title>
+                    <Text>
+                        <Text style={{ fontWeight: "bold" }}>Password:</Text> {data?.password || "No password set"}
+                        <br />
+                        <Text style={{ fontWeight: "bold" }}>Plant Type:</Text>{" "}
+                        {data?.plant_type || "No plant type set"}
+                    </Text>
+                </div>
+                <PlantUsersContainer plant_id={plant_id} />
             </Content>
         </Layout>
     );
