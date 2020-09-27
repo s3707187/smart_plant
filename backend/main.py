@@ -10,6 +10,8 @@ from flask_api_plant import PLANT_API
 from flask_api_iot import IOT_API
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+import argparse
+
 
 app = Flask(__name__)
 # TODO real key
@@ -30,6 +32,7 @@ socket_path = "/cloudsql"
 cloud_sql_instance_name = "smart-plant-1:australia-southeast1:smartplant-dbms"
 # <cloud_sql_instance_name> = <PROJECT-NAME>:<INSTANCE-REGION>:<INSTANCE-NAME>
 
+TEST_DATABASE = "testing_smart_plant"
 
 # mysql+pymysql://<USER>:<PASSWORD>@/<DATABASE>?unix_socket=<socket_path>/<cloud_sql_instance_name>
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@/{}?unix_socket={}/{}".format(USER, PASSWORD, DATABASE,
@@ -54,4 +57,18 @@ def shutdown_session(exception=None):
 
 
 if __name__ == '__main__':
+    # testing argument parsing
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-t", "--test", action='store_true',
+                            default=False, help="Set database to testing DB.")
+    args = vars(parser.parse_args())
+    
+    if args["test"]:
+        # set database to testing database
+        app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@{}/{}".format(USER, PASSWORD, HOST, TEST_DATABASE)
+        from flask_api_shutdown import SHUTDOWN_API
+        # bring in the shutdown route
+        app.register_blueprint(SHUTDOWN_API)
+
     app.run(host='127.0.0.1', port=8080, debug=True)
+    exit()
