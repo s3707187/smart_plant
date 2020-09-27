@@ -43,7 +43,11 @@ def test_admin_plants(client):
         assert plant['password'] is not None
         assert plant['plant_type'] is not None
 
-
+def test_user_nonexistent(client):
+    header = get_auth_header(client, 'rubbish', 'user')
+    response = client.get('/get_users_plants', headers=header)
+    assert response.status_code == 400
+    
 # get all plants
 # try with not admin
 # try with admin
