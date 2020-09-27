@@ -1,5 +1,7 @@
 from backend_testing.setup_tests import *
-    
+
+# this class is probably not even needed, we know the IOT functionality works and there are tests surrounding those stories already
+# on the IOT end 
 
 # DEMONSTRATION METHOD, DELETE TODO
 # def test_get_plants(client):

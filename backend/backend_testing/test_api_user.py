@@ -17,7 +17,7 @@ from backend_testing.setup_tests import *
 
 # delete user
 # try not admin
-# try admin
+# try admin, need to create one first
 
 # update user
 # try not admin or user
