@@ -1,7 +1,12 @@
 from backend_testing.setup_tests import *
 from main import app
 
-
+    
+# get all plants
+# try with not admin *
+# try with admin *
+# check len > whatever *
+# check fields in each returned for each *
 
 def test_user_plants(client):
     header = get_auth_header(client, TEST_USER_1, 'user')
@@ -30,13 +35,79 @@ def test_user_nonexistent(client):
     header = get_auth_header(client, 'rubbish', 'user')
     response = client.get('/get_users_plants', headers=header)
     assert response.status_code == 400
-    
-# get all plants
-# try with not admin
-# try with admin
-# check len > 0
-# check fields in each returned for each
 
+# update plant:
+# try with not admin or owner
+# try with user owner
+# try with admin
+# exists, not exists
+
+def test_update_plant_fail(client):
+    # fail to update the plant that you do not own
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    details = {"plant_id": 2, "plant_name": "temp_name", "plant_type": "Flowering type"}
+    response = client.post('/update_plant_details', headers=header, json=details)
+    assert response.status_code == 403
+
+
+def test_update_plant_from_owner(client):
+    # successfully update the plant that you do own
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    details = {"plant_id": 1, "plant_name": "temp_name", "plant_type": "Foliage type"}
+    response = client.post('/update_plant_details', headers=header, json=details)
+    assert response.status_code == 201
+
+    response_check = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check.status_code == 200
+    assert response_check.json["plant_id"] == 1
+    assert response_check.json["plant_name"] == "temp_name"
+    assert response_check.json["plant_type"] == "Foliage type"
+
+    # update it back and check again
+    details_new = {"plant_id": 1, "plant_name": "George_Keep", "plant_type": "Flowering type"}
+    response = client.post('/update_plant_details', headers=header, json=details_new)
+    assert response.status_code == 201
+
+    response_check_new = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check_new.status_code == 200
+    assert response_check_new.json["plant_id"] == 1
+    assert response_check_new.json["plant_name"] == "George_Keep"
+    assert response_check_new.json["plant_type"] == "Flowering type"
+    assert response_check_new.json["password"] == "testpass"
+
+
+def test_update_plant_from_admin(client):
+    # successfully update a plant as admin
+    # identical to from_owner test except for admin mode
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    details = {"plant_id": 1, "plant_name": "temp_name", "plant_type": "Foliage type"}
+    response = client.post('/update_plant_details', headers=header, json=details)
+    assert response.status_code == 201
+
+    response_check = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check.status_code == 200
+    assert response_check.json["plant_id"] == 1
+    assert response_check.json["plant_name"] == "temp_name"
+    assert response_check.json["plant_type"] == "Foliage type"
+
+    # update it back and check again
+    details_new = {"plant_id": 1, "plant_name": "George_Keep", "plant_type": "Flowering type"}
+    response = client.post('/update_plant_details', headers=header, json=details_new)
+    assert response.status_code == 201
+
+    response_check_new = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check_new.status_code == 200
+    assert response_check_new.json["plant_id"] == 1
+    assert response_check_new.json["plant_name"] == "George_Keep"
+    assert response_check_new.json["plant_type"] == "Flowering type"
+    assert response_check_new.json["password"] == "testpass"
+
+def test_update_plant_nonexistent(client):
+    # fail update a nonexistent plant as admin
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    details = {"plant_id": 290357234, "plant_name": "temp_name", "plant_type": "Foliage type"}
+    response = client.post('/update_plant_details', headers=header, json=details)
+    assert response.status_code == 403
 
 # delete plant:
 # try with not admin
@@ -44,8 +115,3 @@ def test_user_nonexistent(client):
 # try with admin
 # plant exists, not exists
 
-# update plant:
-# try with not admin
-# try with user owner
-# try with admin
-# exists, not exists

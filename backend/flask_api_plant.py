@@ -157,6 +157,7 @@ def view_plant_details():
             Plant_history.date_time.desc()).filter(
                 Plant_history.plant_id == plant_id).limit(1)
 
+        # TODO add .limit(1) here?
         latest_reading = Schema_Plants_history.dump(latest_reading)
         if len(latest_reading) == 1:
             plant_info["latest_reading"] = latest_reading[0]
@@ -273,7 +274,7 @@ def update_plant_details():
     plant_id = request.json['plant_id']
     plant_name = request.json['plant_name']
     plant_type = request.json['plant_type']
-    if (username_exists(current_user)
+    if (plant_exists(plant_id)
         and get_plant_edit_permission(current_user, plant_id)):
 
         plant_to_change = Plant.query.get(plant_id)
