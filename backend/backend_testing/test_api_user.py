@@ -207,8 +207,25 @@ def test_delete_user_success(client):
     assert response_check_delete.status_code == 400
 
 
-# fetch user
-# try not admin or user 
-# try same user
-# try admin
-# not exists, exists
+
+# fetch user:
+# try not admin or user *
+# try same user * - above
+# try admin:
+# not exists, *
+# exists * - above
+
+def test_get_user_details_fail(client):
+    # test that attempting to get user details with no permissions fails
+    header = get_auth_header(client, TEST_USER_2, 'admin')
+    response_check = client.get('/get_user_details?user_to_query={}'.format(TEST_USER_1), headers=header)
+    assert response_check.status_code == 400
+    assert "username" not in response_check.json
+
+def test_get_user_details_nonexistent(client):
+    # test that attempting to get user details when user does not exist fails
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    response_check = client.get('/get_user_details?user_to_query={}'.format("nonexistent_user"), headers=header)
+    assert response_check.status_code == 400
+    assert "username" not in response_check.json
+
