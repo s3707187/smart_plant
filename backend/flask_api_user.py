@@ -247,14 +247,16 @@ def update_user_details():
     successful_change = True
     # perhaps request.json should contain the user to update too?
     # so the admin can update user details? would then need to add an edit-
-    # permissions check where username exists check is
+    # permissions check where username exists check is                      DONE
     current_user = get_jwt_identity()
     password = request.json['password']
     email = request.json['email']
     first_name = request.json['first_name']
     last_name = request.json['last_name']
-    if username_exists(current_user):
-        user_to_change = User.query.get(current_user)
+    username = request.json['username']
+    # check if username exists, current user has permission to edit
+    if username_exists(username) and get_user_edit_permission(current_user, username):
+        user_to_change = User.query.get(username)
         if password != "":
             if len(password) >= PASSWORD_LENGTH:
                 hashed_password = pbkdf2_sha256.hash(password)
