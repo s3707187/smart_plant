@@ -95,7 +95,7 @@ def login():
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": user_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": user_type})
-        }), 201
+        }), 200
 
     else:
         errors.append({

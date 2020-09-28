@@ -1,5 +1,7 @@
 import pytest
 
+from flask_jwt_extended import create_access_token
+
 from main import app
 from main import USER, PASSWORD, HOST
 
@@ -12,6 +14,13 @@ from main import USER, PASSWORD, HOST
 TEST_DATABASE = "testing_smart_plant"
 TEST_JWT_KEY = "testing1234"
 
+TEST_USER_1 = 'test_01'
+TEST_USER_2 = 'test_02'
+TEST_ADMIN = 'test_admin'
+
+NUM_TEST_PLANTS = 2
+TEST_PASS = 'testpass'
+
 @pytest.fixture
 def client():
     app.config['TESTING'] = True
@@ -20,6 +29,19 @@ def client():
     with app.test_client() as client:
         yield client
 
+
+
+
+def get_auth_header(client, identity, role):
+    # need to temporarily simulate the request context inorder to create the
+    # access token
+    with app.test_request_context():
+        token = create_access_token(identity, user_claims={"role": role})
+    # make the header and return
+    auth_header = {
+        'Authorization': 'Bearer {}'.format(token)
+    }
+    return auth_header
 
 
 # testing information

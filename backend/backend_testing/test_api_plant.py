@@ -1,23 +1,6 @@
 from backend_testing.setup_tests import *
-from flask_jwt_extended import create_access_token
 from main import app
 
-TEST_USER_1 = 'test_01'
-TEST_USER_2 = 'test_02'
-TEST_ADMIN = 'test_admin'
-
-NUM_TEST_PLANTS = 2
-
-def get_auth_header(client, identity, role):
-    # need to temporarily simulate the request context inorder to create the
-    # access token
-    with app.test_request_context():
-        token = create_access_token(identity, user_claims={"role": role})
-    # make the header and return
-    auth_header = {
-        'Authorization': 'Bearer {}'.format(token)
-    }
-    return auth_header
 
 
 def test_user_plants(client):
