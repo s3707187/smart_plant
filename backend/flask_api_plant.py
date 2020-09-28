@@ -49,8 +49,11 @@ def register_new_plant():
 
     plant_type = request.json["plant_type"]
     plant_name = request.json["plant_name"]
+    # TODO remove plant_health?? otherwise make it actually work
     # determine plant health by comparing data to plant_types data
-    plant_health = request.json["plant_health"]
+    plant_health = "healthy"
+    if "plant_health" in request.json:
+        plant_health = request.json["plant_health"]
 
     # create a random password for plant
     password = create_random_word()
@@ -235,8 +238,14 @@ def delete_plant():
         and get_plant_edit_permission(current_user, plant_id)):
 
         try:
-            link_delete = Plant_link.query.get(plant_id)
-            db.session.delete(link_delete)
+            # link_delete = Plant_link.query.get(plant_id)
+            # db.session.delete(link_delete)
+            
+            link_delete = Plant_link.query.filter_by(plant_id=plant_id)
+            # TODO check this new fix by mitch
+            for link in link_delete:
+                db.session.delete(link)
+
             plant_delete = Plant.query.get(plant_id)
             db.session.delete(plant_delete)
             db.session.commit()

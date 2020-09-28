@@ -110,8 +110,39 @@ def test_update_plant_nonexistent(client):
     assert response.status_code == 403
 
 # delete plant:
-# try with not admin
+# try with not admin *
 # try with user owner
 # try with admin
 # plant exists, not exists
 
+def test_delete_plant_fail(client):
+    # fail to update the plant that you do not own
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    details = {"plant_id": 2}
+    response = client.post('/delete_plant', headers=header, json=details)
+    assert response.status_code == 403
+
+
+def test_create_link_delete_plant_as_user(client):
+    # create a plant, link it to test user 2, delete it as test user 2
+    # must be combined as one test as no individual function is atomic
+    header = get_auth_header(client, TEST_USER_2, 'user')
+    details = {"plant_type": "Foliage type", "plant_name": "temp_plant_unique"}
+    response = client.post('/register_plant', headers=header, json=details)
+    assert response.status_code == 201
+
+    response_check = client.get('/get_users_plants', headers=header)
+    assert response_check.status_code == 200
+    found_id = None
+    for plant in response_check.json:
+        if plant['plant_name'] == "temp_plant_unique":
+            found_id = plant['plant_id']
+    
+    details_delete = {"plant_id": found_id}
+    response_delete = client.post('/delete_plant', headers=header, json=details_delete)
+    assert response_delete.status_code == 201
+
+    response_check_deleted = client.get('/get_users_plants', headers=header)
+    assert response_check_deleted.status_code == 200
+    for plant in response_check_deleted.json:
+        assert plant['plant_id'] != found_id
