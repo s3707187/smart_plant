@@ -111,7 +111,7 @@ def test_update_plant_nonexistent(client):
 
 # delete plant:
 # try with not admin *
-# try with user owner
+# try with user owner *
 # try with admin
 # plant exists, not exists
 
@@ -146,3 +146,36 @@ def test_create_link_delete_plant_as_user(client):
     assert response_check_deleted.status_code == 200
     for plant in response_check_deleted.json:
         assert plant['plant_id'] != found_id
+
+        
+def test_delete_plant_as_admin(client):
+    # create a plant, link it to test user 2, delete it as ADMIN
+    # very similar to as_user test above, but with admin doing the deleting
+    header_user = get_auth_header(client, TEST_USER_2, 'user')
+    details = {"plant_type": "Foliage type", "plant_name": "temp_plant_unique"}
+    response = client.post('/register_plant', headers=header_user, json=details)
+    assert response.status_code == 201
+
+    response_check = client.get('/get_users_plants', headers=header_user)
+    assert response_check.status_code == 200
+    found_id = None
+    for plant in response_check.json:
+        if plant['plant_name'] == "temp_plant_unique":
+            found_id = plant['plant_id']
+    
+    header_admin = get_auth_header(client, TEST_ADMIN, 'admin')
+    details_delete = {"plant_id": found_id}
+    response_delete = client.post('/delete_plant', headers=header_admin, json=details_delete)
+    assert response_delete.status_code == 201
+
+    response_check_deleted = client.get('/get_users_plants', headers=header_user)
+    assert response_check_deleted.status_code == 200
+    for plant in response_check_deleted.json:
+        assert plant['plant_id'] != found_id
+
+def test_delete_plant_nonexistent(client):
+    # test that deleting a nonexistent plant fails (as admin)
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    details_delete = {"plant_id": 987234986}
+    response_delete = client.post('/delete_plant', headers=header, json=details_delete)
+    assert response_delete.status_code == 403

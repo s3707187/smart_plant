@@ -234,7 +234,7 @@ def delete_plant():
     can_delete = True
     plant_id = request.json["plant_id"]
 
-    if (username_exists(current_user)
+    if (plant_exists(plant_id)
         and get_plant_edit_permission(current_user, plant_id)):
 
         try:
