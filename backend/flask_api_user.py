@@ -209,8 +209,10 @@ def delete_user():
         and get_user_edit_permission(current_user, user_to_del)):
 
         try:
-            link_delete = Plant_link.query.get(user_to_del)
-            db.session.delete(link_delete)
+            link_delete = Plant_link.query.filter_by(username=user_to_del)
+            # TODO check this new fix by mitch
+            for link in link_delete:
+                db.session.delete(link)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
         try:

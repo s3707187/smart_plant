@@ -58,7 +58,7 @@ def get_auth_header(client, identity, role):
 # | username   | password                                                                                | first_name | last_name | email              | account_type |
 # +------------+-----------------------------------------------------------------------------------------+------------+-----------+--------------------+--------------+
 # | test_01    | $pbkdf2-sha256$29000$x9i7dy4FwJgTorS2FgLg3A$ZzjhJr3UCz8RkPijkx1lYralgsSF9M7RwjLCR4eUXoQ | Test       | User      | test@test.com      | user         |
-# | test_02    | $pbkdf2-sha256$29000$x9i7dy4FwJgTorS2FgLg3A$ZzjhJr3UCz8RkPijkx1lYralgsSF9M7RwjLCR4eUXoQ | Test       | User2     | test2@test.com     | user         |
+# | test_02    | $pbkdf2-sha256$29000$x9i7dy4FwJgTorS2FgLg3A$ZzjhJr3UCz8RkPijkx1lYralgsSF9M7RwjLCR4eUXoQ | Test       | UserTwo   | test2@test.com     | user         |
 # | test_admin | $pbkdf2-sha256$29000$x9i7dy4FwJgTorS2FgLg3A$ZzjhJr3UCz8RkPijkx1lYralgsSF9M7RwjLCR4eUXoQ | Test       | Admin     | test2@test.com     | admin        |
 # | test_user  | $pbkdf2-sha256$29000$ZkwpBcDYuxeCECKEUEppTQ$c95vEVMJ3WBLy.wuDMaFax4DFLy0XM4oN3GVspiFFxk | test       | user      | test_user@test.com | user         |
 # +------------+-----------------------------------------------------------------------------------------+------------+-----------+--------------------+--------------+
