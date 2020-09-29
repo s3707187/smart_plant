@@ -225,9 +225,12 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
             plant_type: string;
             plant_health: string;
             password: string;
+            access: "read" | "edit";
         },
         { plant_id: number }
     >("view_plant_details", { plant_id });
+
+    console.log("PLANT DATA", data);
 
     return (
         <Layout>
@@ -275,7 +278,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                         {data?.plant_type || "No plant type set"}
                     </Text>
                 </div>
-                <PlantUsersContainer plant_id={plant_id} />
+                <PlantUsersContainer plant_id={plant_id} canEdit={data?.access === "edit"} />
             </Content>
         </Layout>
     );
