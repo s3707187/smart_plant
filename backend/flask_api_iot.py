@@ -34,6 +34,8 @@ from flask_api_helpers import *
 # from functools import wraps
 
 IOT_API = Blueprint("iot_api", __name__)
+SCALED_MIN = 0.33846
+SCALED_MAX = 0.66154
 
 # ------------ SETUP VARIBLES -------------------
 
@@ -143,6 +145,20 @@ def save_plant_data():
             plant_id, real_time, scaled_temperature, scaled_humidity, scaled_light, scaled_moisture)
         message = "New plant record successfully registered"
         db.session.add(new_plant_history)
+        
+        # count number of unhealthy fields
+        total_unhealthy = 0
+        db.session.commit()
+
+        for val in (scaled_humidity, scaled_moisture, scaled_temperature, scaled_light):
+            if val < SCALED_MIN or val > SCALED_MAX:
+                total_unhealthy += 1
+        # update health
+        if total_unhealthy > 0:
+            plant_check.plant_health = "unhealthy"
+        else:
+            plant_check.plant_health = "healthy"
+        # commit any plant change and new plant history
         db.session.commit()
         return jsonify(message), 201
     else:
