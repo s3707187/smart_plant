@@ -95,7 +95,7 @@ def login():
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": user_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": user_type})
-        }), 201
+        }), 200
 
     else:
         errors.append({
@@ -209,8 +209,10 @@ def delete_user():
         and get_user_edit_permission(current_user, user_to_del)):
 
         try:
-            link_delete = Plant_link.query.get(user_to_del)
-            db.session.delete(link_delete)
+            link_delete = Plant_link.query.filter_by(username=user_to_del)
+            # TODO check this new fix by mitch
+            for link in link_delete:
+                db.session.delete(link)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
         try:
@@ -247,14 +249,16 @@ def update_user_details():
     successful_change = True
     # perhaps request.json should contain the user to update too?
     # so the admin can update user details? would then need to add an edit-
-    # permissions check where username exists check is
+    # permissions check where username exists check is                      DONE
     current_user = get_jwt_identity()
     password = request.json['password']
     email = request.json['email']
     first_name = request.json['first_name']
     last_name = request.json['last_name']
-    if username_exists(current_user):
-        user_to_change = User.query.get(current_user)
+    username = request.json['username']
+    # check if username exists, current user has permission to edit
+    if username_exists(username) and get_user_edit_permission(current_user, username):
+        user_to_change = User.query.get(username)
         if password != "":
             if len(password) >= PASSWORD_LENGTH:
                 hashed_password = pbkdf2_sha256.hash(password)
