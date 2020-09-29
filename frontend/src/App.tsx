@@ -15,6 +15,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 
 import "./App.css";
 import "antd/dist/antd.css";
+import UserScreen from "./screens/UserScreen";
 import RedirectRoute from "./utils/RedirectRoute";
 
 const { Header, Footer, Content } = Layout;
@@ -66,6 +67,7 @@ function App() {
                                 to={"/"}
                             />
                             <ProtectedRoute path="/plant/:id" component={PlantScreen} />
+                            <ProtectedRoute path="/profile" component={UserScreen} />
                             <ProtectedRoute path="/" component={DashboardScreen} />
                         </Switch>
                     </Content>
