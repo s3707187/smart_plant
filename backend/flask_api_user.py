@@ -441,7 +441,7 @@ def get_user_details():
         # get details
         user_details = get_user(user_to_query)
         # don't return the password, ever (unless?)
-        user_details["password"] = None
+        del user_details['password']
         return jsonify(user_details), 200
 
     else:
@@ -454,4 +454,3 @@ def get_user_details():
     return jsonify({
             "errors": errors
         }), 400
-        
