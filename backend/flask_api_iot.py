@@ -99,28 +99,28 @@ def save_plant_data():
             "message": "invalid password"
         })
 
-    if not isinstance(light, float):
+    if not (isinstance(light, float) or isinstance(light, int)):
         valid = False
         errors.append({
             "path": ['light'],
             "message": "light is invalid"
         })
 
-    if not isinstance(moisture, float):
+    if not (isinstance(moisture, float) or isinstance(moisture, int)):
         valid = False
         errors.append({
             "path": ['moisture'],
             "message": "moisture is invalid"
         })
 
-    if not isinstance(humidity, float):
+    if not (isinstance(humidity, float) or isinstance(humidity, int)):
         valid = False
         errors.append({
             "path": ['humidity'],
             "message": "humidity is invalid"
         })
 
-    if not isinstance(temperature, float):
+    if not (isinstance(temperature, float) or isinstance(temperature, int)):
         valid = False
         errors.append({
             "path": ['temperature'],
