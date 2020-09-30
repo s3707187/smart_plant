@@ -251,10 +251,10 @@ def update_user_details():
     # so the admin can update user details? would then need to add an edit-
     # permissions check where username exists check is                      DONE
     current_user = get_jwt_identity()
-    password = request.json['password']
-    email = request.json['email']
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
+    password = request.json.get('password', "")
+    email = request.json.get('email', "")
+    first_name = request.json.get('first_name', "")
+    last_name = request.json.get('last_name', "")
     username = request.json['username']
     # check if username exists, current user has permission to edit
     if username_exists(username) and get_user_edit_permission(current_user, username):
@@ -441,7 +441,7 @@ def get_user_details():
         # get details
         user_details = get_user(user_to_query)
         # don't return the password, ever (unless?)
-        user_details["password"] = None
+        del user_details['password']
         return jsonify(user_details), 200
 
     else:
@@ -454,4 +454,3 @@ def get_user_details():
     return jsonify({
             "errors": errors
         }), 400
-        
