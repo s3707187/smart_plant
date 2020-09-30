@@ -17,7 +17,8 @@ export type ResponseData<Data> = AxiosResponse<Data>;
 
 export const useGet = <Data = {}, Variables = {}>(
     route: string,
-    variables?: Variables
+    variables?: Variables,
+    skip?: boolean
 ): {
     data?: Data;
     errors?: ResponseError[];
@@ -42,7 +43,7 @@ export const useGet = <Data = {}, Variables = {}>(
     };
 
     useEffect(() => {
-        request(variables).then().catch();
+        if (skip !== true) request(variables).then().catch();
     }, []);
 
     return { data, errors, loading, refetch: request };

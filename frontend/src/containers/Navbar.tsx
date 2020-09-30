@@ -29,12 +29,13 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                     <Menu.Item key="/">
                         <Link to="/">Home</Link>
                     </Menu.Item>,
+                    <Menu.Item key="/profile">
+                        <Link to="/profile">Profile</Link>
+                    </Menu.Item>,
                     <Menu.Item key="/about">
                         <Link to="/about">About</Link>
                     </Menu.Item>,
-                    <Menu.Item key="/users">
-                        <Link to="/users">Users</Link>
-                    </Menu.Item>,
+
                     <Menu.Item
                         style={{ float: "right" }}
                         onClick={async () => {

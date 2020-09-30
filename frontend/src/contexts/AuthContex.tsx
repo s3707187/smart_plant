@@ -6,6 +6,8 @@ export interface AuthContextProps {
 }
 
 // @ts-ignore
+export const getUserID = (token: string): string => jwt_decode(token).identity;
+// @ts-ignore
 export const getRole = (token: string): "user" | "admin" => jwt_decode(token).user_claims.role;
 
 export default React.createContext<AuthContextProps>({});

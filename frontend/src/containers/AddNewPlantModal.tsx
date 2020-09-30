@@ -1,4 +1,4 @@
-import { Form, Modal, Input, Button } from "antd";
+import { Form, Modal, Input, Button, Select } from "antd";
 import { ModalProps } from "antd/es/modal";
 import React from "react";
 import { usePost } from "../utils/apiHooks";
@@ -85,9 +85,13 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
                 <Form.Item
                     label="Plant Type"
                     name="plant_type"
-                    rules={[{ required: true, message: "Please input the Plant ID!" }]}
+                    rules={[{ required: true, message: "Please select a plant type!" }]}
                 >
-                    <Input />
+                    <Select placeholder="Select a option and change input text above">
+                        <Select.Option value="Cactus type">Cactus type</Select.Option>
+                        <Select.Option value="Flowering type">Flowering type</Select.Option>
+                        <Select.Option value="Foliage type">Foliage type</Select.Option>
+                    </Select>
                 </Form.Item>
             </Form>
         </Modal>
