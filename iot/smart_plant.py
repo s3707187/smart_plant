@@ -7,7 +7,6 @@ import hashlib
 import os
 import requests
 import urllib3
-from shutil import copyfile
 
 from sensors import SensorManager
 
@@ -252,14 +251,17 @@ def boot_config():
     # quick check to grab a config file from /boot partition.
     # this function helps users who cannot SSH/access the Pi,
     # but can access the microSD card
-    if os.path.exists("/boot/plant.config"):
+    if os.path.exists(BOOT_CONFIG_PATH):
         print("Configuration loaded from /boot directory.")
-        new_path = os.path.join(CURR_DIR, CONFIG_FILE_NAME)
-        copyfile(BOOT_CONFIG_PATH, new_path)
+        with open(BOOT_CONFIG_PATH) as boot_file:
+            with open(CONFIG_FILE_PATH, 'w+') as config_file:
+                for line in boot_file:
+                    config_file.write(line)
+
 
 
 if __name__ == '__main__':
-    # check if /boot config file exists
+    # check if /boot config file exists and load from there
     boot_config()
     runner = SystemRunner()
 

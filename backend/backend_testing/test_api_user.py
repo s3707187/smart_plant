@@ -73,7 +73,7 @@ def test_update_user_fail(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "test2@test.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "UserTwo"
@@ -91,7 +91,7 @@ def test_update_same_user(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "magic@magic.com"
     assert response_check.json["first_name"] == "John"
     assert response_check.json["last_name"] == "Greenson"
@@ -108,7 +108,7 @@ def test_update_same_user(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "test2@test.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "UserTwo"
@@ -126,7 +126,7 @@ def test_update_user_from_admin(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "magic@magic.com"
     assert response_check.json["first_name"] == "John"
     assert response_check.json["last_name"] == "Greenson"
@@ -143,7 +143,7 @@ def test_update_user_from_admin(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "test2@test.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "UserTwo"
@@ -194,7 +194,7 @@ def test_delete_user_success(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == temp_user
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "court@jester.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "Jones"

@@ -160,7 +160,7 @@ def view_plant_details():
     errors = []
     current_user = get_jwt_identity()
     plant_id = request.args.get('plant_id')
-    if (username_exists(current_user) and
+    if (plant_exists(plant_id) and
         get_plant_read_permission(current_user, plant_id)):
         
         plant_info = get_plant(plant_id)
@@ -185,7 +185,7 @@ def view_plant_details():
     else:
         errors.append({
             "path": ['username'],
-            "message": "incorrect token or invalid permission"
+            "message": "Invalid permission or plant does not exist"
         })
         return jsonify({
             "errors": errors
@@ -248,6 +248,9 @@ def delete_plant():
         try:
             # link_delete = Plant_link.query.get(plant_id)
             # db.session.delete(link_delete)
+            histories_unlink = Plant_history.query.filter_by(plant_id=plant_id)
+            for history in histories_unlink:
+                history.plant_id = None
 
             link_delete = Plant_link.query.filter_by(plant_id=plant_id)
             # TODO check this new fix by mitch
