@@ -248,6 +248,9 @@ def delete_plant():
         try:
             # link_delete = Plant_link.query.get(plant_id)
             # db.session.delete(link_delete)
+            histories_unlink = Plant_history.query.filter_by(plant_id=plant_id)
+            for history in histories_unlink:
+                history.plant_id = None
 
             link_delete = Plant_link.query.filter_by(plant_id=plant_id)
             # TODO check this new fix by mitch

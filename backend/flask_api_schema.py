@@ -70,7 +70,7 @@ class Plant_type(db.Model):
 class Plant_history(db.Model):
     __tablename__ = "Plant_history"
     history_id = db.Column(db.Integer, autoincrement=True, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
-    plant_id = db.Column(db.Integer, nullable=False)
+    plant_id = db.Column(db.Integer, nullable=True)
     date_time = db.Column(db.DateTime, nullable=False)
     temperature = db.Column(db.Float, nullable=False)
     humidity = db.Column(db.Float, nullable=False)
