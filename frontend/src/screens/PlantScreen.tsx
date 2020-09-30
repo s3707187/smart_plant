@@ -1,13 +1,14 @@
 import React, { useState } from "react";
-import { Layout, Typography, Menu } from "antd";
+import { Layout, Typography, Menu, Popover } from "antd";
 import HistoryVisualisationComponent from "../components/HistoryVisualisationComponent";
 import HealthVisualisationComponent from "../components/HealthVisualisationComponent";
+import PlantSettingsBodyComponent from "../components/PlantSettingsBodyComponent";
 import PlantHealthContainer from "../containers/PlantHealthContainer";
 import PlantHistoryContainer from "../containers/PlantHistoryContainer";
 import PlantUsersContainer from "../containers/PlantUsersContainer";
 import { useGet } from "../utils/apiHooks";
-import { useParams } from "react-router-dom";
-import { CloseCircleOutlined } from "@ant-design/icons";
+import { useParams, useHistory } from "react-router-dom";
+import { CloseCircleOutlined, SettingOutlined } from "@ant-design/icons";
 
 const { Title, Text, Link } = Typography;
 
@@ -209,6 +210,7 @@ const { Content, Header } = Layout;
 
 const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
     const { id: plant_id } = useParams();
+    const history = useHistory();
 
     const { data, errors, loading } = useGet<
         {
@@ -234,10 +236,26 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
 
     return (
         <Layout>
-            <Header style={{ background: "#FFF", display: "flex", alignItems: "center" }}>
+            <Header
+                style={{ background: "#FFF", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+            >
                 <Typography.Title level={2} style={{ marginBottom: "0.25em" }}>
                     {data?.plant_name}
                 </Typography.Title>
+                <Popover
+                    placement="bottomRight"
+                    title={"Settings"}
+                    content={() => <PlantSettingsBodyComponent plantID={plant_id} />}
+                    trigger="click"
+                >
+                    <SettingOutlined
+                        style={{
+                            fontSize: 20,
+                            padding: 7,
+                            margin: 6,
+                        }}
+                    />
+                </Popover>
             </Header>
             <Content
                 style={{

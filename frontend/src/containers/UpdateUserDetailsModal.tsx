@@ -45,13 +45,14 @@ const UpdateUserDetailsModal: React.FC<UpdateUserDetailsProps> = (props: UpdateU
                 form
                     .validateFields()
                     .then(async (values) => {
-                        await UpdateUser({
+                        const res = await UpdateUser({
                             password: values.password,
                             first_name: values.first_name,
                             last_name: values.last_name,
                             email: values.email,
                             username,
                         });
+                        console.log(res);
                         onOk();
                         // form.resetFields();
                     })
