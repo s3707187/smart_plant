@@ -15,6 +15,9 @@ app = Flask(__name__)
 # TODO real key
 JWT_API_KEY = "sup"
 app.config['JWT_SECRET_KEY'] = JWT_API_KEY
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 15
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = -1
+app.config["SQLALCHEMY_POOL_SIZE"] = 20
 
 jwt = JWTManager(app)
 CORS(app)
