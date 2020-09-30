@@ -13,7 +13,8 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 # TODO real key
-app.config['JWT_SECRET_KEY'] = "sup"
+JWT_API_KEY = "sup"
+app.config['JWT_SECRET_KEY'] = JWT_API_KEY
 
 jwt = JWTManager(app)
 CORS(app)

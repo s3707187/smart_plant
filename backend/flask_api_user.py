@@ -41,6 +41,30 @@ PASSWORD_LENGTH = 8
 
 
 # ------------ CALLABLE API METHODS ----------------
+@USER_API.route("/all_users", methods=["GET"])
+@jwt_required
+def get_all_users():
+    errors = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        if get_jwt_claims()['role'] == "admin":
+            users = User.query.all()
+            result = Schema_Users.dump(users)
+            return jsonify(result), 200
+        else:
+            errors.append({
+                "path": ['account_type'],
+                "message": "incorrect privileges"
+            })
+    else:
+        errors.append({
+            "path": ['username'],
+            "message": "incorrect token"
+        })
+    return jsonify({
+        "errors": errors
+    }), 400
+
 @USER_API.route("/login", methods=["POST"])
 def login():
     """ TODO docstring
@@ -71,7 +95,7 @@ def login():
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": user_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": user_type})
-        }), 201
+        }), 200
 
     else:
         errors.append({
@@ -185,8 +209,10 @@ def delete_user():
         and get_user_edit_permission(current_user, user_to_del)):
 
         try:
-            link_delete = Plant_link.query.get(user_to_del)
-            db.session.delete(link_delete)
+            link_delete = Plant_link.query.filter_by(username=user_to_del)
+            # TODO check this new fix by mitch
+            for link in link_delete:
+                db.session.delete(link)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
         try:
@@ -223,14 +249,16 @@ def update_user_details():
     successful_change = True
     # perhaps request.json should contain the user to update too?
     # so the admin can update user details? would then need to add an edit-
-    # permissions check where username exists check is
+    # permissions check where username exists check is                      DONE
     current_user = get_jwt_identity()
     password = request.json['password']
     email = request.json['email']
     first_name = request.json['first_name']
     last_name = request.json['last_name']
-    if username_exists(current_user):
-        user_to_change = User.query.get(current_user)
+    username = request.json['username']
+    # check if username exists, current user has permission to edit
+    if username_exists(username) and get_user_edit_permission(current_user, username):
+        user_to_change = User.query.get(username)
         if password != "":
             if len(password) >= PASSWORD_LENGTH:
                 hashed_password = pbkdf2_sha256.hash(password)
@@ -396,3 +424,34 @@ def add_plant_link():
             "errors": errors
         }), 400
 
+
+@USER_API.route("/get_user_details", methods=["GET"])
+@jwt_required
+def get_user_details():
+    """ TODO docstring
+    """
+    errors = []
+    current_user = get_jwt_identity()
+    # expects "user_to_query" field being the user_id we want the details of
+    user_to_query = request.args.get('user_to_query')
+
+    # check if user being queried exists and current user has read permission
+    if (username_exists(user_to_query) 
+        and get_user_read_permission(current_user, user_to_query)):
+        # get details
+        user_details = get_user(user_to_query)
+        # don't return the password, ever (unless?)
+        user_details["password"] = None
+        return jsonify(user_details), 200
+
+    else:
+        # error if no permission or user does not exist (can split this if necessary)
+        errors.append({
+            "path": ['user_to_query'],
+            "message": "User does not have permission or queried user does not exist."
+        })
+    
+    return jsonify({
+            "errors": errors
+        }), 400
+        

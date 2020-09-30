@@ -36,13 +36,11 @@ PLANT_API = Blueprint("plant_api", __name__)
 
 
 # ------------ CALLABLE API METHODS ----------------
-
 @PLANT_API.route("/register_plant", methods=["POST"])
 @jwt_required
 def register_new_plant():
     """ TODO docstring
     """
-
     valid = True
     errors = []
     # get username from token
@@ -51,8 +49,11 @@ def register_new_plant():
 
     plant_type = request.json["plant_type"]
     plant_name = request.json["plant_name"]
+    # TODO remove plant_health?? otherwise make it actually work
     # determine plant health by comparing data to plant_types data
-    plant_health = request.json["plant_health"]
+    plant_health = "healthy"
+    if "plant_health" in request.json:
+        plant_health = request.json["plant_health"]
     plant_owner = request.json.get("plant_owner", None)
 
     if plant_owner is not None and get_jwt_claims()['role'] != "admin":
@@ -113,28 +114,32 @@ def register_new_plant():
 def get_users_plants():
     """ TODO docstring
     """
-
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
-        plants = []
-        list_of_plants = []
+        if get_jwt_claims()['role'] == "admin":
+            plant = Plant.query.all()
+            result = Schema_Plants.dump(plant)
+            return jsonify(result), 200
+        else:
+            plants = []
+            list_of_plants = []
 
-        plant_link = Plant_link.query.filter_by(username=current_user).all()
-        link = Schema_Plants_link.dump(plant_link)
+            plant_link = Plant_link.query.filter_by(username=current_user).all()
+            link = Schema_Plants_link.dump(plant_link)
 
-        for x in link:
-            if plant_exists(x["plant_id"]):
-                plants.append(x["plant_id"])
+            for x in link:
+                if plant_exists(x["plant_id"]):
+                    plants.append(x["plant_id"])
 
-        for i in plants:
-            plant = Plant.query.filter_by(plant_id=i).all()
-            assert len(plant) > 0
-            plant = plant[0]
-            result = Schema_Plant.dump(plant)
-            list_of_plants.append(result)
+            for i in plants:
+                plant = Plant.query.filter_by(plant_id=i).all()
+                assert len(plant) > 0
+                plant = plant[0]
+                result = Schema_Plant.dump(plant)
+                list_of_plants.append(result)
 
-        return jsonify(list_of_plants), 200
+            return jsonify(list_of_plants), 200
     else:
         errors.append({
             "path": ['username'],
@@ -163,6 +168,7 @@ def view_plant_details():
             Plant_history.date_time.desc()).filter(
                 Plant_history.plant_id == plant_id).limit(1)
 
+        # TODO add .limit(1) here?
         latest_reading = Schema_Plants_history.dump(latest_reading)
         if len(latest_reading) == 1:
             plant_info["latest_reading"] = latest_reading[0]
@@ -236,12 +242,18 @@ def delete_plant():
     can_delete = True
     plant_id = request.json["plant_id"]
 
-    if (username_exists(current_user)
+    if (plant_exists(plant_id)
         and get_plant_edit_permission(current_user, plant_id)):
 
         try:
-            link_delete = Plant_link.query.get(plant_id)
-            db.session.delete(link_delete)
+            # link_delete = Plant_link.query.get(plant_id)
+            # db.session.delete(link_delete)
+
+            link_delete = Plant_link.query.filter_by(plant_id=plant_id)
+            # TODO check this new fix by mitch
+            for link in link_delete:
+                db.session.delete(link)
+
             plant_delete = Plant.query.get(plant_id)
             db.session.delete(plant_delete)
             db.session.commit()
@@ -279,7 +291,7 @@ def update_plant_details():
     plant_id = request.json['plant_id']
     plant_name = request.json['plant_name']
     plant_type = request.json['plant_type']
-    if (username_exists(current_user)
+    if (plant_exists(plant_id)
         and get_plant_edit_permission(current_user, plant_id)):
 
         plant_to_change = Plant.query.get(plant_id)
