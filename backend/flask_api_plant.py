@@ -54,6 +54,12 @@ def register_new_plant():
     plant_health = "healthy"
     if "plant_health" in request.json:
         plant_health = request.json["plant_health"]
+    plant_owner = request.json.get("plant_owner", None)
+
+    if plant_owner is not None and get_jwt_claims()['role'] != "admin":
+        return jsonify({
+            "errors": [{"message": "You do not have permission to do this.", "path": ["plant_owner"]}]
+        }), 403
 
     # create a random password for plant
     password = create_random_word()
@@ -72,10 +78,11 @@ def register_new_plant():
             "message": "plant name is empty"
         })
 
-    if not username_exists(current_user):
+    user = current_user if plant_owner is None else plant_owner
+    if not username_exists(user):
         valid = False
         errors.append({
-            "path": ['username'],
+            "path": ['plant_owner'],
             "message": "Username does not exist"
         })
 
@@ -87,7 +94,8 @@ def register_new_plant():
         new_plant_dict = Schema_Plant.dump(new_plant)
 
         user_type = "plant_manager"
-        new_plant_link = Plant_link(current_user,
+        user = current_user if plant_owner is None else plant_owner
+        new_plant_link = Plant_link(user,
                                     new_plant_dict['plant_id'],
                                     user_type)
         db.session.add(new_plant_link)
@@ -240,7 +248,7 @@ def delete_plant():
         try:
             # link_delete = Plant_link.query.get(plant_id)
             # db.session.delete(link_delete)
-            
+
             link_delete = Plant_link.query.filter_by(plant_id=plant_id)
             # TODO check this new fix by mitch
             for link in link_delete:

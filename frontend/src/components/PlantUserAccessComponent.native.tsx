@@ -8,10 +8,11 @@ const { Title, Text, Link } = Typography;
 interface PlantUserAccessComponentProps {
     name: string;
     onDelete: () => void;
+    canEdit: boolean;
 }
 
 const PlantUserAccessComponent: React.FC<PlantUserAccessComponentProps> = (props: PlantUserAccessComponentProps) => {
-    const { name, onDelete } = props;
+    const { name, onDelete, canEdit } = props;
 
     return (
         <div
@@ -24,7 +25,7 @@ const PlantUserAccessComponent: React.FC<PlantUserAccessComponentProps> = (props
             }}
         >
             <Text>{name}</Text>
-            <CloseCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={onDelete} />
+            {canEdit && <CloseCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={onDelete} />}
         </div>
     );
 };

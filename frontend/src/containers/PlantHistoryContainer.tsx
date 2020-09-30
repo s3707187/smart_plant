@@ -23,7 +23,7 @@ const PlantHistoryContainer: React.FC<PlantHistoryComponentProps> = (props: Plan
         }[],
         { plant_id: number }
     >("get_plant_records", { plant_id });
-    console.log(data);
+    console.log("PLANT RECORDS", data);
 
     return (
         <div

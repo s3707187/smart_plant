@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Layout, Typography, Spin } from "antd";
 import AddNewPlantModal from "../containers/AddNewPlantModal";
 import PlantCard from "../containers/PlantCard";
+import AuthContex, { getRole } from "../contexts/AuthContex";
 import { useGet, usePost } from "../utils/apiHooks";
 import { Redirect } from "react-router-dom";
 import { SettingOutlined } from "@ant-design/icons";
@@ -27,6 +28,7 @@ interface GetCurrentUserData {
 }
 
 const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenProps) => {
+    const { token } = useContext(AuthContex);
     const { data, loading, errors, refetch } = useGet<GetUsersPlantsData>("get_users_plants");
     const { data: currentUserData } = useGet<GetCurrentUserData>("current_user");
 
@@ -35,6 +37,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
     // const errors = undefined;
 
     const [visible, setVisible] = useState<boolean>(false);
+    const role: undefined | "admin" | "user" = token ? getRole(token) : undefined;
 
     console.log(data, loading, errors, "dashboard", currentUserData);
 
@@ -50,6 +53,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                     //@ts-ignore
                     await refetch();
                 }}
+                role={role}
                 visible={visible}
                 onCancel={() => setVisible(false)}
             />
