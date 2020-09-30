@@ -37,7 +37,7 @@ const PlantUserAccessInputComponent: React.FC<PlantUserAccessInputComponentProps
                     justifyContent: "center",
                 }}
             >
-                <Input placeholder="Basic usage" value={name} onChange={(e) => onChange(e.target.value)} />
+                <Input placeholder="Username" value={name} onChange={(e) => onChange(e.target.value)} />
                 <CloseCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={onCancel} />
                 <CheckCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={() => onDone(name)} />
             </div>

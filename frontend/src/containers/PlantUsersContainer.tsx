@@ -9,10 +9,11 @@ const { Title, Text, Link } = Typography;
 
 interface PlantUsersContainerProps {
     plant_id: number;
+    canEdit: boolean;
 }
 
 const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUsersContainerProps) => {
-    const { plant_id } = props;
+    const { plant_id, canEdit } = props;
 
     const { data: member_data, errors: e, refetch } = useGet<string[], { plant_id: number }>("get_plant_members", {
         plant_id,
@@ -50,7 +51,7 @@ const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUse
                 justifyContent: "center",
             }}
         >
-            <Title level={2}>Access Controls</Title>
+            <Title level={3}>Members who can view this plant</Title>
             {member_data &&
                 member_data.map((linked_user) => (
                     <PlantUserAccessComponent
@@ -60,10 +61,11 @@ const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUse
                                 refetch({ plant_id });
                             });
                         }}
+                        canEdit={canEdit}
                     />
                 ))}
             {/*TODO change this so it works when we get 'access' field.*/}
-            {!isAddingNewPerson && (
+            {!isAddingNewPerson && canEdit && (
                 <Link
                     onClick={() => {
                         setAddingNewPerson(true);
@@ -72,7 +74,7 @@ const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUse
                     Add another user!
                 </Link>
             )}
-            {isAddingNewPerson && (
+            {isAddingNewPerson && canEdit && (
                 <PlantUserAccessInputComponent
                     name={name}
                     errors={errors}
