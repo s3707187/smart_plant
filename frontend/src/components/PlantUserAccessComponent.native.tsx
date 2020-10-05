@@ -24,8 +24,8 @@ const PlantUserAccessComponent: React.FC<PlantUserAccessComponentProps> = (props
                 marginBottom: 7,
             }}
         >
-            <Text>{name}</Text>
-            {canEdit && <CloseCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={onDelete} />}
+            <Text data-cy={"user_listed_" + name}>{name}</Text>
+            {canEdit && <CloseCircleOutlined data-cy={"remove_user_" + name} style={{ fontSize: 15, marginLeft: 15 }} onClick={onDelete} />}
         </div>
     );
 };
