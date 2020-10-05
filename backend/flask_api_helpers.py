@@ -145,6 +145,14 @@ def is_email(email):
         return True
     return False
 
+def get_plant_link(username, plant_id):
+    """ TODO docstring
+    """
+    plant_link = Plant_link.query.get((username, plant_id))
+    result = Schema_Plant_link.dump(plant_link)
+    if result == {}:
+        result = None
+    return result
 
 def get_plant_edit_permission(user_id, plant_id):
     """ TODO docstring

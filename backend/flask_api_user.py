@@ -225,6 +225,8 @@ def delete_user():
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
             can_delete = False
+            # roll back any changes
+            db.session.rollback()
             errors.append({
                 "path": ['user_to_del'],
                 "message": "user_to_del does not exist"
@@ -373,7 +375,10 @@ def remove_plant_link():
             db.session.commit()
             return jsonify("Plant link successfully deleted from database"), 201
         except sql_alchemy_error.exc.NoResultFound:
-            # if the link does not exist, add an error
+            
+            # if the link does not exist, add an error and
+            # roll back any changes
+            db.session.rollback()
             errors.append({
             "path": ['plant_id'],
             "message": "Link does not exist for user."
@@ -433,13 +438,29 @@ def add_plant_link():
 
     # to add a user as "maintenance", current user and user to link must be 
     # admins
+    user_account_type = get_user(user_to_link)["account_type"]
     if user_link_type == "maintenance":
-        user_type = get_user(user_to_link)["account_type"]
-        if get_jwt_claims()['role'] != "admin" or user_type != "admin":
+        if get_jwt_claims()['role'] != "admin" or user_account_type != "admin":
             valid_link = False
             errors.append({
-            "path": ['username'],
-            "message": "User is not an admin."
+                "path": ['username'],
+                "message": "User is not an admin."
+            })
+    elif user_link_type == "plant_viewer":
+        # admins cannot be viewers
+        if user_account_type == "admin":
+            valid_link = False
+            errors.append({
+                "path": ['username'],
+                "message": "User is not an admin."
+            })
+    
+    # finally, there can only be one link between a plant and user
+    if get_plant_link(user_to_link, plant_id) is not None:
+        valid_link = False
+        errors.append({
+                "path": ['user_to_link'],
+                "message": "User already linked to this plant."
         })
 
     # add the new link if all is good
@@ -454,6 +475,10 @@ def add_plant_link():
             "errors": errors
         }), 400
 
+# @USER_API.route("/test_anything", methods=["GET"])
+# def test_anything():
+#     print(get_plant_link("mateo", "37"))
+#     return "dingus", 200
 
 @USER_API.route("/get_user_details", methods=["GET"])
 @jwt_required

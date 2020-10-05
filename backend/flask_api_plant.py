@@ -262,6 +262,8 @@ def delete_plant():
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
             can_delete = False
+            # roll back any changes
+            db.session.rollback()
             errors.append({
                 "path": ['plant_id'],
                 "message": "plant_id does not exist"
