@@ -233,7 +233,7 @@ def toScaledRadarData(healthMin, healthMax, dataPoint):
     # print(sMin)
     return sData #output
 
-def email(target_email,temp_password):
+def send_password_email(target_email, temp_password):
     port = 465  # For SSL
     password = "progamproject123"
 
@@ -245,13 +245,18 @@ def email(target_email,temp_password):
         # TODO: Send email here
         sender_email = "progam.project.fellas@gmail.com"
         target_email = target_email
-        message = """\
-        Subject: ACME Smart Plant
+        # message contents
 
-        Your ACME Smart Plant temporary password is:"""
+        message = """\
+        Subject: ACME Smart Plant Password Reset
+
+        Your ACME Smart Plant temporary password is: """
+
         temp_password = temp_password
 
+        warning = "\n!!! PLEASE CHANGE YOUR PASSWORD NEXT TIME YOU LOG IN !!!."
+
         # Send email here
-        server.sendmail(sender_email, target_email, message + temp_password)
+        server.sendmail(sender_email, target_email, message + temp_password + warning)
 
 
