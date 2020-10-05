@@ -477,9 +477,13 @@ def add_plant_link():
 
 # @USER_API.route("/test_anything", methods=["GET"])
 # def test_anything():
-#     maintainer = get_plant_maintainer(23)
-#     print(maintainer)
+#     # maintainer = get_plant_maintainer(23)
+#     # print(maintainer)
+#     plants = Plant.query.filter_by(plant_health="unhealthy").all()
+#     all_plants = Schema_Plants.dump(plants)
+#     print(all_plants)
 #     return "test", 200
+    
 
 @USER_API.route("/get_user_details", methods=["GET"])
 @jwt_required
