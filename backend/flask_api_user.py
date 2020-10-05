@@ -477,8 +477,9 @@ def add_plant_link():
 
 # @USER_API.route("/test_anything", methods=["GET"])
 # def test_anything():
-#     print(get_plant_link("mateo", "37"))
-#     return "dingus", 200
+#     maintainer = get_plant_maintainer(23)
+#     print(maintainer)
+#     return "test", 200
 
 @USER_API.route("/get_user_details", methods=["GET"])
 @jwt_required

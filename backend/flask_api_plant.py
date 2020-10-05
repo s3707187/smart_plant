@@ -119,8 +119,10 @@ def get_users_plants():
     if username_exists(current_user):
         if get_jwt_claims()['role'] == "admin":
             plant = Plant.query.all()
-            result = Schema_Plants.dump(plant)
-            return jsonify(result), 200
+            all_plants = Schema_Plants.dump(plant)
+            for plant in all_plants:
+                plant["maintainer"] = get_plant_maintainer(plant["plant_id"])
+            return jsonify(all_plants), 200
         else:
             plants = []
             list_of_plants = []
@@ -138,6 +140,9 @@ def get_users_plants():
                 plant = plant[0]
                 result = Schema_Plant.dump(plant)
                 list_of_plants.append(result)
+            
+            for processed_plant in list_of_plants:
+                processed_plant["maintainer"] = get_plant_maintainer(processed_plant["plant_id"])
 
             return jsonify(list_of_plants), 200
     else:
