@@ -50,16 +50,20 @@ def get_all_users():
         if get_jwt_claims()['role'] == "admin":
             users = User.query.all()
             result = Schema_Users.dump(users)
+            # delete password field from each user
+            for user in result:
+                del user['password']
+            # return all users
             return jsonify(result), 200
         else:
             errors.append({
                 "path": ['account_type'],
-                "message": "incorrect privileges"
+                "message": "Incorrect privileges"
             })
     else:
         errors.append({
             "path": ['username'],
-            "message": "incorrect token"
+            "message": "Invalid token"
         })
     return jsonify({
         "errors": errors
@@ -339,6 +343,12 @@ def remove_plant_link():
     plant_id = request.json["plant_id"]
     can_delete = True
 
+    # default behaviour is to remove a viewer
+    link_type = "plant_viewer"
+    # but removing "maintenance" link, for example, can be done
+    if "link_type" in request.json:
+        link_type = request.json["link_type"]
+
     # check edit permissions on plant
     if not get_plant_edit_permission(current_user, plant_id):
         can_delete = False
@@ -350,9 +360,10 @@ def remove_plant_link():
     # if good so far, proceed
     if can_delete:
         try:
-            # try to delete the link
-            plant_link = Plant_link.query.filter_by(username=linked_user).filter_by(plant_id=plant_id).one()
-            db.session.delete(plant_link)
+            # try to delete any matching links
+            plant_links = Plant_link.query.filter_by(username=linked_user).filter_by(plant_id=plant_id).filter_by(user_type=link_type)
+            for link in plant_links:
+                db.session.delete(link)
             db.session.commit()
             return jsonify("Plant link successfully deleted from database"), 201
         except sql_alchemy_error.exc.NoResultFound:
@@ -405,11 +416,24 @@ def add_plant_link():
         })
 
     # check the link type is correct
-    if user_link_type != "plant_manager" and user_link_type != "plant_viewer":
+    if (user_link_type != "plant_manager" 
+        and user_link_type != "plant_viewer" 
+        and user_link_type != "maintenance"):
         valid_link = False
         errors.append({
             "path": ['user_link_type'],
             "message": "User link type is invalid."
+        })
+
+    # to add a user as "maintenance", current user and user to link must be 
+    # admins
+    if user_link_type == "maintenance":
+        user_type = get_user(user_to_link)["account_type"]
+        if get_jwt_claims()['role'] != "admin" or user_type != "admin":
+            valid_link = False
+            errors.append({
+            "path": ['username'],
+            "message": "User is not an admin."
         })
 
     # add the new link if all is good
