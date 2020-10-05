@@ -205,7 +205,7 @@ const tipStyle = {
     //position: "absolute"
 };
 
-interface PlantScreenProps {}
+interface PlantScreenProps { }
 const { Content, Header } = Layout;
 
 const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
@@ -230,7 +230,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
             access: "read" | "edit";
         },
         { plant_id: number }
-    >("view_plant_details", { plant_id });
+        >("view_plant_details", { plant_id });
 
     console.log("PLANT DATA", data);
 
@@ -239,8 +239,8 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
             <Header
                 style={{ background: "#FFF", display: "flex", alignItems: "center", justifyContent: "space-between" }}
             >
-                <Typography.Title level={2} style={{ marginBottom: "0.25em" }}>
-                    {data?.plant_name}
+                <Typography.Title data-cy="plant_name" level={2} style={{ marginBottom: "0.25em" }}>
+                    {data ?.plant_name}
                 </Typography.Title>
                 <Popover
                     placement="bottomRight"
@@ -290,13 +290,13 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                 >
                     <Title level={2}>Plant Details</Title>
                     <Text>
-                        <Text style={{ fontWeight: "bold" }}>Password:</Text> {data?.password || "No password set"}
+                        <Text style={{ fontWeight: "bold" }}>Password:</Text> {data ?.password || "No password set"}
                         <br />
                         <Text style={{ fontWeight: "bold" }}>Plant Type:</Text>{" "}
-                        {data?.plant_type || "No plant type set"}
+                        {data ?.plant_type || "No plant type set"}
                     </Text>
                 </div>
-                <PlantUsersContainer plant_id={plant_id} canEdit={data?.access === "edit"} />
+                <PlantUsersContainer plant_id={plant_id} canEdit={data ?.access === "edit"} />
             </Content>
         </Layout>
     );

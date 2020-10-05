@@ -11,7 +11,7 @@ describe('View Plant Test', () => {
       url: '/get_users_plants'
     }).as('getPlants')
   });
-  it('Tests correct plant is viewed upon selection', () => {
+  it('Tests correct plant is viewed upon selection, and that name is correct', () => {
     cy.visit("/login")
     cy.get('#basic_username').type("mateo")
     cy.get('#basic_password').type("123helloo")
@@ -26,9 +26,11 @@ describe('View Plant Test', () => {
     cy.wait('@getPlants').then(xhr => {
       cy.log(xhr.responseBody);
       cy.log(xhr.requestBody);
-      const plantID = xhr.responseBody[0].plant_id
+      const plantID = xhr.responseBody[plantToSelect].plant_id
+      const plantName = xhr.responseBody[plantToSelect].plant_name
       cy.get(':nth-child(' + (plantToSelect + 1) + ') > .ant-card-head > .ant-card-head-wrapper > .ant-card-extra > a').click()
       cy.url().should('include', '/plant/' + plantID)
+      cy.get('[data-cy="plant_name"').should('contain', plantName)
       //expect(cy.url()).to.eq(Cypress.config().baseUrl + '/plant/' + plantID)
 
     })
