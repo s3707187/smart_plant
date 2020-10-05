@@ -249,7 +249,7 @@ def email(target_email,temp_password):
         Subject: ACME Smart Plant
 
         Your ACME Smart Plant temporary password is:"""
-        temp_password = "temp"
+        temp_password = temp_password
 
         # Send email here
         server.sendmail(sender_email, target_email, message + temp_password)
