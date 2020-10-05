@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Layout, Spin, Typography, Table, Space } from "antd";
 import { SettingOutlined } from "@ant-design/icons";
-import { useGet } from "../utils/apiHooks";
+import { useGet, usePost } from "../utils/apiHooks";
 
 const { Header, Content } = Layout;
 const { Title, Text, Link } = Typography;
@@ -12,8 +12,9 @@ interface UserDashboardScreenProps {}
 const UserDashboardScreen: React.FC<UserDashboardScreenProps> = (props: UserDashboardScreenProps) => {
     const [visible, setVisible] = useState(false);
 
-    const { data, errors, loading } = useGet("all_users");
-    console.log("DATA", data);
+    const { data, errors, loading, refetch } = useGet("all_users");
+    // console.log("DATA", data);
+    const [DeleteUser] = usePost<{}, { user_to_del: string }>("delete_user");
 
     return (
         <Layout style={{ flexGrow: 1 }}>
@@ -51,7 +52,14 @@ const UserDashboardScreen: React.FC<UserDashboardScreenProps> = (props: UserDash
                         render={(text, record: { username: string }) => (
                             <Space size="middle">
                                 <a onClick={() => {}}>Edit</a>
-                                <a onClick={() => {}}>Delete</a>
+                                <a
+                                    onClick={async () => {
+                                        await DeleteUser({ user_to_del: record.username });
+                                        await refetch();
+                                    }}
+                                >
+                                    Delete
+                                </a>
                             </Space>
                         )}
                     />
