@@ -356,6 +356,12 @@ def remove_plant_link():
             "path": ['plant_id'],
             "message": "User does not have permission to edit plant links."
         })
+    
+    # only admins can delete maintenance links
+    if link_type == "maintenance":
+        curr_user_type = get_user(current_user)["account_type"]
+        if curr_user_type != "admin":
+            can_delete = False
 
     # if good so far, proceed
     if can_delete:
