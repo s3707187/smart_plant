@@ -3,7 +3,7 @@ import "antd/dist/antd.css";
 import React, { useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { removeAccessToken, removeRefreshToken } from "../app/token";
-import AuthContex from "../contexts/AuthContex";
+import AuthContex, { getRole } from "../contexts/AuthContex";
 
 const { Header } = Layout;
 
@@ -29,11 +29,13 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                     <Menu.Item key="/">
                         <Link to="/">Home</Link>
                     </Menu.Item>,
+                    getRole(token) === "admin" && (
+                        <Menu.Item key="/users">
+                            <Link to="/users">Users</Link>
+                        </Menu.Item>
+                    ),
                     <Menu.Item key="/profile">
                         <Link to="/profile">Profile</Link>
-                    </Menu.Item>,
-                    <Menu.Item key="/about">
-                        <Link to="/about">About</Link>
                     </Menu.Item>,
 
                     <Menu.Item

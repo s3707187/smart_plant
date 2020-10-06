@@ -11,7 +11,7 @@
 from sqlalchemy import orm as sql_alchemy_error
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, \
-    jwt_required, jwt_refresh_token_required
+    jwt_required, jwt_refresh_token_required, get_jwt_claims
 
 # other imports
 from flask_api_schema import *

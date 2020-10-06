@@ -15,6 +15,7 @@ import RegisterScreen from "./screens/RegisterScreen";
 
 import "./App.css";
 import "antd/dist/antd.css";
+import UserDashboardScreen from "./screens/UserDashboardScreen";
 import UserScreen from "./screens/UserScreen";
 import RedirectRoute from "./utils/RedirectRoute";
 
@@ -68,10 +69,11 @@ function App() {
                             />
                             <ProtectedRoute path="/plant/:id" component={PlantScreen} />
                             <ProtectedRoute path="/profile" component={UserScreen} />
+                            <ProtectedRoute path="/users" component={UserDashboardScreen} />
                             <ProtectedRoute path="/" component={DashboardScreen} />
                         </Switch>
                     </Content>
-                    <Footer>Smort Plont - Mr. Bean, Mate, Paddy, Thomas Frantz, and Thomas Frantz</Footer>
+                    <Footer>Smart Plant - Mitch Wood, Mateo Diaz, Patrick Rohan, Sam Hoch, and Thomas Frantz</Footer>
                 </Router>
             </Layout>
         </AuthContext.Provider>
