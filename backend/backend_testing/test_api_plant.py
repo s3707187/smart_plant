@@ -179,3 +179,53 @@ def test_delete_plant_nonexistent(client):
     details_delete = {"plant_id": 987234986}
     response_delete = client.post('/delete_plant', headers=header, json=details_delete)
     assert response_delete.status_code == 403
+
+
+# Test maintenance linking
+
+def test_admin_allocate_deallocate_success(client):
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 201
+
+    response_check_plant = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check_plant.status_code == 200
+    assert response_check_plant.json["maintainer"] == TEST_ADMIN
+
+    delete_details = {
+        "linked_user" : TEST_ADMIN,
+        "link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    response_delete_link = client.post('/remove_plant_link', headers=header, json=delete_details)
+    assert response_delete_link.status_code == 201
+    
+    response_check_plant = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check_plant.status_code == 200
+    assert response_check_plant.json["maintainer"] == None
+
+
+def test_admin_allocate_wrong_link_type(client):
+    pass
+
+def test_allocate_user_fail(client):
+    pass
+
+def test_allocate_already_linked(client):
+    pass
+
+def test_link_admin_viewer_fail(client):
+    pass
+
+
+# Test notifications
+
+
+
+
+
