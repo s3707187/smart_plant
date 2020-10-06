@@ -159,7 +159,7 @@ def get_plant_maintainer(plant_id):
     """
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
     for link in plant_links:
-        if link.user_type == "maintainer":
+        if link.user_type == "maintenance":
             return link.username
     return None
     
