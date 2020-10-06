@@ -121,7 +121,8 @@ def get_users_plants():
             plants = Plant.query.all()
             all_plants = Schema_Plants.dump(plants)
             for plant in all_plants:
-                plant["maintainer"] = get_plant_maintainer(plant["plant_id"])
+                maintainer = get_plant_maintainer(plant["plant_id"])
+                plant["maintainer"] = maintainer
             return jsonify(all_plants), 200
         else:
             plants = []
@@ -142,7 +143,8 @@ def get_users_plants():
                 list_of_plants.append(result)
             
             for processed_plant in list_of_plants:
-                processed_plant["maintainer"] = get_plant_maintainer(processed_plant["plant_id"])
+                maintainer = get_plant_maintainer(processed_plant["plant_id"])
+                processed_plant["maintainer"] = maintainer
 
             return jsonify(list_of_plants), 200
     else:
@@ -185,6 +187,11 @@ def view_plant_details():
             plant_info["access"] = "read"
         else:
             plant_info["access"] = "edit"
+        
+        # include the plant maintainer if there is one
+        maintainer = get_plant_maintainer(plant_id)
+        plant_info["maintainer"] = maintainer
+
         return jsonify(plant_info)
 
     else:

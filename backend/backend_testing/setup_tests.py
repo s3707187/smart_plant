@@ -23,13 +23,12 @@ TEST_PASS = 'testpass'
 
 @pytest.fixture
 def client():
+    # setup testing environment
     app.config['TESTING'] = True
     app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://{}:{}@{}/{}".format(USER, PASSWORD, HOST, TEST_DATABASE)
     app.config['JWT_SECRET_KEY'] = TEST_JWT_KEY
     with app.test_client() as client:
         yield client
-
-
 
 
 def get_auth_header(client, identity, role):
@@ -44,13 +43,17 @@ def get_auth_header(client, identity, role):
     return auth_header
 
 
-# testing information
+# Testing Information
+
+# DATABASE - testing_smart_plant contents expected:
+# 
 # Plant
 # +----------+----------------+----------+-------------+--------------+
 # | plant_id | plant_type     | password | plant_name  | plant_health |
 # +----------+----------------+----------+-------------+--------------+
 # |        1 | Flowering type | testpass | George_Keep | healthy      |
 # |        2 | Cactus type    | testpass | Simon_Keep  | healthy      |
+# |        3 | Foliage type   | testpass | Harry_Keep  | unhealthy    |
 # +----------+----------------+----------+-------------+--------------+
 
 # User
@@ -62,13 +65,14 @@ def get_auth_header(client, identity, role):
 # | test_admin | $pbkdf2-sha256$29000$x9i7dy4FwJgTorS2FgLg3A$ZzjhJr3UCz8RkPijkx1lYralgsSF9M7RwjLCR4eUXoQ | Test       | Admin     | test2@test.com     | admin        |
 # | test_user  | $pbkdf2-sha256$29000$ZkwpBcDYuxeCECKEUEppTQ$c95vEVMJ3WBLy.wuDMaFax4DFLy0XM4oN3GVspiFFxk | test       | user      | test_user@test.com | user         |
 # +------------+-----------------------------------------------------------------------------------------+------------+-----------+--------------------+--------------+
-# passwords are all 'testpass'
+# NOTE: passwords are all 'testpass'
 
 # Plant_link
 # +----------+----------+---------------+
 # | username | plant_id | user_type     |
 # +----------+----------+---------------+
 # | test_01  |        1 | plant_manager |
+# | test_01  |        3 | plant_manager |
 # +----------+----------+---------------+
 
 # Plant_history
@@ -78,7 +82,7 @@ def get_auth_header(client, identity, role):
 # |          1 |        1 | 2020-09-28 03:35:26 |        0.35 |     0.55 |  0.33 |      0.6 |
 # +------------+----------+---------------------+-------------+----------+-------+----------+
 
-# Plant_type is identical to main version
+# Plant_type is identical to real database table
 
 
 # Used to create new Plant_history table
