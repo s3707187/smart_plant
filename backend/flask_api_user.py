@@ -50,10 +50,12 @@ def get_all_users():
         if get_jwt_claims()['role'] == "admin":
             users = User.query.all()
             result = Schema_Users.dump(users)
+
             # delete password field from each user
             for user in result:
                 del user['password']
             # return all users
+
             return jsonify(result), 200
         else:
             errors.append({
@@ -514,3 +516,37 @@ def get_user_details():
     return jsonify({
             "errors": errors
         }), 400
+
+
+@USER_API.route("/reset_user_password", methods=["POST"])
+def reset_user_password():
+    """ TODO docstring
+    """
+   
+    user_to_reset = request.json["user_to_reset"]
+    if username_exists(user_to_reset):
+        user_details = get_user(user_to_reset)
+        # admins cannot be reset like this
+        if user_details["account_type"] != "admin":
+            # generate new random password
+            temp_password = create_random_word() + create_random_word()
+            temp_hashed_password = pbkdf2_sha256.hash(password)
+
+            try:
+                # send the reset email
+                send_password_email(user_details["email"])
+                # update the database password
+                user_object = User.query.get(user_to_reset)
+                user_object.password = temp_hashed_password
+                db.session.commit()
+            except SMTPException:
+                # if the email fails, the password won't reset
+                pass
+   
+    
+    # this method will not return errors, for security
+    # that is, we do not want to allow repeated reset request to
+    # reveal usernames that exist in the system.
+    # frontend should say "if this user exists, the password will be reset"
+    return 200
+

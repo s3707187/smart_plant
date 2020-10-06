@@ -41,6 +41,12 @@ SCALED_MAX = 0.66154
 
 
 # ------------ CALLABLE API METHODS ----------------
+@IOT_API.route("/emailme", methods=["GET"])
+def emailme():
+    email("rohap12@gmail.com", "hello")
+    hi = "Hi"
+    return hi
+
 #DELETE THIS
 @IOT_API.route("/plants", methods=["GET"])
 def get_plants():

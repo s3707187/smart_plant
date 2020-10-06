@@ -3,6 +3,7 @@ import datetime
 import re
 import string
 import random
+import smtplib, ssl
 # import json
 # import os
 # import requests
@@ -249,3 +250,31 @@ def toScaledRadarData(healthMin, healthMax, dataPoint):
     # }
     # print(sMin)
     return sData #output
+
+def send_password_email(target_email, temp_password):
+    port = 465  # For SSL
+    password = "progamproject123"
+
+    # Create a secure SSL context
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login("progam.project.fellas@gmail.com", password)
+        # TODO: Send email here
+        sender_email = "progam.project.fellas@gmail.com"
+        target_email = target_email
+        # message contents
+
+        message = """\
+        Subject: ACME Smart Plant Password Reset
+
+        Your ACME Smart Plant temporary password is: """
+
+        temp_password = temp_password
+
+        warning = "\n!!! PLEASE CHANGE YOUR PASSWORD NEXT TIME YOU LOG IN !!!."
+
+        # Send email here
+        server.sendmail(sender_email, target_email, message + temp_password + warning)
+
+
