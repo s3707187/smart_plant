@@ -9,6 +9,7 @@ import "./app/axiosAccess";
 
 import AuthContext from "./contexts/AuthContex";
 import DashboardScreen from "./screens/DashboardScreen";
+import ForgotPasswordScreen from "./screens/ForgotPasswordScreen";
 import LoginScreen from "./screens/LoginScreen";
 import PlantScreen from "./screens/PlantScreen";
 import RegisterScreen from "./screens/RegisterScreen";
@@ -57,6 +58,13 @@ function App() {
                                 path="/login"
                                 exact
                                 component={LoginScreen}
+                                redirectOn={token !== undefined}
+                                to={"/"}
+                            />
+                            <RedirectRoute
+                                path="/forgot_password"
+                                exact
+                                component={ForgotPasswordScreen}
                                 redirectOn={token !== undefined}
                                 to={"/"}
                             />
