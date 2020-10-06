@@ -242,20 +242,22 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                 <Typography.Title level={2} style={{ marginBottom: "0.25em" }}>
                     {data?.plant_name}
                 </Typography.Title>
-                <Popover
-                    placement="bottomRight"
-                    title={"Settings"}
-                    content={() => <PlantSettingsBodyComponent plantID={plant_id} />}
-                    trigger="click"
-                >
-                    <SettingOutlined
-                        style={{
-                            fontSize: 20,
-                            padding: 7,
-                            margin: 6,
-                        }}
-                    />
-                </Popover>
+                {data?.access === "edit" && (
+                    <Popover
+                        placement="bottomRight"
+                        title={"Settings"}
+                        content={() => <PlantSettingsBodyComponent plantID={plant_id} />}
+                        trigger="click"
+                    >
+                        <SettingOutlined
+                            style={{
+                                fontSize: 20,
+                                padding: 7,
+                                margin: 6,
+                            }}
+                        />
+                    </Popover>
+                )}
             </Header>
             <Content
                 style={{
@@ -294,6 +296,8 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                         <br />
                         <Text style={{ fontWeight: "bold" }}>Plant Type:</Text>{" "}
                         {data?.plant_type || "No plant type set"}
+                        <br />
+                        <Text style={{ fontWeight: "bold" }}>Admin Allocated:</Text> No Admin Allocated.
                     </Text>
                 </div>
                 <PlantUsersContainer plant_id={plant_id} canEdit={data?.access === "edit"} />

@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Typography, Popconfirm } from "antd";
 import { useHistory } from "react-router-dom";
+import AuthContex, { getRole } from "../contexts/AuthContex";
 import { usePost } from "../utils/apiHooks";
 
 const { Link } = Typography;
@@ -14,6 +15,7 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
 ) => {
     const history = useHistory();
     const { plantID: plant_id } = props;
+    const { token } = useContext(AuthContex);
 
     const [DeletePlant] = usePost<{}, { plant_id: number }>("delete_plant");
 
@@ -24,7 +26,7 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
     };
 
     return (
-        <>
+        <div style={{ display: "flex", flexDirection: "column" }}>
             <Popconfirm
                 placement="left"
                 title={"Are you sure you want to delete this plant?"}
@@ -34,7 +36,8 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
             >
                 <Link type={"danger"}>Delete Plant</Link>
             </Popconfirm>
-        </>
+            {token && getRole(token) === "admin" && <Link>Assign yourself to plant maintenance.</Link>}
+        </div>
     );
 };
 
