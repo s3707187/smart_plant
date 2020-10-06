@@ -2,11 +2,7 @@ from backend_testing.setup_tests import *
 from main import app
 
     
-# get all plants
-# try with not admin *
-# try with admin *
-# check len > whatever *
-# check fields in each returned for each *
+# Test getting all viewable plants for user
 
 def test_user_plants(client):
     header = get_auth_header(client, TEST_USER_1, 'user')
@@ -36,11 +32,7 @@ def test_user_nonexistent(client):
     response = client.get('/get_users_plants', headers=header)
     assert response.status_code == 400
 
-# update plant:
-# try with not admin or owner
-# try with user owner
-# try with admin
-# exists, not exists
+# Test update plant
 
 def test_update_plant_fail(client):
     # fail to update the plant that you do not own
@@ -109,11 +101,8 @@ def test_update_plant_nonexistent(client):
     response = client.post('/update_plant_details', headers=header, json=details)
     assert response.status_code == 403
 
-# delete plant:
-# try with not admin *
-# try with user owner *
-# try with admin
-# plant exists, not exists
+
+# Test plant deletion
 
 def test_delete_plant_fail(client):
     # fail to update the plant that you do not own
@@ -179,3 +168,179 @@ def test_delete_plant_nonexistent(client):
     details_delete = {"plant_id": 987234986}
     response_delete = client.post('/delete_plant', headers=header, json=details_delete)
     assert response_delete.status_code == 403
+
+
+# Test maintenance linking
+
+def test_admin_allocate_deallocate_success(client):
+    # admin self allocate to plant
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 201
+    
+    # check allocation leads to maintainer returned
+    response_check_plant = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check_plant.status_code == 200
+    assert response_check_plant.json["maintainer"] == TEST_ADMIN
+
+    # delete the link, deallocating self
+    delete_details = {
+        "linked_user" : TEST_ADMIN,
+        "link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    response_delete_link = client.post('/remove_plant_link', headers=header, json=delete_details)
+    assert response_delete_link.status_code == 201
+    # check maintainer is now none
+    response_check_plant = client.get('/view_plant_details?plant_id={}'.format(1), headers=header)
+    assert response_check_plant.status_code == 200
+    assert response_check_plant.json["maintainer"] == None
+
+
+def test_admin_allocate_wrong_link_type(client):
+    # attempt to allocate with a nonexistent link type
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "gibberingo",
+        "plant_id" : 1        
+    }
+    # check it fails
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
+
+def test_allocate_user_fail(client):
+    # attempt to allocate a normal user to a plant as a maintainer
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_USER_1,
+        "user_link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    # check it fails
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
+
+def test_allocate_as_user_fail(client):
+    # attempt to allocate a normal user to a plant as a maintainer, from
+    # a normal user account itself
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    link_details = {
+        "user_to_link" : TEST_USER_2,
+        "user_link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    # check it fails
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
+
+def test_allocate_already_linked(client):
+    # attempt to link a user to a plant that they already own, as viewer
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_USER_1,
+        "user_link_type" : "plant_viewer",
+        "plant_id" : 1        
+    }
+    # check it fails
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
+
+def test_link_admin_viewer_fail(client):
+    # attempt to link self (admin) as viewer to a plant
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "plant_viewer",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
+
+
+# Test notifications
+
+def test_notifications_admin_maintained(client):
+    # check notifications are empty when we have an unhealthy plant,
+    # that also has an allocated admin
+
+    # add maintainer to the only unhealthy plant
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "maintenance",
+        "plant_id" : 3
+    }
+    # double check linking worked
+    response_link = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response_link.status_code == 201
+
+    # get notifications
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    # should be no unhealthy, unmaintained plants
+    assert len(response.json) == 0
+
+    # revert database so no admin is allocate to the plant
+    delete_details = {
+        "linked_user" : TEST_ADMIN,
+        "link_type" : "maintenance",
+        "plant_id" : 3
+    }
+    response_delete_link = client.post('/remove_plant_link', headers=header, json=delete_details)
+    assert response_delete_link.status_code == 201
+
+
+def test_notifications_admin_some(client):
+    # test some notifications are returned because a plant has 
+    # no maintainer and is unhealthy
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    # find expected plant in returned notifications list
+    plant_2 = None
+    for plant in response.json:
+        if plant["plant_id"] == 3:
+            plant_2 = plant
+
+    assert plant_2["plant_id"] == 3
+    assert plant_2["plant_name"] == "Harry_Keep"
+
+def test_notifications_user_some(client):
+    # some returned because no maintainer and unhealthy
+    
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    # get notifications for TEST_USER_1
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    plant_2 = None
+    # find expected plant which is known to be unhealthy and has 
+    # no admin allocated/maintainer
+    for plant in response.json:
+        if plant["plant_id"] == 3:
+            plant_2 = plant
+
+    assert plant_2["plant_id"] == 3
+    assert plant_2["plant_name"] == "Harry_Keep"
+
+def test_notifications_user_none(client):
+    # test zero notifications are returned,
+    # because user is not linked to any plants
+    header = get_auth_header(client, TEST_USER_2, 'user')
+    
+    response = client.get('/get_plant_notifications', headers=header)
+    # check length of notifications is 0
+    assert response.status_code == 200
+    assert len(response.json) == 0
+
+
+
+
+
+
