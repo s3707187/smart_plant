@@ -51,6 +51,7 @@ def get_auth_header(client, identity, role):
 # +----------+----------------+----------+-------------+--------------+
 # |        1 | Flowering type | testpass | George_Keep | healthy      |
 # |        2 | Cactus type    | testpass | Simon_Keep  | healthy      |
+# |        3 | Foliage type   | testpass | Harry_Keep  | unhealthy    |
 # +----------+----------------+----------+-------------+--------------+
 
 # User
@@ -69,6 +70,7 @@ def get_auth_header(client, identity, role):
 # | username | plant_id | user_type     |
 # +----------+----------+---------------+
 # | test_01  |        1 | plant_manager |
+# | test_01  |        3 | plant_manager |
 # +----------+----------+---------------+
 
 # Plant_history

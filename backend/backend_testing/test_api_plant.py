@@ -211,19 +211,122 @@ def test_admin_allocate_deallocate_success(client):
 
 
 def test_admin_allocate_wrong_link_type(client):
-    pass
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "gibberingo",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
 
 def test_allocate_user_fail(client):
-    pass
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_USER_1,
+        "user_link_type" : "gibberingo",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
+
+def test_allocate_as_user_fail(client):
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    link_details = {
+        "user_to_link" : TEST_USER_2,
+        "user_link_type" : "maintenance",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
 
 def test_allocate_already_linked(client):
-    pass
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_USER_1,
+        "user_link_type" : "plant_viewer",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
 
 def test_link_admin_viewer_fail(client):
-    pass
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "plant_viewer",
+        "plant_id" : 1        
+    }
+    response = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response.status_code == 400
 
 
 # Test notifications
+
+
+def test_notifications_admin_maintained(client):
+    # add maintainer to the only unhealthy plant
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    link_details = {
+        "user_to_link" : TEST_ADMIN,
+        "user_link_type" : "maintenance",
+        "plant_id" : 3
+    }
+    response_link = client.post('/add_plant_link', headers=header, json=link_details)
+    assert response_link.status_code == 201
+
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    # should be no unhealthy, unmaintained plants
+    assert len(response.json) == 0
+
+    # revert maintainer to nonexistent
+    delete_details = {
+        "linked_user" : TEST_ADMIN,
+        "link_type" : "maintenance",
+        "plant_id" : 3
+    }
+    response_delete_link = client.post('/remove_plant_link', headers=header, json=delete_details)
+    assert response_delete_link.status_code == 201
+
+
+def test_notifications_admin_some(client):
+    # some returned because no maintainer and unhealthy
+    header = get_auth_header(client, TEST_ADMIN, 'admin')
+    
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    plant_2 = None
+    for plant in response.json:
+        if plant["plant_id"] == 3:
+            plant_2 = plant
+
+    assert plant_2["plant_id"] == 3
+    assert plant_2["plant_name"] == "Harry_Keep"
+
+def test_notifications_user_some(client):
+    # none returned because user is not linked to any plants
+    header = get_auth_header(client, TEST_USER_1, 'user')
+    
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    plant_2 = None
+    for plant in response.json:
+        if plant["plant_id"] == 3:
+            plant_2 = plant
+
+    assert plant_2["plant_id"] == 3
+    assert plant_2["plant_name"] == "Harry_Keep"
+
+def test_notifications_user_none(client):
+    # some returned because no maintainer and unhealthy
+    header = get_auth_header(client, TEST_USER_2, 'user')
+    
+    response = client.get('/get_plant_notifications', headers=header)
+    assert response.status_code == 200
+    assert len(response.json) == 0
+
 
 
 
