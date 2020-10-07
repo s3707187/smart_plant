@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { Typography, Popconfirm } from "antd";
 import { useHistory } from "react-router-dom";
+
 import AuthContex, { getRole, getUserID } from "../contexts/AuthContex";
 import { usePost } from "../utils/apiHooks";
 
@@ -17,6 +18,7 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
     props: PlantSettingsBodyComponentProps
 ) => {
     const history = useHistory();
+
     const { maintainer, plantID: plant_id, refetch, topLoading } = props;
     const { token } = useContext(AuthContex);
     const current_user = token && getUserID(token);
@@ -67,6 +69,7 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
             >
                 <Link type={"danger"}>Delete Plant</Link>
             </Popconfirm>
+
             {token && getRole(token) === "admin" && (
                 <Link disabled={addLoading || removeLoading || topLoading} onClick={toggleMaintenance}>
                     {maintainer != undefined && maintainer === current_user

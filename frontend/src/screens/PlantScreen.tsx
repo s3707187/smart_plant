@@ -247,6 +247,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     <Popover
                         placement="bottomRight"
                         title={"Settings"}
+
                         content={() => (
                             <PlantSettingsBodyComponent
                                 topLoading={loading}
@@ -305,6 +306,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                         <Text style={{ fontWeight: "bold" }}>Plant Type:</Text>{" "}
                         {data?.plant_type || "No plant type set"}
                         <br />
+
                         <Text style={{ fontWeight: "bold" }}>Admin Allocated:</Text>{" "}
                         {data?.maintainer || "No Admin Allocated."}
                     </Text>

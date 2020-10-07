@@ -8,6 +8,8 @@
 # import requests
 
 # third party imports
+from smtplib import SMTPException
+
 from sqlalchemy import orm as sql_alchemy_error
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, \
@@ -530,11 +532,11 @@ def reset_user_password():
         if user_details["account_type"] != "admin":
             # generate new random password
             temp_password = create_random_word() + create_random_word()
-            temp_hashed_password = pbkdf2_sha256.hash(password)
+            temp_hashed_password = pbkdf2_sha256.hash(temp_password)
 
             try:
                 # send the reset email
-                send_password_email(user_details["email"])
+                send_password_email(user_details["email"], temp_password)
                 # update the database password
                 user_object = User.query.get(user_to_reset)
                 user_object.password = temp_hashed_password
@@ -548,5 +550,5 @@ def reset_user_password():
     # that is, we do not want to allow repeated reset request to
     # reveal usernames that exist in the system.
     # frontend should say "if this user exists, the password will be reset"
-    return 200
+    return jsonify({}), 200
 
