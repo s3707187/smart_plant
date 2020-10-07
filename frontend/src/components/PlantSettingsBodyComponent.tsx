@@ -3,7 +3,8 @@ import { Typography, Popconfirm } from "antd";
 import { useHistory } from "react-router-dom";
 
 import AuthContex, { getRole, getUserID } from "../contexts/AuthContex";
-import { usePost } from "../utils/apiHooks";
+import NotificationsContext from "../contexts/NotificationsContext";
+import { useGet, usePost } from "../utils/apiHooks";
 
 const { Link } = Typography;
 
@@ -41,6 +42,8 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
         { user_to_link: string; user_link_type: string; plant_id: number }
     >("add_plant_link");
 
+    const { refetchAll: refetch_notificaitons } = useContext(NotificationsContext);
+
     const toggleMaintenance = async () => {
         if (token && maintainer == undefined)
             await AddPlantMaintainer({
@@ -56,6 +59,7 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
             });
         }
         refetch();
+        refetch_notificaitons();
     };
 
     return (
