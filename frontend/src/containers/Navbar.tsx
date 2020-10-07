@@ -1,17 +1,34 @@
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Badge } from "antd";
 import "antd/dist/antd.css";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { removeAccessToken, removeRefreshToken } from "../app/token";
 import AuthContex, { getRole } from "../contexts/AuthContex";
+import { AlertOutlined } from "@ant-design/icons";
+import NotificationsContext from "../contexts/NotificationsContext";
+import { useGet } from "../utils/apiHooks";
 
 const { Header } = Layout;
 
-interface NavbarProps {}
+interface NavbarProps {
+    openSidebar(): void;
+}
 
 const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
     let location = useLocation();
+    const { openSidebar } = props;
     const { token } = useContext(AuthContex);
+
+    const { data, refetch } = useGet<{ plant_id: number; plant_name: string }[]>("get_plant_notifications");
+
+    const { registerNotificationSubscriber, deregisterNotificationSubscriber } = useContext(NotificationsContext);
+
+    useEffect(() => {
+        const sub = registerNotificationSubscriber(refetch);
+        return () => {
+            deregisterNotificationSubscriber(sub);
+        };
+    }, [refetch, registerNotificationSubscriber, deregisterNotificationSubscriber]);
 
     return (
         <Header>
@@ -37,6 +54,10 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                     <Menu.Item key="/profile">
                         <Link to="/profile">Profile</Link>
                     </Menu.Item>,
+
+                    <Badge count={data?.length || 0} style={{ float: "right", alignSelf: "flex-end" }}>
+                        <AlertOutlined style={{ fontSize: 20, margin: "0 15px" }} onClick={openSidebar} />
+                    </Badge>,
 
                     <Menu.Item
                         style={{ float: "right" }}
