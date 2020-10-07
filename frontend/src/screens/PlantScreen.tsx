@@ -212,7 +212,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
     const { id: plant_id } = useParams();
     const history = useHistory();
 
-    const { data, errors, loading } = useGet<
+    const { data, errors, loading, refetch } = useGet<
         {
             latest_reading?: {
                 date_time: string;
@@ -228,6 +228,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
             plant_health: string;
             password: string;
             access: "read" | "edit";
+            maintainer: string | null;
         },
         { plant_id: number }
     >("view_plant_details", { plant_id });
@@ -246,7 +247,15 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     <Popover
                         placement="bottomRight"
                         title={"Settings"}
-                        content={() => <PlantSettingsBodyComponent plantID={plant_id} />}
+
+                        content={() => (
+                            <PlantSettingsBodyComponent
+                                topLoading={loading}
+                                refetch={refetch}
+                                plantID={plant_id}
+                                maintainer={data?.maintainer || undefined}
+                            />
+                        )}
                         trigger="click"
                     >
                         <SettingOutlined
@@ -297,7 +306,9 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                         <Text style={{ fontWeight: "bold" }}>Plant Type:</Text>{" "}
                         {data?.plant_type || "No plant type set"}
                         <br />
-                        <Text style={{ fontWeight: "bold" }}>Admin Allocated:</Text> No Admin Allocated.
+
+                        <Text style={{ fontWeight: "bold" }}>Admin Allocated:</Text>{" "}
+                        {data?.maintainer || "No Admin Allocated."}
                     </Text>
                 </div>
                 <PlantUsersContainer plant_id={plant_id} canEdit={data?.access === "edit"} />
