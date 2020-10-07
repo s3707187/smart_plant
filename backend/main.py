@@ -20,9 +20,9 @@ SQLALCHEMY_ENGINE_OPTIONS = {
     "pool_recycle": 15,
     "max_overflow" : -1
 }
-# app.config['SQLALCHEMY_POOL_RECYCLE'] = 15
-# app.config['SQLALCHEMY_MAX_OVERFLOW'] = -1
-# app.config["SQLALCHEMY_POOL_SIZE"] = 20
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 15
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = -1
+app.config["SQLALCHEMY_POOL_SIZE"] = 20
 
 jwt = JWTManager(app)
 CORS(app)
