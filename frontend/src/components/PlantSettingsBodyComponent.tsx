@@ -32,7 +32,7 @@ const PlantSettingsBodyComponent: React.FC<PlantSettingsBodyComponentProps> = (
                 okText="Yes"
                 cancelText="No"
             >
-                <Link type={"danger"}>Delete Plant</Link>
+                <Link data-cy="delete_plant_confirm" type={"danger"}>Delete Plant</Link>
             </Popconfirm>
         </>
     );

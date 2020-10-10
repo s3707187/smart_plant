@@ -1,5 +1,9 @@
-describe('Manage Plant Test', () => {
+//    const result = await axios.post(`${apiURL}/${route}`, variables, {});
 
+import axios, { AxiosResponse } from "axios";
+import { setAccessToken, setRefreshToken } from "../../src/app/token.ts"
+
+describe('Manage Plant Test', () => {
   let plantID
   let userToAdd = "tomato150"
 
@@ -9,7 +13,7 @@ describe('Manage Plant Test', () => {
 
     cy.route({
       method: 'POST',
-      url: '/login'
+      url: '/login',
     }).as('appLogin');
     cy.route({
       method: 'GET',
@@ -27,16 +31,12 @@ describe('Manage Plant Test', () => {
 
   });
   it('Tests user can be added to and removed from plant', () => {
-    cy.visit("/login")
-    cy.get('#basic_username').type("mateo")
-    cy.get('#basic_password').type("123helloo")
-    cy.get('[data-cy=test]').click()
+    cy.request('POST', `http://localhost:8080/login`, { username: "mateo", password: "123helloo" }).then(xhr => {
+      cy.log(xhr)
+      setAccessToken(xhr.body.access_token)
+    });
+    cy.visit("/")
 
-    cy.wait('@appLogin').then(xhr => {
-      cy.log(xhr.responseBody);
-      cy.log(xhr.requestBody);
-      expect(xhr.responseBody.access_token).to.exist
-    })
     //WHICH PLANT TO PERFORM TEST ON, MATTERS, MUST BE OWNED BY ACCOUNT
     const plantToSelect = 5
     cy.wait('@getPlants').then(xhr => {

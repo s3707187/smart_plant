@@ -12,16 +12,12 @@ describe('View Plant Test', () => {
     }).as('getPlants')
   });
   it('Tests correct plant is viewed upon selection, and that name is correct', () => {
-    cy.visit("/login")
-    cy.get('#basic_username').type("mateo")
-    cy.get('#basic_password').type("123helloo")
-    cy.get('[data-cy=test]').click()
-
-    cy.wait('@appLogin').then(xhr => {
-      cy.log(xhr.responseBody);
-      cy.log(xhr.requestBody);
-      expect(xhr.responseBody.access_token).to.exist
-    })
+    cy.request('POST', `http://localhost:8080/login`, { username: "mateo", password: "123helloo" }).then(xhr => {
+      cy.log(xhr)
+      setAccessToken(xhr.body.access_token)
+    });
+    cy.visit("/")
+    //WHICH PLANT TO PERFORM TEST ON, FOR VIEW_PLANT SHOULDN'T MATTER
     const plantToSelect = 0
     cy.wait('@getPlants').then(xhr => {
       cy.log(xhr.responseBody);

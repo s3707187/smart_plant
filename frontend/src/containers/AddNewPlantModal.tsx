@@ -22,7 +22,7 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
     const [CreatePlant] = usePost<
         {},
         { plant_name: string; plant_health: string; plant_type: string; plant_owner?: string }
-    >("register_plant", form);
+        >("register_plant", form);
     const onFinish = (values: any) => {
         console.log("Success:", values);
     };
@@ -89,7 +89,7 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
                 >
                     <Select placeholder="Select a option and change input text above">
                         <Select.Option value="Cactus type">Cactus type</Select.Option>
-                        <Select.Option value="Flowering type">Flowering type</Select.Option>
+                        <Select.Option data-cy="plant_option" value="Flowering type">Flowering type</Select.Option>
                         <Select.Option value="Foliage type">Foliage type</Select.Option>
                     </Select>
                 </Form.Item>

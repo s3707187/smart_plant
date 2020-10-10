@@ -249,6 +249,7 @@ const PlantScreen: React.FC<PlantScreenProps> = (props: PlantScreenProps) => {
                     trigger="click"
                 >
                     <SettingOutlined
+                        data-cy="plant_settings"
                         style={{
                             fontSize: 20,
                             padding: 7,
