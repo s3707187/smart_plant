@@ -7,7 +7,7 @@ import AuthContex from "../contexts/AuthContex";
 
 const { Header } = Layout;
 
-interface NavbarProps {}
+interface NavbarProps { }
 
 const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
     let location = useLocation();
@@ -29,7 +29,7 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                     <Menu.Item key="/">
                         <Link to="/">Home</Link>
                     </Menu.Item>,
-                    <Menu.Item key="/profile">
+                    <Menu.Item data-cy="profile_tab" key="/profile">
                         <Link to="/profile">Profile</Link>
                     </Menu.Item>,
                     <Menu.Item key="/about">

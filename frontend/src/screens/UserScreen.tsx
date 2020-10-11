@@ -10,7 +10,7 @@ import { SettingOutlined, UserOutlined } from "@ant-design/icons";
 const { Content, Header } = Layout;
 const { Text, Title } = Typography;
 
-interface UserScreenProps {}
+interface UserScreenProps { }
 
 const UserScreen: React.FC<UserScreenProps> = (props: UserScreenProps) => {
     const { token } = useContext(AuthContex);
@@ -50,10 +50,10 @@ const UserScreen: React.FC<UserScreenProps> = (props: UserScreenProps) => {
                     }}
                 >
                     <Typography.Title level={2} style={{ marginBottom: "0.25em" }}>
-                        {data?.first_name} {data?.last_name}'s Profile
+                        {data ?.first_name} {data ?.last_name}'s Profile
                     </Typography.Title>
                     <div style={{ display: "flex", alignItems: "center", float: "right" }}>
-                        <Button type={"primary"} onClick={() => setVisible(true)}>
+                        <Button data-cy="edit_user_button" type={"primary"} onClick={() => setVisible(true)}>
                             Edit user profile
                         </Button>
                         {/*<SettingOutlined*/}
@@ -76,19 +76,19 @@ const UserScreen: React.FC<UserScreenProps> = (props: UserScreenProps) => {
                 >
                     <Avatar size={128} style={{ margin: 20 }} icon={<UserOutlined />} />
                     <Title level={2}>User Details</Title>
-                    <Text>
-                        <Text style={{ fontWeight: "bold" }}>First Name:</Text> {data?.first_name}
+                    <Text data-cy="first_name_data">
+                        <Text style={{ fontWeight: "bold" }}>First Name:</Text> {data ?.first_name}
                     </Text>
-                    <Text>
-                        <Text style={{ fontWeight: "bold" }}>Last Name:</Text> {data?.last_name}
+                    <Text data-cy="last_name_data">
+                        <Text style={{ fontWeight: "bold" }}>Last Name:</Text> {data ?.last_name}
                     </Text>
                     <Text>
                         <Text style={{ fontWeight: "bold" }}>Email: </Text>
-                        {data?.email}
+                        {data ?.email}
                     </Text>
                     <Text>
                         <Text style={{ fontWeight: "bold" }}>Username: </Text>
-                        {data?.username}
+                        {data ?.username}
                     </Text>
                 </Content>
             </Layout>

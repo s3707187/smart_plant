@@ -1,3 +1,5 @@
+import { setAccessToken, setRefreshToken } from "../../src/app/token.ts"
+
 describe('View Plant Test', () => {
   beforeEach(() => {
     Cypress.config('baseUrl', 'http://localhost:3000');
