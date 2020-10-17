@@ -37,9 +37,10 @@ const PlantUserAccessInputComponent: React.FC<PlantUserAccessInputComponentProps
                     justifyContent: "center",
                 }}
             >
-                <Input placeholder="Username" value={name} onChange={(e) => onChange(e.target.value)} />
-                <CloseCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={onCancel} />
-                <CheckCircleOutlined style={{ fontSize: 15, marginLeft: 15 }} onClick={() => onDone(name)} />
+                <Input data-cy="add_user_input"
+                    placeholder="Username" value={name} onChange={(e) => onChange(e.target.value)} />
+                <CloseCircleOutlined data-cy="add_user_cancel" style={{ fontSize: 15, marginLeft: 15 }} onClick={onCancel} />
+                <CheckCircleOutlined data-cy="add_user_confirm" style={{ fontSize: 15, marginLeft: 15 }} onClick={() => onDone(name)} />
             </div>
             {errors && errors.length > 0 && <Text type={"danger"}>{errors[0].message}</Text>}
         </div>

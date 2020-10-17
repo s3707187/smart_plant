@@ -25,7 +25,7 @@ const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUse
             user_link_type: string;
             plant_id: number;
         }
-    >("add_plant_link");
+        >("add_plant_link");
 
     const [RemoveUser, { errors: er }] = usePost<
         unknown,
@@ -33,7 +33,7 @@ const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUse
             linked_user: string;
             plant_id: number;
         }
-    >("remove_plant_link");
+        >("remove_plant_link");
 
     const [isAddingNewPerson, setAddingNewPerson] = useState<boolean>(false);
     const [name, setName] = useState("");
@@ -67,6 +67,7 @@ const PlantUsersContainer: React.FC<PlantUsersContainerProps> = (props: PlantUse
             {/*TODO change this so it works when we get 'access' field.*/}
             {!isAddingNewPerson && canEdit && (
                 <Link
+                    data-cy="add_user_button"
                     onClick={() => {
                         setAddingNewPerson(true);
                     }}

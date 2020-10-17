@@ -51,7 +51,7 @@ const Navbar: React.FC<NavbarProps> = (props: NavbarProps) => {
                             <Link to="/users">Users</Link>
                         </Menu.Item>
                     ),
-                    <Menu.Item key="/profile">
+                    <Menu.Item data-cy="profile_tab" key="/profile">
                         <Link to="/profile">Profile</Link>
                     </Menu.Item>,
 

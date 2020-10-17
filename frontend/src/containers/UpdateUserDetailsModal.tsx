@@ -27,7 +27,7 @@ const UpdateUserDetailsModal: React.FC<UpdateUserDetailsProps> = (props: UpdateU
     const [UpdateUser] = usePost<
         {},
         { username: string; password: string; email: string; first_name: string; last_name: string }
-    >("update_user_details", form);
+        >("update_user_details", form);
     const onFinish = (values: any) => {
         console.log("Success:", values);
     };
@@ -74,6 +74,7 @@ const UpdateUserDetailsModal: React.FC<UpdateUserDetailsProps> = (props: UpdateU
                 onFinishFailed={onFinishFailed}
             >
                 <Form.Item
+                    data-cy="first_name"
                     label="Given Name"
                     name="first_name"
                     rules={[{ required: true, message: "Please input your given name!" }]}
@@ -81,6 +82,7 @@ const UpdateUserDetailsModal: React.FC<UpdateUserDetailsProps> = (props: UpdateU
                     <Input />
                 </Form.Item>
                 <Form.Item
+                    data-cy="last_name"
                     label="Family Name"
                     name="last_name"
                     rules={[{ required: true, message: "Please input the family Name!" }]}

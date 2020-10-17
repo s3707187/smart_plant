@@ -13,7 +13,7 @@ const antIcon = <LoadingOutlined style={{ fontSize: 48 }} spin />;
 const { Content, Sider, Header } = Layout;
 const { Title } = Typography;
 
-interface DashboardScreenProps {}
+interface DashboardScreenProps { }
 
 type GetUsersPlantsData = {
     plant_id: number;
@@ -70,7 +70,7 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                     {currentUserData && currentUserData.username}'s Dashboard
                 </Title>
                 <div style={{ display: "flex", alignItems: "center" }}>
-                    <Button type={"primary"} onClick={() => setVisible(true)}>
+                    <Button data-cy="add_plant_button" type={"primary"} onClick={() => setVisible(true)}>
                         Add Plant
                     </Button>
                     <SettingOutlined

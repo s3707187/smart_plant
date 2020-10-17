@@ -14,7 +14,7 @@ const tailLayout = {
     wrapperCol: { offset: 8, span: 15 },
 };
 
-interface LoginScreenProps {}
+interface LoginScreenProps { }
 type Response = { access_token: string; refresh_token: string };
 
 const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
@@ -29,7 +29,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                 password: values.password,
             });
             await Promise.all([setRefreshToken(res.data.refresh_token), setAccessToken(res.data.access_token)]);
-        } catch (e) {}
+        } catch (e) { }
 
         console.log("PROMISE SETTLED");
     };
@@ -83,7 +83,7 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>
-                        <Button type="primary" htmlType="submit">
+                        <Button data-cy="test" type="primary" htmlType="submit">
                             Submit
                         </Button>
                     </Form.Item>
