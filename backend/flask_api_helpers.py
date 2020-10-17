@@ -3,6 +3,7 @@ import datetime
 import re
 import string
 import random
+import smtplib, ssl
 # import json
 # import os
 # import requests
@@ -145,6 +146,24 @@ def is_email(email):
         return True
     return False
 
+def get_plant_link(username, plant_id):
+    """ TODO docstring
+    """
+    plant_link = Plant_link.query.get((username, plant_id))
+    result = Schema_Plant_link.dump(plant_link)
+    if result == {}:
+        result = None
+    return result
+
+def get_plant_maintainer(plant_id):
+    """ TODO docstring
+    """
+    plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
+    for link in plant_links:
+        if link.user_type == "maintenance":
+            return link.username
+    return None
+    
 
 def get_plant_edit_permission(user_id, plant_id):
     """ TODO docstring
@@ -231,3 +250,31 @@ def toScaledRadarData(healthMin, healthMax, dataPoint):
     # }
     # print(sMin)
     return sData #output
+
+def send_password_email(target_email, temp_password):
+    port = 465  # For SSL
+    password = "progamproject123"
+
+    # Create a secure SSL context
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
+        server.login("progam.project.fellas@gmail.com", password)
+        # TODO: Send email here
+        sender_email = "progam.project.fellas@gmail.com"
+        target_email = target_email
+        # message contents
+
+        message = """\
+        Subject: ACME Smart Plant Password Reset
+
+        Your ACME Smart Plant temporary password is: """
+
+        temp_password = temp_password
+
+        warning = "\n!!! PLEASE CHANGE YOUR PASSWORD NEXT TIME YOU LOG IN !!!."
+
+        # Send email here
+        server.sendmail(sender_email, target_email, message + temp_password + warning)
+
+

@@ -2,18 +2,7 @@ from backend_testing.setup_tests import *
 from passlib.hash import pbkdf2_sha256
     
 
-# DEMONSTRATION METHOD, DELETE TODO
-# def test_get_plants(client):
-#     response = client.get('/plants')
-#     print(response)
-
-# login admin
-# try login with bad password
-
-# another: not admin, check claim?
-
-# another: admin, check claim etc.
-
+# Test Login
 
 def test_login_fail(client):
     # login as admin with bad password
@@ -53,11 +42,7 @@ def test_login_user_success(client):
     assert "access_token" in response.json
 
 
-# update user
-# try not admin or user *
-# try same user *
-# try admin *
-# not exists, exists *
+# Test updating a user
 
 def test_update_user_fail(client):
     # attempt to update the user when no permissions allowed
@@ -73,7 +58,7 @@ def test_update_user_fail(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "test2@test.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "UserTwo"
@@ -91,7 +76,7 @@ def test_update_same_user(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "magic@magic.com"
     assert response_check.json["first_name"] == "John"
     assert response_check.json["last_name"] == "Greenson"
@@ -108,7 +93,7 @@ def test_update_same_user(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "test2@test.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "UserTwo"
@@ -126,7 +111,7 @@ def test_update_user_from_admin(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "magic@magic.com"
     assert response_check.json["first_name"] == "John"
     assert response_check.json["last_name"] == "Greenson"
@@ -143,7 +128,7 @@ def test_update_user_from_admin(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == TEST_USER_2
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "test2@test.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "UserTwo"
@@ -156,10 +141,7 @@ def test_update_user_nonexistent(client):
     response = client.post('/update_user_details', headers=header, json=details)
     assert response.status_code == 403
 
-# delete user
-# try not admin *
-# try admin, need to create one first *
-# exists *and not exists*
+# Test deleting a user
 
 def test_delete_user_fail(client):
     # attempt to delete user when current one has no permission
@@ -194,7 +176,7 @@ def test_delete_user_success(client):
     assert response_check.status_code == 200
     assert response_check.json["username"] == temp_user
     # password is NEVER returned!
-    assert response_check.json["password"] == None
+    assert "password" not in response_check.json
     assert response_check.json["email"] == "court@jester.com"
     assert response_check.json["first_name"] == "Test"
     assert response_check.json["last_name"] == "Jones"
@@ -208,12 +190,7 @@ def test_delete_user_success(client):
 
 
 
-# fetch user:
-# try not admin or user *
-# try same user * - above
-# try admin:
-# not exists, *
-# exists * - above
+# Test getting user details
 
 def test_get_user_details_fail(client):
     # test that attempting to get user details with no permissions fails

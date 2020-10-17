@@ -21,6 +21,7 @@ type GetUsersPlantsData = {
     plant_health: string;
     plant_name: string;
     password: string;
+    maintainer: string | null;
 }[];
 
 interface GetCurrentUserData {
@@ -102,6 +103,8 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                             key={item.plant_id}
                             title={item.plant_name}
                             overallHealth={item.plant_health}
+                            maintainer={item.maintainer || undefined}
+                            plant_type={item.plant_type}
                         />
                     ))}
             </Content>

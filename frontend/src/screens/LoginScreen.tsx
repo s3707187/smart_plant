@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Form, Input, Button, Checkbox, Layout } from "antd";
+import { Form, Input, Button, Checkbox, Layout, Typography } from "antd";
 import { getAccessToken, setAccessToken, setRefreshToken } from "../app/token";
 import { ResponseData, ResponseError, usePost } from "../utils/apiHooks";
+import { Link as NavLink } from "react-router-dom";
+
+const { Link } = Typography;
 
 const layout = {
     labelCol: { span: 8 },
@@ -73,6 +76,10 @@ const LoginScreen: React.FC<LoginScreenProps> = (props: LoginScreenProps) => {
 
                     <Form.Item {...tailLayout} name="remember" valuePropName="checked">
                         <Checkbox>Remember me</Checkbox>
+                    </Form.Item>
+
+                    <Form.Item {...tailLayout} {...tailLayout}>
+                        <NavLink to={"/forgot_password"}>Forgot Password?</NavLink>
                     </Form.Item>
 
                     <Form.Item {...tailLayout}>

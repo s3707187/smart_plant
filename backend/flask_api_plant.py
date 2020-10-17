@@ -118,9 +118,12 @@ def get_users_plants():
     current_user = get_jwt_identity()
     if username_exists(current_user):
         if get_jwt_claims()['role'] == "admin":
-            plant = Plant.query.all()
-            result = Schema_Plants.dump(plant)
-            return jsonify(result), 200
+            plants = Plant.query.all()
+            all_plants = Schema_Plants.dump(plants)
+            for plant in all_plants:
+                maintainer = get_plant_maintainer(plant["plant_id"])
+                plant["maintainer"] = maintainer
+            return jsonify(all_plants), 200
         else:
             plants = []
             list_of_plants = []
@@ -138,6 +141,10 @@ def get_users_plants():
                 plant = plant[0]
                 result = Schema_Plant.dump(plant)
                 list_of_plants.append(result)
+            
+            for processed_plant in list_of_plants:
+                maintainer = get_plant_maintainer(processed_plant["plant_id"])
+                processed_plant["maintainer"] = maintainer
 
             return jsonify(list_of_plants), 200
     else:
@@ -160,7 +167,7 @@ def view_plant_details():
     errors = []
     current_user = get_jwt_identity()
     plant_id = request.args.get('plant_id')
-    if (username_exists(current_user) and
+    if (plant_exists(plant_id) and
         get_plant_read_permission(current_user, plant_id)):
         
         plant_info = get_plant(plant_id)
@@ -180,12 +187,17 @@ def view_plant_details():
             plant_info["access"] = "read"
         else:
             plant_info["access"] = "edit"
+        
+        # include the plant maintainer if there is one
+        maintainer = get_plant_maintainer(plant_id)
+        plant_info["maintainer"] = maintainer
+
         return jsonify(plant_info)
 
     else:
         errors.append({
             "path": ['username'],
-            "message": "incorrect token or invalid permission"
+            "message": "Invalid permission or plant does not exist"
         })
         return jsonify({
             "errors": errors
@@ -248,6 +260,9 @@ def delete_plant():
         try:
             # link_delete = Plant_link.query.get(plant_id)
             # db.session.delete(link_delete)
+            histories_unlink = Plant_history.query.filter_by(plant_id=plant_id)
+            for history in histories_unlink:
+                history.plant_id = None
 
             link_delete = Plant_link.query.filter_by(plant_id=plant_id)
             # TODO check this new fix by mitch
@@ -259,6 +274,8 @@ def delete_plant():
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
             can_delete = False
+            # roll back any changes
+            db.session.rollback()
             errors.append({
                 "path": ['plant_id'],
                 "message": "plant_id does not exist"
@@ -348,6 +365,60 @@ def get_plant_members():
         errors.append({
             "path": ['plant_id'],
             "message": "User does not have permission to view plant details."
+        })
+        return jsonify({
+            "errors": errors
+        }), 400
+
+@PLANT_API.route("/get_plant_notifications", methods=["GET"])
+@jwt_required
+def get_plant_notifications():
+    """ TODO docstring
+    """
+
+    errors = []
+    current_user = get_jwt_identity()
+    if username_exists(current_user):
+        # admin list is all plants that are unhealthy and not allocated to an admin
+        if get_jwt_claims()['role'] == "admin":
+            # get all unhealthy plants
+            plants = Plant.query.filter_by(plant_health="unhealthy").all()
+            all_plants = Schema_Plants.dump(plants)
+            
+            # only append unhealthy plants that do not have a maintainer
+            plants_in_need = []
+            for plant in all_plants:
+                maintainer = get_plant_maintainer(plant["plant_id"])
+                if maintainer is None:
+                    # notifications only need the ID and name of plant
+                    plants_in_need.append({"plant_id" : plant["plant_id"], "plant_name" : plant["plant_name"]})
+            return jsonify(plants_in_need), 200
+        else:
+            # return all user's unhealthy plants IDs and Names
+            plants = []
+            unhealthy_plants = []
+
+            # get all IDs of plants linked to user
+            plant_link = Plant_link.query.filter_by(username=current_user).all()
+            links = Schema_Plants_link.dump(plant_link)
+
+            for x in links:
+                if plant_exists(x["plant_id"]):
+                    plants.append(x["plant_id"])
+
+            # get plants themselves
+            for i in plants:
+                plant = Plant.query.get(i)
+                plant_details = Schema_Plant.dump(plant)
+                # only need the ID and name for notifications
+                if plant_details["plant_health"] == "unhealthy":
+                    unhealthy_plants.append({"plant_id" : plant_details["plant_id"], "plant_name" : plant_details["plant_name"]})
+            
+            return jsonify(unhealthy_plants), 200
+    else:
+        errors.append({
+            "path": ['username'],
+            "message": "incorrect token"
         })
         return jsonify({
             "errors": errors
