@@ -3,6 +3,16 @@ Team Reza's Fellas
 
 See release.txt for current release info.
 
+GitHub Repo Link: https://github.com/s3707187/smart_plant
+
+Deployed Frontend Link: https://frontend-dot-smart-plant-1.uc.r.appspot.com/
+Deployed Backend Link: https://smart-plant-1.uc.r.appspot.com/
+
+Demo user account details:
+Username: mateo
+Password: 123helloo
+
+
 --------- INSTALLATION AND RUNNING INSTRUCTIONS 
 
 Please refer to the Development Guide in our documentation package for instructions on how to run,
