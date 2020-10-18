@@ -1,7 +1,7 @@
 ACME Smart Plant
 Team Reza's Fellas
 
-Current Project State/Release Document (Week 12 Submission, Post Sprint 9)
+Current Project State/Release Document (Week 12 Submission, Post Sprint 9), 1.0.0
 --------------------------------------
 
 --------- RECENTLY ADDED
