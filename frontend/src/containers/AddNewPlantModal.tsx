@@ -1,10 +1,11 @@
-import { Form, Modal, Input, Button } from "antd";
+import { Form, Modal, Input, Button, Select } from "antd";
 import { ModalProps } from "antd/es/modal";
 import React from "react";
 import { usePost } from "../utils/apiHooks";
 
 interface AddNewPlantModalProps extends Pick<ModalProps, "visible" | "onCancel"> {
     onOk: () => void;
+    role: "admin" | "user" | undefined;
 }
 
 const layout = {
@@ -16,12 +17,12 @@ const tailLayout = {
 };
 
 const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantModalProps) => {
-    const { visible, onOk, onCancel } = props;
+    const { visible, onOk, onCancel, role } = props;
     const [form] = Form.useForm();
-    const [CreatePlant] = usePost<{}, { plant_name: string; plant_health: string; plant_type: string }>(
-        "register_plant",
-        form
-    );
+    const [CreatePlant] = usePost<
+        {},
+        { plant_name: string; plant_health: string; plant_type: string; plant_owner?: string }
+        >("register_plant", form);
     const onFinish = (values: any) => {
         console.log("Success:", values);
     };
@@ -40,6 +41,7 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
                     .validateFields()
                     .then(async (values) => {
                         await CreatePlant({
+                            ...values,
                             plant_health: "healthy",
                             plant_name: values.plant_name,
                             plant_type: values.plant_type,
@@ -64,6 +66,15 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
                 onFinish={onFinish}
                 onFinishFailed={onFinishFailed}
             >
+                {role === "admin" && (
+                    <Form.Item
+                        label="Plant Owner"
+                        name="plant_owner"
+                        rules={[{ required: true, message: "Please input the user who will own this plant!" }]}
+                    >
+                        <Input />
+                    </Form.Item>
+                )}
                 <Form.Item
                     label="Plant Name"
                     name="plant_name"
@@ -74,9 +85,13 @@ const AddNewPlantModal: React.FC<AddNewPlantModalProps> = (props: AddNewPlantMod
                 <Form.Item
                     label="Plant Type"
                     name="plant_type"
-                    rules={[{ required: true, message: "Please input the Plant ID!" }]}
+                    rules={[{ required: true, message: "Please select a plant type!" }]}
                 >
-                    <Input />
+                    <Select placeholder="Select a option and change input text above">
+                        <Select.Option value="Cactus type">Cactus type</Select.Option>
+                        <Select.Option data-cy="plant_option" value="Flowering type">Flowering type</Select.Option>
+                        <Select.Option value="Foliage type">Foliage type</Select.Option>
+                    </Select>
                 </Form.Item>
             </Form>
         </Modal>

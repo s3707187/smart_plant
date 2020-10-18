@@ -69,14 +69,16 @@ class Plant_type(db.Model):
 #Plant_history model
 class Plant_history(db.Model):
     __tablename__ = "Plant_history"
-    plant_id = db.Column(db.Integer, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
-    date_time = db.Column(db.Float, nullable=False)
+    history_id = db.Column(db.Integer, autoincrement=True, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
+    plant_id = db.Column(db.Integer, nullable=True)
+    date_time = db.Column(db.DateTime, nullable=False)
     temperature = db.Column(db.Float, nullable=False)
     humidity = db.Column(db.Float, nullable=False)
     light  = db.Column(db.Float, nullable=False)
     moisture  = db.Column(db.Float, nullable=False)
 
-    def __init__(self, plant_id, date_time, temperature, humidity, light, moisture):
+    def __init__(self,plant_id,date_time, temperature, humidity, light, moisture):
+        # self.history_id = history_id
         self.plant_id = plant_id
         self.date_time = date_time
         self.temperature = temperature
@@ -87,7 +89,7 @@ class Plant_history(db.Model):
 #Plant_history model
 class Plant_link(db.Model):
     __tablename__ = "Plant_link"
-    username = db.Column(db.VARCHAR(100), nullable=False, primary_key=True) #, ForeignKey('User.username')
+    username = db.Column(db.VARCHAR(100), nullable=False, primary_key=True) #primary_key=True #, ForeignKey('User.username')
     plant_id = db.Column(db.Integer, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
     user_type = db.Column(db.VARCHAR(100), nullable=False)
 
@@ -124,7 +126,7 @@ class Plant_type_Schema(ma.Schema):
     class Meta:
         # Fields to expose
         fields = ('plant_id', 'temp_min', 'temp_max', 'humidity_min', 'humidity_max',
-                    'light_min', 'light_max', 'moisture_min', 'moisture_max')
+                  'light_min', 'light_max', 'moisture_min', 'moisture_max')
 
 class Plant_history_Schema(ma.Schema):
 
