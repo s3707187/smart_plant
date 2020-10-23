@@ -1,11 +1,4 @@
 # standard imports
-# import datetime
-# import re
-# import string
-# import random
-# import json
-# import os
-# import requests
 
 # third party imports
 from smtplib import SMTPException
@@ -19,20 +12,9 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from flask_api_schema import *
 from flask_api_schema import db
 from flask import Blueprint, request, jsonify
-# render_template, Flask
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_marshmallow import Marshmallow
-# from flask import current_app as app
-# from sqlalchemy import func, ForeignKey, desc
-
-# from flask_api_schema import User_Schema, db, User, Plant, Plant_link, \
-#     Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history, \
-#     Schema_Users, Schema_Plants, Schema_Plant_link, Schema_User, Schema_Plant_type, \
-#     Plant_type
 
 from flask_api_helpers import *
 
-# from functools import wraps
 
 USER_API = Blueprint("user_api", __name__)
 
@@ -46,6 +28,15 @@ PASSWORD_LENGTH = 8
 @USER_API.route("/all_users", methods=["GET"])
 @jwt_required
 def get_all_users():
+    """ 
+    API method to get all users in database
+
+    Method: GET
+
+    GET Parameters: None
+
+    JWT: Required
+    """
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
@@ -75,7 +66,14 @@ def get_all_users():
 
 @USER_API.route("/login", methods=["POST"])
 def login():
-    """ TODO docstring
+    """ 
+    API method to login and retrieve JWT token 
+
+    Method: POST
+
+    JSON Parameters: username, password
+
+    JWT: Not required
     """
 
     errors = []
@@ -117,7 +115,14 @@ def login():
 
 @USER_API.route("/register", methods=["POST"])
 def register_new_user():
-    """ TODO docstring
+    """ 
+    API method to register and retrieve JWT token (auto login)
+
+    Method: POST
+
+    JSON Parameters: username, password, first_name, last_name, email
+
+    JWT: Not required
     """
 
     errors = []
@@ -181,7 +186,14 @@ def register_new_user():
 @USER_API.route("/refresh", methods=["POST"])
 @jwt_refresh_token_required
 def refresh():
-    """ TODO docstring
+    """ 
+    API method to refresh JWT token
+
+    Method: POST
+
+    JSON Parameters: None
+
+    JWT: Required
     """
 
     current_user = get_jwt_identity()
@@ -203,7 +215,14 @@ def refresh():
 @USER_API.route("/delete_user", methods=["POST"])
 @jwt_required
 def delete_user():
-    """ TODO docstring
+    """ 
+    API method to delete user and related objects (Plant links) from system
+
+    Method: POST
+
+    JSON Parameters: user_to_del
+
+    JWT: Required
     """
 
     errors = []
@@ -218,7 +237,6 @@ def delete_user():
 
         try:
             link_delete = Plant_link.query.filter_by(username=user_to_del)
-            # TODO check this new fix by mitch
             for link in link_delete:
                 db.session.delete(link)
         except sql_alchemy_error.exc.UnmappedInstanceError:
@@ -252,7 +270,14 @@ def delete_user():
 @USER_API.route("/update_user_details", methods=["POST"])
 @jwt_required
 def update_user_details():
-    """ TODO docstring
+    """ 
+    API method to update user details
+
+    Method: POST
+
+    JSON Parameters: username, password, email, first_name, last_name
+
+    JWT: Required
     """
 
     errors = []
@@ -327,7 +352,14 @@ def update_user_details():
 @USER_API.route("/current_user", methods=["GET"])
 @jwt_required
 def get_current_user():
-    """ TODO docstring
+    """ 
+    API method to get identity of current JWT identity
+
+    Method: GET
+
+    GET Parameters: None
+
+    JWT: Required
     """
 
     # Access the identity of the current user
@@ -338,7 +370,15 @@ def get_current_user():
 @USER_API.route("/remove_plant_link", methods=["POST"])
 @jwt_required
 def remove_plant_link():
-    """ TODO docstring
+    """ 
+    API method to remove a plant link between user and plant.
+
+    Method: POST
+
+    JSON Parameters: linked_user, plant_id
+    Optional JSON Parameters: link_type
+
+    JWT: Required
     """
 
     errors = []
@@ -396,7 +436,14 @@ def remove_plant_link():
 @USER_API.route("/add_plant_link", methods=["POST"])
 @jwt_required
 def add_plant_link():
-    """ TODO docstring
+    """ 
+    API method to add a plant link between user and plant.
+
+    Method: POST
+
+    JSON Parameters: user_to_link, plant_id, user_link_type
+
+    JWT: Required
     """
     errors = []
     # Access the identity of the current user
@@ -479,20 +526,18 @@ def add_plant_link():
             "errors": errors
         }), 400
 
-# @USER_API.route("/test_anything", methods=["GET"])
-# def test_anything():
-#     # maintainer = get_plant_maintainer(23)
-#     # print(maintainer)
-#     plants = Plant.query.filter_by(plant_health="unhealthy").all()
-#     all_plants = Schema_Plants.dump(plants)
-#     print(all_plants)
-#     return "test", 200
-    
 
 @USER_API.route("/get_user_details", methods=["GET"])
 @jwt_required
 def get_user_details():
-    """ TODO docstring
+    """ 
+    API method to get details for a user.
+
+    Method: GET
+
+    GET Parameters: user_to_query
+
+    JWT: Required
     """
     errors = []
     current_user = get_jwt_identity()
@@ -522,7 +567,14 @@ def get_user_details():
 
 @USER_API.route("/reset_user_password", methods=["POST"])
 def reset_user_password():
-    """ TODO docstring
+    """ 
+    API method to reset user's password and automatically email a temporary password.
+
+    Method: POST
+
+    POST Parameters: user_to_reset
+
+    JWT: Not required
     """
    
     user_to_reset = request.json["user_to_reset"]

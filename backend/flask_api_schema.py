@@ -9,7 +9,7 @@ db = SQLAlchemy()
 ma = Marshmallow()
 
 
-#User model
+# User model
 class User(db.Model):
     __tablename__ = "User"
     username = db.Column(db.VARCHAR(100), nullable=False, unique=True, primary_key=True)
@@ -27,7 +27,7 @@ class User(db.Model):
         self.email = email
         self.account_type = account_type
 
-#Plant model
+# Plant model
 class Plant(db.Model):
     __tablename__ = "Plant"
     plant_id = db.Column(db.Integer, nullable=False, unique=True, autoincrement=True, primary_key=True)
@@ -42,7 +42,7 @@ class Plant(db.Model):
         self.password = password
         self.plant_health = plant_health
 
-#Plant_type model
+# Plant_type model
 class Plant_type(db.Model):
     __tablename__ = "Plant_type"
     plant_type = db.Column(db.VARCHAR(100), nullable=False, unique=True, primary_key=True)
@@ -66,7 +66,7 @@ class Plant_type(db.Model):
         self.moisture_min = moisture_min
         self.moisture_max = moisture_max
 
-#Plant_history model
+# Plant_history model
 class Plant_history(db.Model):
     __tablename__ = "Plant_history"
     history_id = db.Column(db.Integer, autoincrement=True, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
@@ -86,7 +86,7 @@ class Plant_history(db.Model):
         self.light = light
         self.moisture = moisture
 
-#Plant_history model
+# Plant_history model
 class Plant_link(db.Model):
     __tablename__ = "Plant_link"
     username = db.Column(db.VARCHAR(100), nullable=False, primary_key=True) #primary_key=True #, ForeignKey('User.username')
