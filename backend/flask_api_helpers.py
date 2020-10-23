@@ -36,7 +36,10 @@ from flask import Blueprint, request, jsonify
 
 
 def username_exists(username_to_query):
-    """ TODO docstring
+    """ 
+    Helper method to check if user exists in database.
+
+    Returns: boolean
     """
 
     username = User.query.get(username_to_query)
@@ -46,7 +49,10 @@ def username_exists(username_to_query):
 
 
 def plant_exists(plant_to_query):
-    """ TODO docstring
+    """ 
+    Helper method to check if plant exists in database.
+
+    Returns: boolean
     """
 
     plant = Plant.query.get(plant_to_query)
@@ -55,19 +61,12 @@ def plant_exists(plant_to_query):
     return True
 
 
-# def get_plant_link(user_id, plant_id_to_query):
-#     """ TODO docstring
-#     """
-
-#     plant_link = Plant_link.query.filter_by(username=user_id, plant_id=plant_id_to_query)
-#     # print(plant_link)
-#     # plant_link = Plant_link.query.get(user_id).filter_by(plant_id=plant_id)
-#     links = Schema_Plants_link.dump(plant_link)
-#     print(links)
-#     return links
 
 def password_match(plant_id, password):
-    """ TODO docstring
+    """ 
+    Helper method to check if plant id/password matches
+
+    Returns: boolean
     """
 
     if plant_exists(plant_id):
@@ -81,7 +80,10 @@ def password_match(plant_id, password):
 
 
 def email_exists(email):
-    """ TODO docstring
+    """ 
+    Helper method to check if email exists for user in database.
+
+    Returns: boolean
     """
 
     response = db.session.query(User).filter((User.email == email)).first()
@@ -91,7 +93,10 @@ def email_exists(email):
 
 
 def get_user(username):
-    """ TODO docstring
+    """ 
+    Helper method to return user details from database.
+
+    Returns: dict
     """
 
     user = User.query.get(username)
@@ -100,7 +105,10 @@ def get_user(username):
 
 
 def get_plant(plant_id):
-    """ TODO docstring
+    """ 
+    Helper method to return plant details from database.
+
+    Returns: dict
     """
 
     plant = Plant.query.get(plant_id)
@@ -109,7 +117,10 @@ def get_plant(plant_id):
 
 
 def create_random_word():
-    """ TODO docstring
+    """ 
+    Helper method to create random 8 character string
+
+    Returns: string
     """
 
     word = ""
@@ -120,7 +131,10 @@ def create_random_word():
 
 
 def get_plant_type(type_to_check):
-    """ TODO docstring
+    """ 
+    Helper method to get details of plant_type from database
+
+    Returns: dict
     """
 
     plant_type = Plant_type.query.get(type_to_check)
@@ -129,7 +143,10 @@ def get_plant_type(type_to_check):
 
 
 def plant_type_exists(plant_type_to_query):
-    """ TODO docstring
+    """ 
+    Helper method to check if plant_type exists in database.
+
+    Returns: boolean
     """
 
     plant_type = get_plant_type(plant_type_to_query)
@@ -139,7 +156,10 @@ def plant_type_exists(plant_type_to_query):
 
 
 def is_email(email):
-    """ TODO docstring
+    """ 
+    Helper method to check if string matches email regex.
+
+    Returns: boolean
     """
 
     if re.match(r'[\w.-]+@([\w.-]+\.)+[\w-]+', email):
@@ -147,7 +167,10 @@ def is_email(email):
     return False
 
 def get_plant_link(username, plant_id):
-    """ TODO docstring
+    """ 
+    Helper method to return details of plant link from database.
+
+    Returns: dict
     """
     plant_link = Plant_link.query.get((username, plant_id))
     result = Schema_Plant_link.dump(plant_link)
@@ -156,7 +179,10 @@ def get_plant_link(username, plant_id):
     return result
 
 def get_plant_maintainer(plant_id):
-    """ TODO docstring
+    """ 
+    Helper method to return username of current allocated plant maintainer
+
+    Returns: string or None
     """
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
     for link in plant_links:
@@ -166,7 +192,10 @@ def get_plant_maintainer(plant_id):
     
 
 def get_plant_edit_permission(user_id, plant_id):
-    """ TODO docstring
+    """ 
+    Helper method to check if user can edit plant
+
+    Returns: boolean
     """
 
     # return true if user_id can edit details for plant_id (i.e. is the owner)
@@ -190,7 +219,10 @@ def get_plant_edit_permission(user_id, plant_id):
 
 
 def get_plant_read_permission(user_id, plant_id):
-    """ TODO docstring
+    """ 
+    Helper method to check if user can read plant
+
+    Returns: boolean
     """
 
     # return true if user_id can READ details for plant_id (i.e. is owner or viewer)
@@ -211,7 +243,10 @@ def get_plant_read_permission(user_id, plant_id):
 
 
 def get_user_edit_permission(user_id, user_to_edit):
-    """ TODO docstring
+    """ 
+    Helper method to check if user can edit other user
+
+    Returns: boolean
     """
     user_obj = get_user(user_id)
     if user_obj["account_type"] == "admin":
@@ -222,7 +257,10 @@ def get_user_edit_permission(user_id, user_to_edit):
 
 
 def get_user_read_permission(user_id, user_to_edit):
-    """ TODO docstring
+    """ 
+    Helper method to check if user can read other user
+
+    Returns: boolean
     """
     user_obj = get_user(user_id)
     if user_obj["account_type"] == "admin":
@@ -233,6 +271,11 @@ def get_user_read_permission(user_id, user_to_edit):
 
 
 def toScaledRadarData(healthMin, healthMax, dataPoint):
+    """ 
+    Helper method to convert data point to a scaled form for radar displays
+
+    Returns: float (between 0 and 1)
+    """
     # Static modifier for the standard deviation, this determines how large the healthy range should be on the chart
     dMod = 1.2
     # Calculated difference between min and max
@@ -241,17 +284,15 @@ def toScaledRadarData(healthMin, healthMax, dataPoint):
     mean = healthMax - (diff / 2)
     # Calculated scaled data, as well as the threshold for the min/max data
     sData = norm.cdf(dataPoint, mean, dMod * (diff))
-    # sMin = norm.cdf(healthMin, mean, dMod * (diff))
-    # sMax = norm.cdf(healthMax, mean, dMod * (diff))
-    # output = {
-    #     "scaledData": sData,
-    #     "scaledMin": sMin,
-    #     "scaledMax": sMax
-    # }
-    # print(sMin)
+    
     return sData #output
 
 def send_password_email(target_email, temp_password):
+    """ 
+    Helper method to send email with temporary password to a user.
+
+    Returns: None
+    """
     port = 465  # For SSL
     password = "progamproject123"
 
@@ -260,7 +301,6 @@ def send_password_email(target_email, temp_password):
 
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login("progam.project.fellas@gmail.com", password)
-        # TODO: Send email here
         sender_email = "progam.project.fellas@gmail.com"
         target_email = target_email
         # message contents
