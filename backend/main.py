@@ -41,12 +41,12 @@ cloud_sql_instance_name = "smart-plant-1:australia-southeast1:smartplant-dbms"
 
 
 # mysql+pymysql://<USER>:<PASSWORD>@/<DATABASE>?unix_socket=<socket_path>/<cloud_sql_instance_name>
-# app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@/{}?unix_socket={}/{}".format(USER, PASSWORD, DATABASE,
-                                                                                            #   socket_path,
-                                                                                            #   cloud_sql_instance_name)
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@/{}?unix_socket={}/{}".format(USER, PASSWORD, DATABASE,
+                                                                                               socket_path,
+                                                                                               cloud_sql_instance_name)
 
 #LOCAL
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@{}/{}".format(USER, PASSWORD, HOST, DATABASE)
+#app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://{}:{}@{}/{}".format(USER, PASSWORD, HOST, DATABASE)
 
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

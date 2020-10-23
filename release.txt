@@ -1,0 +1,25 @@
+ACME Smart Plant
+Team Reza's Fellas
+
+Current Project State/Release Document (Week 12 Submission, Post Sprint 9), 1.0.0
+--------------------------------------
+
+--------- RECENTLY ADDED
+
+- admin plant maintenance allocation/deallocation
+- updated user dashboard with colours, images and statuses
+- updated administrator dashboard with colours, images, statuses and maintenance
+- added notification system for unhealthy plants
+- password reset email feature
+
+
+--------- MISSING
+
+- plant dashboard key/legend
+- backend code documentation (commenting and docstrings)
+- some `mobile-friendlification` of front end UI
+
+--------- BUGS
+
+- admin deleting a user occasionally fails 
+- loaders and confirmation for frontend has a bug for plant actions
