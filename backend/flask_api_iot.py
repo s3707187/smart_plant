@@ -3,9 +3,6 @@ import datetime
 import re
 import string
 import random
-# import json
-# import os
-# import requests
 
 # third party imports
 from sqlalchemy import orm as sql_alchemy_error
@@ -17,50 +14,27 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from flask_api_schema import *
 from flask_api_schema import db
 from flask import Blueprint, request, jsonify
-# render_template, Flask
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_marshmallow import Marshmallow
-# from flask import current_app as app
-# from sqlalchemy import func, ForeignKey, desc
-
-# from flask_api_schema import User_Schema, db, User, Plant, Plant_link, \
-#     Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history, \
-#     Schema_Users, Schema_Plants, Schema_Plant_link, Schema_User, Schema_Plant_type, \
-#     Plant_type
 
 from flask_api_helpers import *
 
 
-# from functools import wraps
-
+# ------------ SETUP VARIBLES -------------------
 IOT_API = Blueprint("iot_api", __name__)
 SCALED_MIN = 0.33846
 SCALED_MAX = 0.66154
 
-# ------------ SETUP VARIBLES -------------------
-
 
 # ------------ CALLABLE API METHODS ----------------
-@IOT_API.route("/emailme", methods=["GET"])
-def emailme():
-    email("rohap12@gmail.com", "hello")
-    hi = "Hi"
-    return hi
-
-#DELETE THIS
-@IOT_API.route("/plants", methods=["GET"])
-def get_plants():
-    """ TODO docstring
-    """
-
-    plant = Plant.query.all()
-    result = Schema_Plants.dump(plant)
-    return jsonify(result)
 
 # IOT device
 @IOT_API.route("/verify_plant", methods=["POST"])
 def verify_plant():
-    """ TODO docstring
+    """ 
+    API method to verify a plant and password combination.
+    
+    Method: POST
+
+    JSON Parameters: plant_id, password
     """
 
     plant_id = request.json["plant_id"]
@@ -76,13 +50,18 @@ def verify_plant():
 
 @IOT_API.route("/save_plant_data", methods=["POST"])
 def save_plant_data():
-    """ TODO docstring
+    """ 
+    API method to upload a single instance of plant data.
+
+    Method: POST
+
+    JSON Parameters: plant_id, password, date_time, light, moisture, humidity, temperature
+
     """
 
     errors = []
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
-    # date_time = datetime.datetime.now().strftime("%H:%M:%S %Y-%m-%d") #request.json["date_time"]
     light = request.json["light"]
     moisture = request.json["moisture"]
     humidity = request.json["humidity"]
@@ -98,13 +77,14 @@ def save_plant_data():
             "message": "Username does not exist"
         })
 
+    # check password matches
     if not password_match(plant_id, password):
         valid = False
         errors.append({
             "path": ['password'],
             "message": "invalid password"
         })
-
+    # check light is a number
     if not (isinstance(light, float) or isinstance(light, int)):
         valid = False
         errors.append({
@@ -112,6 +92,7 @@ def save_plant_data():
             "message": "light is invalid"
         })
 
+    # check moisture is a number
     if not (isinstance(moisture, float) or isinstance(moisture, int)):
         valid = False
         errors.append({
@@ -119,6 +100,7 @@ def save_plant_data():
             "message": "moisture is invalid"
         })
 
+    # check humidity is a number
     if not (isinstance(humidity, float) or isinstance(humidity, int)):
         valid = False
         errors.append({
@@ -126,6 +108,7 @@ def save_plant_data():
             "message": "humidity is invalid"
         })
 
+    # check temperature is a number
     if not (isinstance(temperature, float) or isinstance(temperature, int)):
         valid = False
         errors.append({
@@ -133,19 +116,22 @@ def save_plant_data():
             "message": "temperature is invalid"
         })
 
+    # all checks pass
     if valid:
         plant_check = Plant.query.get(plant_id)
         plant_result = Schema_Plant.dump(plant_check)
 
+        # get max/min values for healthy ranges
         type_check = Plant_type.query.get(plant_result['plant_type'])
         type_result = Schema_Plant_type.dump(type_check)
 
-        #toScaledRadarData(healthMin, healthMax, dataPoint)
+        # scale data between 0 and 1 based on healthy ranges
         scaled_humidity = toScaledRadarData(type_result['humidity_min'], type_result['humidity_max'], humidity)
         scaled_moisture = toScaledRadarData(type_result['moisture_min'], type_result['moisture_max'], moisture)
         scaled_temperature = toScaledRadarData(type_result['temp_min'], type_result['temp_max'], temperature)
         scaled_light = toScaledRadarData(type_result['light_min'], type_result['light_max'], light)
 
+        # convert time to a valid SQL time format (%H:%M:%S %Y-%m-%d)
         real_time = datetime.datetime.strptime(date_time, "%H:%M:%S %Y-%m-%d")
         new_plant_history = Plant_history(
             plant_id, real_time, scaled_temperature, scaled_humidity, scaled_light, scaled_moisture)
@@ -168,6 +154,7 @@ def save_plant_data():
         db.session.commit()
         return jsonify(message), 201
     else:
+        # return any errors
         return jsonify({
             "errors": errors
         }), 400

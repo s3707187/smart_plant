@@ -3,9 +3,6 @@ import datetime
 import re
 import string
 import random
-# import json
-# import os
-# import requests
 
 # third party imports
 from sqlalchemy import orm as sql_alchemy_error
@@ -15,20 +12,9 @@ from flask_jwt_extended import get_jwt_identity, jwt_required, get_jwt_claims
 from flask_api_schema import *
 from flask_api_schema import db
 from flask import Blueprint, request, jsonify
-# render_template, Flask
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_marshmallow import Marshmallow
-# from flask import current_app as app
-# from sqlalchemy import func, ForeignKey, desc
-
-# from flask_api_schema import User_Schema, db, User, Plant, Plant_link, \
-#     Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history, \
-#     Schema_Users, Schema_Plants, Schema_Plant_link, Schema_User, Schema_Plant_type, \
-#     Plant_type
 
 from flask_api_helpers import *
 
-# from functools import wraps
 
 PLANT_API = Blueprint("plant_api", __name__)
 
@@ -39,7 +25,15 @@ PLANT_API = Blueprint("plant_api", __name__)
 @PLANT_API.route("/register_plant", methods=["POST"])
 @jwt_required
 def register_new_plant():
-    """ TODO docstring
+    """ 
+    API method to add a plant to the system
+
+    Method: POST
+
+    JSON Parameters: plant_type, plant_name, plant_owner
+    Optional JSON Parameters: plant_health
+
+    JWT: Required
     """
     valid = True
     errors = []
@@ -112,7 +106,14 @@ def register_new_plant():
 @PLANT_API.route("/get_users_plants", methods=["GET"])
 @jwt_required
 def get_users_plants():
-    """ TODO docstring
+    """ 
+    API method to get all plants visible to user
+
+    Method: GET
+
+    GET Parameters: None
+
+    JWT: Required
     """
     errors = []
     current_user = get_jwt_identity()
@@ -161,7 +162,14 @@ def get_users_plants():
 @PLANT_API.route("/view_plant_details", methods=["GET"])
 @jwt_required
 def view_plant_details():
-    """ TODO docstring
+    """ 
+    API method to get details for a plant
+
+    Method: GET
+
+    GET Parameters: plant_id
+
+    JWT: Required
     """
 
     errors = []
@@ -207,7 +215,14 @@ def view_plant_details():
 @PLANT_API.route("/get_plant_records", methods=["GET"])
 @jwt_required
 def get_recent_plant_record():
-    """ TODO docstring
+    """ 
+    API method to get all plant history for a plant
+
+    Method: GET
+
+    GET Parameters: plant_id
+
+    JWT: Required
     """
 
     errors = []
@@ -246,7 +261,14 @@ def get_recent_plant_record():
 @PLANT_API.route("/delete_plant", methods=["POST"])
 @jwt_required
 def delete_plant():
-    """ TODO docstring
+    """ 
+    API method to delete plant from system
+
+    Method: POST
+
+    JSON Parameters: plant_id
+
+    JWT: Required
     """
 
     errors = []
@@ -299,7 +321,14 @@ def delete_plant():
 @PLANT_API.route("/update_plant_details", methods=["POST"])
 @jwt_required
 def update_plant_details():
-    """ TODO docstring
+    """ 
+    API method to update details for plant in system.
+
+    Method: POST
+
+    JSON Parameters: plant_id, plant_name, plant_type
+
+    JWT: Required
     """
 
     errors = []
@@ -344,7 +373,14 @@ def update_plant_details():
 @PLANT_API.route("/get_plant_members", methods=["GET"])
 @jwt_required
 def get_plant_members():
-    """ TODO docstring
+    """ 
+    API method to get all members added to plant viewership.
+
+    Method: GET
+
+    JSON Parameters: plant_id
+
+    JWT: Required
     """
 
     errors = []
@@ -373,7 +409,14 @@ def get_plant_members():
 @PLANT_API.route("/get_plant_notifications", methods=["GET"])
 @jwt_required
 def get_plant_notifications():
-    """ TODO docstring
+    """ 
+    API method to get notifications for unhealthy plants in system.
+
+    Method: GET
+
+    GET Parameters: None
+
+    JWT: Required
     """
 
     errors = []
