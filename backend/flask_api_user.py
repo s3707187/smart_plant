@@ -1,4 +1,6 @@
-# standard imports
+"""
+Module storing User API functionalities for ACME Smart Plant.
+"""
 
 # third party imports
 from smtplib import SMTPException
@@ -40,6 +42,7 @@ def get_all_users():
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
+        # only proceed if admin user
         if get_jwt_claims()['role'] == "admin":
             users = User.query.all()
             result = Schema_Users.dump(users)
@@ -47,8 +50,8 @@ def get_all_users():
             # delete password field from each user
             for user in result:
                 del user['password']
-            # return all users
 
+            # return all users
             return jsonify(result), 200
         else:
             errors.append({
@@ -77,10 +80,12 @@ def login():
     """
 
     errors = []
+    # get JSON params
     username = request.json["username"]
     password = request.json["password"]
     hashed_password = None
     valid_user = True
+    # check user exists
     if not username_exists(username):
         valid_user = False
         errors.append({
@@ -92,12 +97,13 @@ def login():
         }), 400
     else:
         hashed_password = get_user(username)["password"]
-
+    # check password hash matches
     if pbkdf2_sha256.verify(password, hashed_password) and valid_user:
         # return tokens
         # would frontend want to be returned the user type here?
         # otherwise a new API method to return user type
         user_type = get_user(username)["account_type"]
+        # return token, success, and user type as role user claim
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": user_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": user_type})
@@ -127,15 +133,17 @@ def register_new_user():
 
     errors = []
     valid_user = True
+    # get JSON params
     username = request.json["username"]
     first_name = request.json["first_name"]
     last_name = request.json["last_name"]
     email = request.json["email"]
     password = request.json["password"]
-    # account_type = request.json["account_type"]
+    # only user accounts can be registered
     account_type = "user"
-
+    # check password is long enough
     if len(password) >= PASSWORD_LENGTH:
+        # hash password
         hashed_password = pbkdf2_sha256.hash(password)
     else:
         valid_user = False
@@ -143,18 +151,21 @@ def register_new_user():
             "path": ['password'],
             "message": "The password did not contain enough characters (min 8)"
         })
+    # check username does not exist
     if username_exists(username):
         valid_user = False
         errors.append({
             "path": ['username'],
             "message": "Username already exists or is incorrect"
         })
+    # check email has not been used already, and is a valid format
     if email_exists(email) or not is_email(email):
         valid_user = False
         errors.append({
             "path": ['email'],
             "message": "Email already exists or is incorrect"
         })
+    # check names are only letters and not empty
     if not first_name.isalpha() or len(first_name) == 0:
         valid_user = False
         errors.append({
@@ -169,10 +180,12 @@ def register_new_user():
         })
 
     if valid_user:
+        # create user if all valid
         new_user = User(username, hashed_password,
                         first_name, last_name, email, account_type)
         db.session.add(new_user)
         db.session.commit()
+        # return JWT token with user role claim, success
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": account_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": account_type})
@@ -193,12 +206,14 @@ def refresh():
 
     JSON Parameters: None
 
-    JWT: Required
+    JWT: Refresh token required
     """
-
+    # get the username
     current_user = get_jwt_identity()
     if username_exists(current_user):
+        # get user type
         user_type = get_user(current_user)["account_type"]
+        # return access token
         return jsonify({
             "access_token": create_access_token(current_user, user_claims={"role": user_type})
         }), 201
@@ -230,22 +245,24 @@ def delete_user():
     user_to_del = request.json["user_to_del"]
     can_delete = True
     # check if the user to delete exists and current user has permissions over it
-    # don't need to check if current_user exists here 
     if (username_exists(current_user) 
         and username_exists(user_to_del)
         and get_user_edit_permission(current_user, user_to_del)):
 
         try:
+            # attempt to delete all plant links if they exist
             link_delete = Plant_link.query.filter_by(username=user_to_del)
             for link in link_delete:
                 db.session.delete(link)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
         try:
+            # attempt to delete user
             user_delete = User.query.get(user_to_del)
             db.session.delete(user_delete)
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
+            # will return error if delete fails
             can_delete = False
             # roll back any changes
             db.session.rollback()
@@ -282,9 +299,7 @@ def update_user_details():
 
     errors = []
     successful_change = True
-    # perhaps request.json should contain the user to update too?
-    # so the admin can update user details? would then need to add an edit-
-    # permissions check where username exists check is                      DONE
+    # get new user details from JSON, or blanks if not filled
     current_user = get_jwt_identity()
     password = request.json.get('password', "")
     email = request.json.get('email', "")
@@ -293,8 +308,11 @@ def update_user_details():
     username = request.json['username']
     # check if username exists, current user has permission to edit
     if username_exists(username) and get_user_edit_permission(current_user, username):
+        # get user object
         user_to_change = User.query.get(username)
+        # only process non-empty fields
         if password != "":
+            # check password is long enough
             if len(password) >= PASSWORD_LENGTH:
                 hashed_password = pbkdf2_sha256.hash(password)
                 user_to_change.password = hashed_password
@@ -306,6 +324,7 @@ def update_user_details():
                                "enough characters (min 8)"
                 })
         if email != "":
+            # check email is valid
             if is_email(email):
                 user_to_change.email = email
             else:
@@ -316,6 +335,7 @@ def update_user_details():
                 })
 
         if first_name != "":
+            # check names are characters only
             if first_name.isalpha() and len(first_name) > 0:
                 user_to_change.first_name = first_name
             else:
@@ -324,6 +344,7 @@ def update_user_details():
                     "message": "first name is incorrect"
                 })
         if last_name != "":
+            # check names are characters only
             if last_name.isalpha() and len(last_name) > 0:
                 user_to_change.last_name = last_name
             else:
@@ -341,6 +362,7 @@ def update_user_details():
         })
 
     if successful_change:
+        # commit user object changes
         db.session.commit()
         return jsonify("User Details Successfully Changed"), 201
     else:
@@ -549,7 +571,7 @@ def get_user_details():
         and get_user_read_permission(current_user, user_to_query)):
         # get details
         user_details = get_user(user_to_query)
-        # don't return the password, ever (unless?)
+        # don't return the password, ever
         del user_details['password']
         return jsonify(user_details), 200
 
@@ -598,9 +620,8 @@ def reset_user_password():
                 pass
    
     
-    # this method will not return errors, for security
+    # this method will not return errors, for security.
     # that is, we do not want to allow repeated reset request to
-    # reveal usernames that exist in the system.
-    # frontend should say "if this user exists, the password will be reset"
+    # reveal users/admins that exist in the system.
     return jsonify({}), 200
 

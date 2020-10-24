@@ -1,12 +1,13 @@
+"""
+Module storing API helper functionalities for ACME Smart Plant.
+"""
+
 # standard imports
 import datetime
 import re
 import string
 import random
 import smtplib, ssl
-# import json
-# import os
-# import requests
 
 # third party imports
 from scipy.stats import norm
@@ -19,18 +20,6 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from flask_api_schema import *
 from flask_api_schema import db
 from flask import Blueprint, request, jsonify
-
-
-# render_template, Flask
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_marshmallow import Marshmallow
-# from flask import current_app as app
-# from sqlalchemy import func, ForeignKey, desc
-
-# from flask_api_schema import User_Schema, db, User, Plant, Plant_link, \
-#     Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history, \
-#     Schema_Users, Schema_Plants, Schema_Plant_link, Schema_User, Schema_Plant_type, \
-#     Plant_type
 
 # ------------ HELPER FUNCTIONS ----------------
 

@@ -1,3 +1,6 @@
+"""
+Module storing IoT API functionalities for ACME Smart Plant.
+"""
 # standard imports
 import datetime
 import re

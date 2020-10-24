@@ -1,3 +1,6 @@
+"""
+Module storing database Schema information for ACME Smart Plant.
+"""
 from flask import Flask, Blueprint, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
@@ -5,12 +8,16 @@ from flask import current_app as app
 from sqlalchemy import func, ForeignKey, desc
 import datetime
 
+# instantiate database and marshmallow objects
 db = SQLAlchemy()
 ma = Marshmallow()
 
 
 # User model
 class User(db.Model):
+    """
+    Class to represent User database object model
+    """
     __tablename__ = "User"
     username = db.Column(db.VARCHAR(100), nullable=False, unique=True, primary_key=True)
     password = db.Column(db.VARCHAR(100), nullable=False)
@@ -29,6 +36,9 @@ class User(db.Model):
 
 # Plant model
 class Plant(db.Model):
+    """
+    Class to represent Plant database object model
+    """
     __tablename__ = "Plant"
     plant_id = db.Column(db.Integer, nullable=False, unique=True, autoincrement=True, primary_key=True)
     plant_type = db.Column(db.VARCHAR(100), nullable=False) #, ForeignKey('Plant_type.plant_type')
@@ -44,6 +54,9 @@ class Plant(db.Model):
 
 # Plant_type model
 class Plant_type(db.Model):
+    """
+    Class to represent Plant_type database object model
+    """
     __tablename__ = "Plant_type"
     plant_type = db.Column(db.VARCHAR(100), nullable=False, unique=True, primary_key=True)
     temp_min = db.Column(db.Float, nullable=False)
@@ -68,6 +81,9 @@ class Plant_type(db.Model):
 
 # Plant_history model
 class Plant_history(db.Model):
+    """
+    Class to represent Plant_history database object model
+    """
     __tablename__ = "Plant_history"
     history_id = db.Column(db.Integer, autoincrement=True, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
     plant_id = db.Column(db.Integer, nullable=True)
@@ -88,6 +104,9 @@ class Plant_history(db.Model):
 
 # Plant_history model
 class Plant_link(db.Model):
+    """
+    Class to represent Plant_link database object model
+    """
     __tablename__ = "Plant_link"
     username = db.Column(db.VARCHAR(100), nullable=False, primary_key=True) #primary_key=True #, ForeignKey('User.username')
     plant_id = db.Column(db.Integer, nullable=False, primary_key=True) #, ForeignKey('Plant.plant_id')
@@ -101,51 +120,77 @@ class Plant_link(db.Model):
 
 
 class User_Schema(ma.Schema):
-
+    """
+    Class to represent schema for User objects
+    """
     def __init__(self, strict=True, **kwargs):
         super(User_Schema, self).__init__(**kwargs)
 
     class Meta:
+        """
+        Required inner class storing fields.
+        """
         # Fields to expose
         fields = ('username', 'password', 'first_name', 'last_name', 'email', 'account_type')
 
 class Plant_Schema(ma.Schema):
-
+    """
+    Class to represent schema for Plant objects
+    """ 
     def __init__(self, strict=True, **kwargs):
         super(Plant_Schema, self).__init__(**kwargs)
 
     class Meta:
+        """
+        Required inner class storing fields.
+        """
         # Fields to expose
         fields = ('plant_id', 'plant_type', 'plant_name', 'plant_health', 'password')
 
 class Plant_type_Schema(ma.Schema):
-
+    """
+    Class to represent schema for Plant_type objects
+    """ 
     def __init__(self, strict=True, **kwargs):
         super(Plant_type_Schema, self).__init__(**kwargs)
 
     class Meta:
+        """
+        Required inner class storing fields.
+        """
         # Fields to expose
         fields = ('plant_id', 'temp_min', 'temp_max', 'humidity_min', 'humidity_max',
                   'light_min', 'light_max', 'moisture_min', 'moisture_max')
 
 class Plant_history_Schema(ma.Schema):
-
+    """
+    Class to represent schema for Plant_history objects
+    """ 
     def __init__(self, strict=True, **kwargs):
         super(Plant_history_Schema, self).__init__(**kwargs)
 
     class Meta:
+        """
+        Required inner class storing fields.
+        """
         # Fields to expose
         fields = ('plant_id', 'date_time', 'temperature', 'humidity', 'light', 'moisture')
 
 class Plant_link_Schema(ma.Schema):
-
+    """
+    Class to represent schema for Plant_link objects
+    """ 
     def __init__(self, strict=True, **kwargs):
         super(Plant_link_Schema, self).__init__(**kwargs)
 
     class Meta:
+        """
+        Required inner class storing fields.
+        """
         # Fields to expose
         fields = ('username', 'plant_id', 'user_type')
 
+# instantiate schemas for singular and multiples
 Schema_User = User_Schema()
 Schema_Users = User_Schema(many=True)
 
