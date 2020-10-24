@@ -357,15 +357,17 @@ def update_plant_details():
     plant_id = request.json['plant_id']
     plant_name = request.json['plant_name']
     plant_type = request.json['plant_type']
+    # check plant exists and user has edit permissions
     if (plant_exists(plant_id)
         and get_plant_edit_permission(current_user, plant_id)):
 
         plant_to_change = Plant.query.get(plant_id)
-
+        # check each field is submitted (not empty) before updating
         if plant_name != "":
             plant_to_change.plant_name = plant_name
 
         if plant_type != "":
+            # check plant type is valid
             if plant_type_exists(plant_type):
                 plant_to_change.plant_type = plant_type
             else:
@@ -383,6 +385,7 @@ def update_plant_details():
         })
 
     if successful_change:
+        # commit changes if successful
         db.session.commit()
         return jsonify("User Details Successfully Changed"), 201
     else:
@@ -407,14 +410,17 @@ def get_plant_members():
     current_user = get_jwt_identity()
     plant_id = request.args.get('plant_id')
 
+    # check current user has read permission on plant
     if get_plant_read_permission(current_user, plant_id):
+        # get all links to plant
         plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
         links = Schema_Plants_link.dump(plant_links)
-        # print(links)
         user_ids = []
+        # get user_ids from each link
         for link in links:
             if link["user_type"] == "plant_viewer":
                 user_ids.append(link["username"])
+        # return list of users
         return jsonify(user_ids), 200
 
     else:
