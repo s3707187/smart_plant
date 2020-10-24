@@ -30,7 +30,7 @@ def username_exists(username_to_query):
 
     Returns: boolean
     """
-
+    # check username query return is not None
     username = User.query.get(username_to_query)
     if username is None:
         return False
@@ -43,7 +43,7 @@ def plant_exists(plant_to_query):
 
     Returns: boolean
     """
-
+    # check plant_id query return is not None
     plant = Plant.query.get(plant_to_query)
     if plant is None:
         return False
@@ -53,19 +53,22 @@ def plant_exists(plant_to_query):
 
 def password_match(plant_id, password):
     """ 
-    Helper method to check if plant id/password matches
+    Helper method to check if plant id/password (hashed) matches
 
     Returns: boolean
     """
-
+    # check plant exists
     if plant_exists(plant_id):
+        # get plant as dict
         plant = Plant.query.get(plant_id)
         result = Schema_Plant.dump(plant)
-
+        # check password (hashed) matches exactly
         if not result['password'] == password:
             return False
         else:
             return True
+    else:
+        return False
 
 
 def email_exists(email):
@@ -74,8 +77,9 @@ def email_exists(email):
 
     Returns: boolean
     """
-
+    # get user by matching email
     response = db.session.query(User).filter((User.email == email)).first()
+    # return false if no user has this email already
     if response is None:
         return False
     return True
@@ -88,6 +92,7 @@ def get_user(username):
     Returns: dict
     """
 
+    # fetch and return user details as dict
     user = User.query.get(username)
     result = Schema_User.dump(user)
     return result
@@ -99,7 +104,7 @@ def get_plant(plant_id):
 
     Returns: dict
     """
-
+    # fetch and return plant details as dict
     plant = Plant.query.get(plant_id)
     result = Schema_Plant.dump(plant)
     return result
@@ -114,6 +119,7 @@ def create_random_word():
 
     word = ""
     for i in range(4):
+        # append a random int and random ascii char
         word += str(random.randint(0, 9))
         word += random.choice(string.ascii_letters)
     return word
@@ -125,9 +131,10 @@ def get_plant_type(type_to_check):
 
     Returns: dict
     """
-
+    # fetch plant_type object as dict from database
     plant_type = Plant_type.query.get(type_to_check)
     result = Schema_Plant_type.dump(plant_type)
+    # return dict
     return result
 
 
@@ -137,7 +144,7 @@ def plant_type_exists(plant_type_to_query):
 
     Returns: boolean
     """
-
+    # check plant_type exists in database (query is not None)
     plant_type = get_plant_type(plant_type_to_query)
     if plant_type is None or plant_type == {}:
         return False
@@ -150,7 +157,7 @@ def is_email(email):
 
     Returns: boolean
     """
-
+    # check email matches regex
     if re.match(r'[\w.-]+@([\w.-]+\.)+[\w-]+', email):
         return True
     return False
@@ -161,8 +168,11 @@ def get_plant_link(username, plant_id):
 
     Returns: dict
     """
+    # fetch plant_link from database
     plant_link = Plant_link.query.get((username, plant_id))
+    # convert to dict
     result = Schema_Plant_link.dump(plant_link)
+    # return None or dict
     if result == {}:
         result = None
     return result
@@ -173,8 +183,11 @@ def get_plant_maintainer(plant_id):
 
     Returns: string or None
     """
+    # get all plant links for this plant
     plant_links = Plant_link.query.filter_by(plant_id=plant_id).all()
+    # find plant link of type maintenance
     for link in plant_links:
+        # return username of maintenance link
         if link.user_type == "maintenance":
             return link.username
     return None
@@ -187,11 +200,7 @@ def get_plant_edit_permission(user_id, plant_id):
     Returns: boolean
     """
 
-    # return true if user_id can edit details for plant_id (i.e. is the owner)
-    # (including whether they can edit the links for that plant, which they can
-    # if they own it)
-    # admins get TRUE too
-    # use this to determine if they can get the plant password too
+    # automatically return true for admins
     user_obj = get_user(user_id)
     if user_obj["account_type"] == "admin":
         return True
@@ -209,13 +218,15 @@ def get_plant_edit_permission(user_id, plant_id):
 
 def get_plant_read_permission(user_id, plant_id):
     """ 
-    Helper method to check if user can read plant
+    Helper method to check if user can read plant.
 
     Returns: boolean
     """
 
-    # return true if user_id can READ details for plant_id (i.e. is owner or viewer)
-    # admins get TRUE too
+    # return true if user_id can read details for plant_id 
+    # (i.e. is owner or viewer or admin)
+
+    # always return true for admins
     user_obj = get_user(user_id)
     if user_obj["account_type"] == "admin":
         return True
@@ -237,11 +248,12 @@ def get_user_edit_permission(user_id, user_to_edit):
 
     Returns: boolean
     """
+    # return True for admins attempting to do the editing
     user_obj = get_user(user_id)
     if user_obj["account_type"] == "admin":
         return True
 
-    # return true if user_id = user_to_edit or if user_id is an admin
+    # return true if the user is editing itself
     return user_id == user_to_edit
 
 
@@ -251,11 +263,12 @@ def get_user_read_permission(user_id, user_to_edit):
 
     Returns: boolean
     """
+    # return True for admins attempting to do the reading
     user_obj = get_user(user_id)
     if user_obj["account_type"] == "admin":
         return True
         
-    # return true if user_id = user_to_edit or if user_id is an admin
+    # return true if user is reading itself
     return user_id == user_to_edit
 
 
@@ -287,13 +300,13 @@ def send_password_email(target_email, temp_password):
 
     # Create a secure SSL context
     context = ssl.create_default_context()
-
+    
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login("progam.project.fellas@gmail.com", password)
         sender_email = "progam.project.fellas@gmail.com"
         target_email = target_email
-        # message contents
 
+        # message contents
         message = """\
         Subject: ACME Smart Plant Password Reset
 

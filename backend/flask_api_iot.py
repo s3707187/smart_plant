@@ -39,12 +39,12 @@ def verify_plant():
 
     JSON Parameters: plant_id, password
     """
-
+    # get JSON params
     plant_id = request.json["plant_id"]
     password = request.json["password"]
     invalid_message = "incorrect password"
     valid_message = "Plant successfully verified"
-
+    # check password matches (method checks plant exists)
     if password_match(plant_id, password):
         return jsonify(valid_message), 200
     else:
@@ -63,6 +63,7 @@ def save_plant_data():
     """
 
     errors = []
+    # get plant information and sensor data params
     plant_id = request.json["plant_id"]
     date_time = request.json["date_time"]
     light = request.json["light"]
