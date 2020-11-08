@@ -9,8 +9,10 @@ from main import USER, PASSWORD, HOST
 # use -s option after `pytest` to show all print statement output
 
 # used flask tutorial: https://flask.palletsprojects.com/en/1.1.x/testing/
+# useful link for JWT authorisation mocking:
 # https://stackoverflow.com/questions/46846762/flask-jwt-extended-fake-authorization-header-during-testing-pytest
 
+# testing constants
 TEST_DATABASE = "testing_smart_plant"
 TEST_JWT_KEY = "testing1234"
 

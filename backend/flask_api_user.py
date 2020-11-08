@@ -1,11 +1,6 @@
-# standard imports
-# import datetime
-# import re
-# import string
-# import random
-# import json
-# import os
-# import requests
+"""
+Module storing User API functionalities for ACME Smart Plant.
+"""
 
 # third party imports
 from smtplib import SMTPException
@@ -19,20 +14,9 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from flask_api_schema import *
 from flask_api_schema import db
 from flask import Blueprint, request, jsonify
-# render_template, Flask
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_marshmallow import Marshmallow
-# from flask import current_app as app
-# from sqlalchemy import func, ForeignKey, desc
-
-# from flask_api_schema import User_Schema, db, User, Plant, Plant_link, \
-#     Schema_Plant, Schema_Plants_history, Schema_Plants_link, Plant_history, \
-#     Schema_Users, Schema_Plants, Schema_Plant_link, Schema_User, Schema_Plant_type, \
-#     Plant_type
 
 from flask_api_helpers import *
 
-# from functools import wraps
 
 USER_API = Blueprint("user_api", __name__)
 
@@ -46,9 +30,19 @@ PASSWORD_LENGTH = 8
 @USER_API.route("/all_users", methods=["GET"])
 @jwt_required
 def get_all_users():
+    """ 
+    API method to get all users in database
+
+    Method: GET
+
+    GET Parameters: None
+
+    JWT: Required
+    """
     errors = []
     current_user = get_jwt_identity()
     if username_exists(current_user):
+        # only proceed if admin user
         if get_jwt_claims()['role'] == "admin":
             users = User.query.all()
             result = Schema_Users.dump(users)
@@ -56,8 +50,8 @@ def get_all_users():
             # delete password field from each user
             for user in result:
                 del user['password']
-            # return all users
 
+            # return all users
             return jsonify(result), 200
         else:
             errors.append({
@@ -75,14 +69,23 @@ def get_all_users():
 
 @USER_API.route("/login", methods=["POST"])
 def login():
-    """ TODO docstring
+    """ 
+    API method to login and retrieve JWT token 
+
+    Method: POST
+
+    JSON Parameters: username, password
+
+    JWT: Not required
     """
 
     errors = []
+    # get JSON params
     username = request.json["username"]
     password = request.json["password"]
     hashed_password = None
     valid_user = True
+    # check user exists
     if not username_exists(username):
         valid_user = False
         errors.append({
@@ -94,12 +97,13 @@ def login():
         }), 400
     else:
         hashed_password = get_user(username)["password"]
-
+    # check password hash matches
     if pbkdf2_sha256.verify(password, hashed_password) and valid_user:
         # return tokens
         # would frontend want to be returned the user type here?
         # otherwise a new API method to return user type
         user_type = get_user(username)["account_type"]
+        # return token, success, and user type as role user claim
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": user_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": user_type})
@@ -117,20 +121,29 @@ def login():
 
 @USER_API.route("/register", methods=["POST"])
 def register_new_user():
-    """ TODO docstring
+    """ 
+    API method to register and retrieve JWT token (auto login)
+
+    Method: POST
+
+    JSON Parameters: username, password, first_name, last_name, email
+
+    JWT: Not required
     """
 
     errors = []
     valid_user = True
+    # get JSON params
     username = request.json["username"]
     first_name = request.json["first_name"]
     last_name = request.json["last_name"]
     email = request.json["email"]
     password = request.json["password"]
-    # account_type = request.json["account_type"]
+    # only user accounts can be registered
     account_type = "user"
-
+    # check password is long enough
     if len(password) >= PASSWORD_LENGTH:
+        # hash password
         hashed_password = pbkdf2_sha256.hash(password)
     else:
         valid_user = False
@@ -138,18 +151,21 @@ def register_new_user():
             "path": ['password'],
             "message": "The password did not contain enough characters (min 8)"
         })
+    # check username does not exist
     if username_exists(username):
         valid_user = False
         errors.append({
             "path": ['username'],
             "message": "Username already exists or is incorrect"
         })
+    # check email has not been used already, and is a valid format
     if email_exists(email) or not is_email(email):
         valid_user = False
         errors.append({
             "path": ['email'],
             "message": "Email already exists or is incorrect"
         })
+    # check names are only letters and not empty
     if not first_name.isalpha() or len(first_name) == 0:
         valid_user = False
         errors.append({
@@ -164,10 +180,12 @@ def register_new_user():
         })
 
     if valid_user:
+        # create user if all valid
         new_user = User(username, hashed_password,
                         first_name, last_name, email, account_type)
         db.session.add(new_user)
         db.session.commit()
+        # return JWT token with user role claim, success
         return jsonify({
             "access_token": create_access_token(username, user_claims={"role": account_type}),
             "refresh_token": create_refresh_token(username, user_claims={"role": account_type})
@@ -181,12 +199,21 @@ def register_new_user():
 @USER_API.route("/refresh", methods=["POST"])
 @jwt_refresh_token_required
 def refresh():
-    """ TODO docstring
-    """
+    """ 
+    API method to refresh JWT token
 
+    Method: POST
+
+    JSON Parameters: None
+
+    JWT: Refresh token required
+    """
+    # get the username
     current_user = get_jwt_identity()
     if username_exists(current_user):
+        # get user type
         user_type = get_user(current_user)["account_type"]
+        # return access token
         return jsonify({
             "access_token": create_access_token(current_user, user_claims={"role": user_type})
         }), 201
@@ -203,7 +230,14 @@ def refresh():
 @USER_API.route("/delete_user", methods=["POST"])
 @jwt_required
 def delete_user():
-    """ TODO docstring
+    """ 
+    API method to delete user and related objects (Plant links) from system
+
+    Method: POST
+
+    JSON Parameters: user_to_del
+
+    JWT: Required
     """
 
     errors = []
@@ -211,23 +245,24 @@ def delete_user():
     user_to_del = request.json["user_to_del"]
     can_delete = True
     # check if the user to delete exists and current user has permissions over it
-    # don't need to check if current_user exists here 
     if (username_exists(current_user) 
         and username_exists(user_to_del)
         and get_user_edit_permission(current_user, user_to_del)):
 
         try:
+            # attempt to delete all plant links if they exist
             link_delete = Plant_link.query.filter_by(username=user_to_del)
-            # TODO check this new fix by mitch
             for link in link_delete:
                 db.session.delete(link)
         except sql_alchemy_error.exc.UnmappedInstanceError:
             pass
         try:
+            # attempt to delete user
             user_delete = User.query.get(user_to_del)
             db.session.delete(user_delete)
             db.session.commit()
         except sql_alchemy_error.exc.UnmappedInstanceError:
+            # will return error if delete fails
             can_delete = False
             # roll back any changes
             db.session.rollback()
@@ -252,14 +287,19 @@ def delete_user():
 @USER_API.route("/update_user_details", methods=["POST"])
 @jwt_required
 def update_user_details():
-    """ TODO docstring
+    """ 
+    API method to update user details
+
+    Method: POST
+
+    JSON Parameters: username, password, email, first_name, last_name
+
+    JWT: Required
     """
 
     errors = []
     successful_change = True
-    # perhaps request.json should contain the user to update too?
-    # so the admin can update user details? would then need to add an edit-
-    # permissions check where username exists check is                      DONE
+    # get new user details from JSON, or blanks if not filled
     current_user = get_jwt_identity()
     password = request.json.get('password', "")
     email = request.json.get('email', "")
@@ -268,8 +308,11 @@ def update_user_details():
     username = request.json['username']
     # check if username exists, current user has permission to edit
     if username_exists(username) and get_user_edit_permission(current_user, username):
+        # get user object
         user_to_change = User.query.get(username)
+        # only process non-empty fields
         if password != "":
+            # check password is long enough
             if len(password) >= PASSWORD_LENGTH:
                 hashed_password = pbkdf2_sha256.hash(password)
                 user_to_change.password = hashed_password
@@ -281,6 +324,7 @@ def update_user_details():
                                "enough characters (min 8)"
                 })
         if email != "":
+            # check email is valid
             if is_email(email):
                 user_to_change.email = email
             else:
@@ -291,6 +335,7 @@ def update_user_details():
                 })
 
         if first_name != "":
+            # check names are characters only
             if first_name.isalpha() and len(first_name) > 0:
                 user_to_change.first_name = first_name
             else:
@@ -299,6 +344,7 @@ def update_user_details():
                     "message": "first name is incorrect"
                 })
         if last_name != "":
+            # check names are characters only
             if last_name.isalpha() and len(last_name) > 0:
                 user_to_change.last_name = last_name
             else:
@@ -316,6 +362,7 @@ def update_user_details():
         })
 
     if successful_change:
+        # commit user object changes
         db.session.commit()
         return jsonify("User Details Successfully Changed"), 201
     else:
@@ -327,7 +374,14 @@ def update_user_details():
 @USER_API.route("/current_user", methods=["GET"])
 @jwt_required
 def get_current_user():
-    """ TODO docstring
+    """ 
+    API method to get identity of current JWT identity
+
+    Method: GET
+
+    GET Parameters: None
+
+    JWT: Required
     """
 
     # Access the identity of the current user
@@ -338,7 +392,15 @@ def get_current_user():
 @USER_API.route("/remove_plant_link", methods=["POST"])
 @jwt_required
 def remove_plant_link():
-    """ TODO docstring
+    """ 
+    API method to remove a plant link between user and plant.
+
+    Method: POST
+
+    JSON Parameters: linked_user, plant_id
+    Optional JSON Parameters: link_type
+
+    JWT: Required
     """
 
     errors = []
@@ -396,7 +458,14 @@ def remove_plant_link():
 @USER_API.route("/add_plant_link", methods=["POST"])
 @jwt_required
 def add_plant_link():
-    """ TODO docstring
+    """ 
+    API method to add a plant link between user and plant.
+
+    Method: POST
+
+    JSON Parameters: user_to_link, plant_id, user_link_type
+
+    JWT: Required
     """
     errors = []
     # Access the identity of the current user
@@ -479,20 +548,18 @@ def add_plant_link():
             "errors": errors
         }), 400
 
-# @USER_API.route("/test_anything", methods=["GET"])
-# def test_anything():
-#     # maintainer = get_plant_maintainer(23)
-#     # print(maintainer)
-#     plants = Plant.query.filter_by(plant_health="unhealthy").all()
-#     all_plants = Schema_Plants.dump(plants)
-#     print(all_plants)
-#     return "test", 200
-    
 
 @USER_API.route("/get_user_details", methods=["GET"])
 @jwt_required
 def get_user_details():
-    """ TODO docstring
+    """ 
+    API method to get details for a user.
+
+    Method: GET
+
+    GET Parameters: user_to_query
+
+    JWT: Required
     """
     errors = []
     current_user = get_jwt_identity()
@@ -504,7 +571,7 @@ def get_user_details():
         and get_user_read_permission(current_user, user_to_query)):
         # get details
         user_details = get_user(user_to_query)
-        # don't return the password, ever (unless?)
+        # don't return the password, ever
         del user_details['password']
         return jsonify(user_details), 200
 
@@ -522,7 +589,14 @@ def get_user_details():
 
 @USER_API.route("/reset_user_password", methods=["POST"])
 def reset_user_password():
-    """ TODO docstring
+    """ 
+    API method to reset user's password and automatically email a temporary password.
+
+    Method: POST
+
+    POST Parameters: user_to_reset
+
+    JWT: Not required
     """
    
     user_to_reset = request.json["user_to_reset"]
@@ -546,9 +620,8 @@ def reset_user_password():
                 pass
    
     
-    # this method will not return errors, for security
+    # this method will not return errors, for security.
     # that is, we do not want to allow repeated reset request to
-    # reveal usernames that exist in the system.
-    # frontend should say "if this user exists, the password will be reset"
+    # reveal users/admins that exist in the system.
     return jsonify({}), 200
 
