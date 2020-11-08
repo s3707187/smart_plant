@@ -11,9 +11,9 @@ import { LoadingOutlined } from "@ant-design/icons";
 const antIcon = <LoadingOutlined style={{ fontSize: 48 }} spin />;
 
 const { Content, Sider, Header } = Layout;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
-interface DashboardScreenProps { }
+interface DashboardScreenProps {}
 
 type GetUsersPlantsData = {
     plant_id: number;
@@ -82,31 +82,60 @@ const DashboardScreen: React.FC<DashboardScreenProps> = (props: DashboardScreenP
                     />
                 </div>
             </Header>
-            <Content
-                style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    flexGrow: loading ? 1 : 0,
-                    flexShrink: loading ? 0 : 1,
-                    flexWrap: "wrap",
-                    justifyContent: loading ? "center" : "flex-start",
-                    alignItems: loading ? "center" : "flex-start",
-                }}
-            >
-                {loading && <Spin indicator={antIcon} />}
-                {data &&
-                    !loading &&
-                    //@ts-ignore
-                    data.map((item) => (
-                        <PlantCard
-                            id={item.plant_id.toString()}
-                            key={item.plant_id}
-                            title={item.plant_name}
-                            overallHealth={item.plant_health}
-                            maintainer={item.maintainer || undefined}
-                            plant_type={item.plant_type}
-                        />
-                    ))}
+            <Content>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        flexGrow: loading ? 1 : 0,
+                        flexShrink: loading ? 0 : 1,
+                        flexWrap: "wrap",
+                        justifyContent: loading ? "center" : "flex-start",
+                        alignItems: loading ? "center" : "flex-start",
+                    }}
+                >
+                    {loading && <Spin indicator={antIcon} />}
+                    {data &&
+                        !loading &&
+                        //@ts-ignore
+                        data.map((item) => (
+                            <PlantCard
+                                id={item.plant_id.toString()}
+                                key={item.plant_id}
+                                title={item.plant_name}
+                                overallHealth={item.plant_health}
+                                maintainer={item.maintainer || undefined}
+                                plant_type={item.plant_type}
+                            />
+                        ))}
+                </div>
+                <div
+                    style={{
+                        backgroundColor: "#FFF",
+                        marginLeft: 50,
+                        marginRight: 50,
+                        padding: 10,
+                        flexDirection: "column",
+                        display: "flex",
+                    }}
+                >
+                    <Title>Key</Title>
+                    <Text style={{ flexDirection: "row", display: "flex", marginBottom: 10 }}>
+                        <div style={{ height: 25, width: 25, backgroundColor: "#DFD", marginRight: 10 }} /> Healthy
+                    </Text>
+                    <Text style={{ flexDirection: "row", display: "flex", marginBottom: 10 }}>
+                        <div style={{ height: 25, width: 25, backgroundColor: "#FDD", marginRight: 10 }} /> Unhealthy &
+                        No maintainer
+                    </Text>
+                    <Text style={{ flexDirection: "row", display: "flex", marginBottom: 10 }}>
+                        <div style={{ height: 25, width: 25, backgroundColor: "#DDF", marginRight: 10 }} /> Unhealthy &
+                        you are maintaining this plant
+                    </Text>
+                    <Text style={{ flexDirection: "row", display: "flex", marginBottom: 10 }}>
+                        <div style={{ height: 25, width: 25, backgroundColor: "#FFD", marginRight: 10 }} /> Unhealthy &
+                        someone else is maintaining this plant
+                    </Text>
+                </div>
             </Content>
         </Layout>
     );
