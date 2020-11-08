@@ -1,6 +1,31 @@
 ACME Smart Plant
 Team Reza's Fellas
 
+Current Project State/Release Document (Final Submission, Post Sprint 12), 1.1.0
+--------------------------------------
+
+--------- RECENTLY ADDED
+
+- dashboard key/legend for usability
+- minor mobile usability touchups
+- new backend API documentation (making it easier to use API)
+- minor bugfixes relating to API calls
+
+--------- MISSING
+
+- nothing!
+
+--------- BUGS
+
+- no further known bugs
+
+
+--------------------------------------
+--------------------------------------
+--------------------------------------
+
+PREVIOUS RELEASE INFORMATION:
+
 Current Project State/Release Document (Week 12 Submission, Post Sprint 9), 1.0.0
 --------------------------------------
 

@@ -12,6 +12,13 @@ Demo user account details:
 Username: mateo
 Password: 123helloo
 
+Real plants:
+hellothere:
+https://frontend-dot-smart-plant-1.uc.r.appspot.com/plant/24
+
+sadasda:
+https://frontend-dot-smart-plant-1.uc.r.appspot.com/plant/37
+
 
 --------- INSTALLATION AND RUNNING INSTRUCTIONS 
 
@@ -58,6 +65,21 @@ deploy and test our system.
 - mobile friendly touch-ups
 - email password reset 
 
----- S IX (18-10-20)
+---- S IX (18-10-20) (release 1.0.0)
 - documentation creation
 - no new implemented features
+
+---- S X (25-10-20)
+- full API documentation (and cleanup)
+- no new features
+
+---- S XI (1-11-20)
+- documentation updates
+- no new features
+
+---- S XII (8-11-20) (release 1.1.0)
+- new documentation (release.txt and readme.txt)
+- dashboard key/legend
+- minor mobile usability touchups
+- minor bugfixes where some API calls were not confirmed
+

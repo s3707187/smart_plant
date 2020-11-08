@@ -1,3 +1,7 @@
+"""
+Module to manage main ACME Smart Plant device functionality
+"""
+
 import time
 import argparse
 import os
@@ -25,11 +29,17 @@ CONFIG_FILE_PATH = os.path.join(CURR_DIR, CONFIG_FILE_NAME)
 
 
 class SystemRunner:
+    """
+    Class to run main menu and local functionalities.
+    """
     def __init__(self):
         # sensor manager used to get all sensor data
         self.SM = SensorManager()
 
     def menu_system(self):
+        """
+        Method for main menu display and user interaction management.
+        """
         # main menu and user interaction
         while True:
             # print menu
@@ -61,9 +71,12 @@ class SystemRunner:
                 print("Invalid selection. Try again.")
 
     def start_sampling(self, period_t, logging=False):
-        # method to start local logging of data
-        # period_t parameter defines time between data samples/logs
-        # logging parameter set to True if file logging is desired
+        """
+        Method to start local logging of data.
+
+        period_t - defines time between data samples/logs
+        logging - set to True if file logging is desired
+        """
         while True:
             # get sensor data
             light = round(self.SM.get_light_pct(), 2)
@@ -90,10 +103,13 @@ class SystemRunner:
             time.sleep(period_t)
 
     def configure_cloud(self):
-        # this method is used to connect the plant with the cloud.
-        # config is based on user input.
-        # configuration JSON file is created.
-        # if APi check fails, log error output - actually probably not since we have interactivity here
+        """
+        This method is used to connect the plant with the cloud.
+        Config is based on user input.
+        Configuration JSON file is created.
+        """
+        
+        # if API check fails, log error output - actually probably not since we have interactivity here
         again = True
         while again:
             # print info
@@ -142,7 +158,10 @@ class SystemRunner:
                 again = False
 
     def verify_plant(self, plant_id, key):
-        # returns true or false, calls API on plant check
+        """
+        This method checks if plant_id and key match via API.
+        Returns true or false matching verification.
+        """
         # details JSON
         details = {"plant_id": plant_id,
                    "password": key
@@ -167,7 +186,9 @@ class SystemRunner:
             return False
 
     def upload_data(self, plant_id, plant_key, date_time, light, moisture, humidity, temperature):
-        # uploads a single piece of data
+        """
+        This method uploads a single instance of plant data via the API.
+        """
         # put information into JSON
         information = {"date_time": date_time,
                        "light": light,
@@ -233,6 +254,9 @@ class SystemRunner:
         self.clean_exit(False)
 
     def log_error(self, message):
+        """
+        This method logs an error with datetime, to file.
+        """
         # log the datetime+message to error_log.txt
         curr_time = datetime.datetime.now().strftime("%H:%M:%S "
                                                      "%Y-%m-%d")
@@ -240,6 +264,9 @@ class SystemRunner:
             error_file.write("{} $ {}\n".format(curr_time, message))
 
     def clean_exit(self, notify=True):
+        """
+        Method to perform cleanup and notify user of closing, if option is set.
+        """
         if notify:
             print("\nClosing.")
         # cleanup sensors via manager
@@ -248,6 +275,9 @@ class SystemRunner:
 
 
 def boot_config():
+    """
+    Method to load cloud configuration from /boot partition.
+    """
     # quick check to grab a config file from /boot partition.
     # this function helps users who cannot SSH/access the Pi,
     # but can access the microSD card
